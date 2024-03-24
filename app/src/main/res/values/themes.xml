@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Final_login" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+<!--        <item name="colorPrimary">@color/blue</item>-->
+<!--        <item name="colorPrimaryVariant">@color/blue</item>-->
+<!--        <item name="android:statusBarColor">@color/blue</item>-->
+    </style>
+
+    <style name="Theme.Final_login" parent="Base.Theme.Final_login" />
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "69959552127",
+    "project_id": "final-login-test-bd473",
+    "storage_bucket": "final-login-test-bd473.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:69959552127:android:8def2c2a59b57d1b9d834a",
+        "android_client_info": {
+          "package_name": "com.example.final_login"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAF8AyzL9IL8uC4zsowHOyb3-tvWUFdgG4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
