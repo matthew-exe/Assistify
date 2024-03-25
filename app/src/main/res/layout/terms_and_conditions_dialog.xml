@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- TODO: Proper Terms and Conditions need implementing as a string in the values/strings.xml-->
+<!-- TODO: Restyle the terms and conditions window -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"

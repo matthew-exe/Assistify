@@ -105,6 +105,7 @@ class Register : AppCompatActivity() {
             if(isAllInputsValid(editTextForename, editTextSurname, editTextEmail, editTextPassword, editTextConfirmPassword, termsCheckBox)){
                 createUser(signupUsername,signupPassword, editTextForename, editTextSurname)
             } else {
+                // TODO: Implement some kind of messaging system between the form controller and here to show why it failed such as incorrect email format
                 Toast.makeText(this@Register,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
             }
         }
@@ -139,9 +140,9 @@ class Register : AppCompatActivity() {
             @RequiresApi(Build.VERSION_CODES.O)
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!dataSnapshot.exists()){
-                    val id = databaseReference.child(security.enc(uid)).key
+                    val id = databaseReference.child(security.enc(uid)).key!!
                     val userData = UserData(id, security.enc(firstname.text.toString()), security.enc(surname.text.toString()))
-                    databaseReference.child(id!!).setValue(userData)
+                    databaseReference.child(id).setValue(userData)
                     Toast.makeText(this@Register,"Signup Successful",Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@Register, Login::class.java))
                     finish()
@@ -161,8 +162,7 @@ class Register : AppCompatActivity() {
 
     private fun checkAllInputs(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox) {
         val regBtn: Button = findViewById(R.id.btn_register)
-        regBtn.isEnabled =
-            isAllInputsValid(forename, surname, username, password, confirmPassword, checkbox)
+        regBtn.isEnabled = isAllInputsValid(forename, surname, username, password, confirmPassword, checkbox)
     }
     // String Colours
     private fun setColorsOnString(txtViewId: Int, strToChange: String, colour: Int): SpannableString {

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- TODO: Implement the standard color theme and accessible color theme -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,6 +9,7 @@
     tools:context=".Login">
 
 <!-- Switch Themes Button -->
+<!--    TODO: Style and move switch themes button, was thinking using a vector like light/dark switch but accessible themed instead -->
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

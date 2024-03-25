@@ -51,7 +51,6 @@ class FormController {
     private fun applyGreenTick(element: TextInputEditText) {
         element.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.correct_tick, 0)
     }
-
     private fun removeTick(element: TextInputEditText) {
         element.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
     }

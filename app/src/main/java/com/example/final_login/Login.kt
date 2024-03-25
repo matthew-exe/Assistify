@@ -100,6 +100,9 @@ class Login : AppCompatActivity() {
         }
     }
 
+    private fun loginUserGoogle(){
+        // TODO: Implement google auth
+    }
     private fun setColorsOnString(txtViewId: Int, strToChange: String, colour: Int): SpannableString {
         val txtView: TextView = findViewById(txtViewId)
         val spannableString = SpannableString(txtView.text)
@@ -114,7 +117,7 @@ class Login : AppCompatActivity() {
     }
 
     private fun toggleTheme() {
-        // TO-DO
+        // TODO: Switch from accessible to normal theme just implemenmt functionality, styling can be done once designed by UI
         // Toggles theme from accessible to normal
     }
 

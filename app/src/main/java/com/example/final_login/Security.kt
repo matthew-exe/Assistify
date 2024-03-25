@@ -26,7 +26,7 @@ class Security {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun dec(encData: String): String {
+    fun dec(encData: String?): String {
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(secretKey, "AES"), IvParameterSpec(fixedIv))
         val decryptedData = cipher.doFinal(Base64.getUrlDecoder().decode(encData))
         return decryptedData.toString(Charsets.UTF_8).trimEnd { it == '\u0000' }
