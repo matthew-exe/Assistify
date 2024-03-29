@@ -7,6 +7,7 @@ import java.util.Base64.getUrlEncoder
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import java.security.SecureRandom
 
 class Security {
 
@@ -41,5 +42,13 @@ class Security {
             i += 2
         }
         return data
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun generateSecureKey(length: Int): String {
+        val random = SecureRandom()
+        val keyBytes = ByteArray(length)
+        random.nextBytes(keyBytes)
+        return Base64.getEncoder().encodeToString(keyBytes)
     }
 }

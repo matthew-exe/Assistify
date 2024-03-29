@@ -29,19 +29,20 @@ class Register : AppCompatActivity() {
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var databaseReference: DatabaseReference
 
-    private lateinit var editTextForename: TextInputEditText
-    private lateinit var editTextSurname: TextInputEditText
-    private lateinit var editTextEmail: TextInputEditText
-    private lateinit var editTextPassword: TextInputEditText
-    private lateinit var editTextConfirmPassword: TextInputEditText
-    private lateinit var termsCheckBox: CheckBox
+    private lateinit var inputFirstname: TextInputEditText
+    private lateinit var inputSurname: TextInputEditText
+    private lateinit var inputEmail: TextInputEditText
+    private lateinit var inputPassword: TextInputEditText
+    private lateinit var inputConfirmPassword: TextInputEditText
+    private lateinit var checkBoxTermsConditons: CheckBox
 
-    private lateinit var buttonReg: Button
-    private lateinit var loginRedirect: TextView
-    private lateinit var termsConditionsTxtView: TextView
+    private lateinit var btnRegister: Button
+    private lateinit var textLogin: TextView
+    private lateinit var textTermsConditons: TextView
 
     private val formController = FormController()
     private val security = Security()
+    private val user = User()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,109 +52,87 @@ class Register : AppCompatActivity() {
         firebaseDatabase = FirebaseDatabase.getInstance()
         databaseReference = firebaseDatabase.reference.child("users")
         // Inputs
-        editTextForename = findViewById(R.id.signupForename)
-        editTextSurname = findViewById(R.id.signupSurname)
-        editTextEmail = findViewById(R.id.signupUsername)
-        editTextPassword = findViewById(R.id.signupPassword)
-        editTextConfirmPassword = findViewById(R.id.signupConfirmPassword)
-        termsCheckBox = findViewById(R.id.termsCheck)
+        inputFirstname = findViewById(R.id.inputFirstname)
+        inputSurname = findViewById(R.id.inputSurname)
+        inputEmail = findViewById(R.id.inputEmail)
+        inputPassword = findViewById(R.id.inputPassword)
+        inputConfirmPassword = findViewById(R.id.inputConfirmPassword)
+        checkBoxTermsConditons = findViewById(R.id.checkBoxTermsConditons)
         // Buttons
-        buttonReg = findViewById(R.id.btn_register)
+        btnRegister = findViewById(R.id.btnRegister)
         // Text Links & Styling
-        loginRedirect = findViewById(R.id.loginRedirect)
-        loginRedirect.text = setColorsOnString(R.id.loginRedirect, "Login Here!", R.color.blue)
-        termsConditionsTxtView = findViewById(R.id.termsConditionsBtn)
-        termsConditionsTxtView.text = setColorsOnString(R.id.termsConditionsBtn, "Terms and Conditions.", R.color.warning)
+        textLogin = findViewById(R.id.textLogin)
+        textLogin.text = setColorsOnString(R.id.textLogin, "Login Here!", R.color.blue)
+        textTermsConditons = findViewById(R.id.textTermsConditons)
+        textTermsConditons.text = setColorsOnString(R.id.textTermsConditons, "Terms and Conditions.", R.color.warning)
 
         // Input on Change Events
-        editTextForename.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+        inputFirstname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                formController.checkName(editTextForename)
-                checkAllInputs(editTextForename, editTextSurname, editTextEmail, editTextPassword, editTextConfirmPassword, termsCheckBox)
+                formController.checkName(inputFirstname)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
             }
         }
-        editTextSurname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+        inputSurname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                formController.checkName(editTextSurname)
-                checkAllInputs(editTextForename, editTextSurname, editTextEmail, editTextPassword, editTextConfirmPassword, termsCheckBox)
+                formController.checkName(inputSurname)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
             }
         }
-        editTextEmail.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+        inputEmail.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                formController.checkEmail(editTextEmail)
-                checkAllInputs(editTextForename, editTextSurname, editTextEmail, editTextPassword, editTextConfirmPassword, termsCheckBox)
+                formController.checkEmail(inputEmail)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
             }
         }
-        editTextPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+        inputPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                checkAllInputs(editTextForename, editTextSurname, editTextEmail, editTextPassword, editTextConfirmPassword, termsCheckBox)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
             }
         }
-        editTextConfirmPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+        inputConfirmPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                checkAllInputs(editTextForename, editTextSurname, editTextEmail, editTextPassword, editTextConfirmPassword, termsCheckBox)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
             }
         }
-        termsCheckBox.setOnCheckedChangeListener { _, _ ->
-            checkAllInputs(editTextForename, editTextSurname, editTextEmail, editTextPassword, editTextConfirmPassword, termsCheckBox)
+        checkBoxTermsConditons.setOnCheckedChangeListener { _, _ ->
+            checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
         }
 
         // Button Clicks
-        buttonReg.setOnClickListener{
-            val signupUsername = editTextEmail.text.toString()
-            val signupPassword = editTextPassword.text.toString()
-            if(isAllInputsValid(editTextForename, editTextSurname, editTextEmail, editTextPassword, editTextConfirmPassword, termsCheckBox)){
-                createUser(signupUsername,signupPassword, editTextForename, editTextSurname)
+        btnRegister.setOnClickListener{
+            val signupUsername = inputEmail.text.toString()
+            val signupPassword = inputPassword.text.toString()
+            if(isAllInputsValid(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)){
+                sendRegistration(signupUsername,signupPassword, inputFirstname, inputSurname)
             } else {
                 // TODO: Implement some kind of messaging system between the form controller and here to show why it failed such as incorrect email format
                 Toast.makeText(this@Register,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
             }
         }
         // Link Clicks
-        loginRedirect.setOnClickListener{
+        textLogin.setOnClickListener{
             startActivity(Intent(this@Register, Login::class.java))
             finish()
         }
-        termsConditionsTxtView.setOnClickListener{
+        textTermsConditons.setOnClickListener{
             showTermsAndConditionsDialog()
         }
     }
     // User Signup Function
-    private fun createUser(username:String, password:String, firstname: TextInputEditText, surname: TextInputEditText){
+    private fun sendRegistration(username:String, password:String, firstname: TextInputEditText, surname: TextInputEditText){
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(username, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val firebaseUser: FirebaseUser = task.result!!.user!!
-                createUserDBObj(firebaseUser.uid,firstname, surname)
+                user.dbCreateUser(username,firstname.text.toString(), surname.text.toString())
                 Toast.makeText(this@Register,"You are Registered.",Toast.LENGTH_SHORT).show()
                 val intent = Intent(this@Register, Login::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
             } else {
-                Toast.makeText(this@Register,"Whoops.",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@Register,"Failed To Create User Please Try Again.",Toast.LENGTH_SHORT).show()
             }
         }
-    }
-    // Create User In Database
-    private fun createUserDBObj(uid: String, firstname: TextInputEditText, surname: TextInputEditText){
-        databaseReference.orderByChild("username").equalTo(uid).addListenerForSingleValueEvent(object: ValueEventListener{
-            @RequiresApi(Build.VERSION_CODES.O)
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (!dataSnapshot.exists()){
-                    val id = databaseReference.child(security.enc(uid)).key!!
-                    val userData = UserData(id, security.enc(firstname.text.toString()), security.enc(surname.text.toString()))
-                    databaseReference.child(id).setValue(userData)
-                    Toast.makeText(this@Register,"Signup Successful",Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@Register, Login::class.java))
-                    finish()
-                } else {
-                    Toast.makeText(this@Register,"User already exists",Toast.LENGTH_SHORT).show()
-                }
-            }
-            override fun onCancelled(databaseError: DatabaseError){
-                Toast.makeText(this@Register,"Database Error: ${databaseError.message} ",Toast.LENGTH_SHORT).show()
-            }
-        })
     }
 
     private fun isAllInputsValid(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox): Boolean {
@@ -161,8 +140,7 @@ class Register : AppCompatActivity() {
     }
 
     private fun checkAllInputs(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox) {
-        val regBtn: Button = findViewById(R.id.btn_register)
-        regBtn.isEnabled = isAllInputsValid(forename, surname, username, password, confirmPassword, checkbox)
+        btnRegister.isEnabled = isAllInputsValid(forename, surname, username, password, confirmPassword, checkbox)
     }
     // String Colours
     private fun setColorsOnString(txtViewId: Int, strToChange: String, colour: Int): SpannableString {
@@ -180,8 +158,8 @@ class Register : AppCompatActivity() {
     // Terms & Conditions
     private fun showTermsAndConditionsDialog() {
         val dialogView = layoutInflater.inflate(R.layout.terms_and_conditions_dialog, null)
-        val acceptButton = dialogView.findViewById<Button>(R.id.acceptButton)
-        val declineButton = dialogView.findViewById<Button>(R.id.declineButton)
+        val btnAcceptTerms = dialogView.findViewById<Button>(R.id.btnAcceptTerms)
+        val btnDeclineTerms = dialogView.findViewById<Button>(R.id.btnDeclineTerms)
 
         val dialogBuilder = AlertDialog.Builder(this)
             .setView(dialogView)
@@ -189,27 +167,25 @@ class Register : AppCompatActivity() {
 
         val alertDialog = dialogBuilder.show()
 
-        acceptButton.setOnClickListener {
+        btnAcceptTerms.setOnClickListener {
             acceptedTermsConditions()
             alertDialog.dismiss()
         }
 
-        declineButton.setOnClickListener {
+        btnDeclineTerms.setOnClickListener {
             declinedTermsConditions()
             alertDialog.dismiss()
         }
     }
 
     private fun acceptedTermsConditions() {
-        val myCheckBox: CheckBox = findViewById(R.id.termsCheck)
-        myCheckBox.isEnabled = true
-        myCheckBox.isChecked = true
+        checkBoxTermsConditons.isEnabled = true
+        checkBoxTermsConditons.isChecked = true
     }
 
     private fun declinedTermsConditions() {
-        val myCheckBox: CheckBox = findViewById(R.id.termsCheck)
-        myCheckBox.isEnabled = false
-        myCheckBox.isChecked = false
+        checkBoxTermsConditons.isEnabled = false
+        checkBoxTermsConditons.isChecked = false
     }
 
 }

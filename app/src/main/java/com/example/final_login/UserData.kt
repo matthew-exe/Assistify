@@ -6,6 +6,3 @@ data class UserData(
     val surname:String,
 )
 
-class User{
-
-}

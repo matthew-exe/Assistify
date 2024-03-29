@@ -9,12 +9,6 @@
     tools:context=".Login">
 
 <!-- Switch Themes Button -->
-<!--    TODO: Style and move switch themes button, was thinking using a vector like light/dark switch but accessible themed instead -->
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btnAccessibleTheme"/>
-
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -30,16 +24,26 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="16dp">
-
-            <TextView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/welcome"
-                android:textSize="30sp" />
+                android:layout_height="wrap_content">
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:layout_alignParentStart="true"
+                    android:id="@+id/btnAccessibleTheme"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/welcome"
+                    android:textSize="30sp"
+                    android:layout_centerInParent="true"/>
+            </RelativeLayout>
+
 
             <TextView
-                android:id="@+id/registerRedirect"
+                android:id="@+id/textRegister"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -52,11 +56,11 @@
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/email"
+                    android:id="@+id/inputEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:hint="@string/username" />
+                    android:hint="@string/email" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -66,7 +70,7 @@
                 app:endIconMode="password_toggle">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/password"
+                    android:id="@+id/inputPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -76,15 +80,16 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
-                android:id="@+id/btn_login"
+                android:id="@+id/btnLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="7dp"
-                android:text="@string/login" />
+                android:text="@string/login"
+                android:enabled="false"/>
 
             <TextView
-                android:id="@+id/forgotPassword"
+                android:id="@+id/textForgotPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="7dp"
@@ -127,18 +132,19 @@
             </RelativeLayout>
 
             <Button
-                android:id="@+id/ButtonExample"
+                android:id="@+id/btnGoogleLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/google_button"
                 android:drawableLeft="@drawable/google"
                 android:text="@string/google_signin"
-                android:textColor="@color/off_white"
+                android:textColor="@color/black"
                 android:textSize="18sp" />
-
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+
 
 </RelativeLayout>
