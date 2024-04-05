@@ -7,10 +7,13 @@
         android:left="8dp"
         android:right="8dp"
         android:top="4dp"/>
+    <stroke
+        android:color="@color/light_grey"
+        android:width="2dp"/>
     <corners
         android:radius="190dp"/>
     <solid
-        android:color="@color/light_grey"/>
+        android:color="@color/off_white"/>
 </shape>
 
 

@@ -14,15 +14,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 class Register : AppCompatActivity() {
 
@@ -40,8 +39,12 @@ class Register : AppCompatActivity() {
     private lateinit var textLogin: TextView
     private lateinit var textTermsConditons: TextView
 
+    private lateinit var btnThemeSwitch: SwitchMaterial
+    private var themeAccessibleActive = false
+    private lateinit var wholePage: ConstraintLayout
+    private lateinit var cardPage: CardView
+
     private val formController = FormController()
-    private val security = Security()
     private val user = User()
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -60,11 +63,22 @@ class Register : AppCompatActivity() {
         checkBoxTermsConditons = findViewById(R.id.checkBoxTermsConditons)
         // Buttons
         btnRegister = findViewById(R.id.btnRegister)
+        // Theme Switcheroo
+        btnThemeSwitch = findViewById(R.id.btnAccessibleTheme)
+        wholePage = findViewById(R.id.wholePage)
+        cardPage = findViewById(R.id.cardPage)
+        themeAccessibleActive = !intent.getBooleanExtra("themeAccessibleActive", false)
         // Text Links & Styling
         textLogin = findViewById(R.id.textLogin)
         textLogin.text = setColorsOnString(R.id.textLogin, "Login Here!", R.color.blue)
-        textTermsConditons = findViewById(R.id.textTermsConditons)
-        textTermsConditons.text = setColorsOnString(R.id.textTermsConditons, "Terms and Conditions.", R.color.warning)
+        textTermsConditons = findViewById(R.id.textTermsConditions)
+        textTermsConditons.text = setColorsOnString(R.id.textTermsConditions, "Terms and Conditions.", R.color.warning)
+
+
+
+
+
+
 
         // Input on Change Events
         inputFirstname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
@@ -112,12 +126,21 @@ class Register : AppCompatActivity() {
         }
         // Link Clicks
         textLogin.setOnClickListener{
-            startActivity(Intent(this@Register, Login::class.java))
+
+            val intent = Intent(this@Register, Login::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            intent.putExtra("themeAccessibleActive", themeAccessibleActive)
+            startActivity(intent)
             finish()
         }
         textTermsConditons.setOnClickListener{
             showTermsAndConditionsDialog()
         }
+
+        btnThemeSwitch.setOnClickListener{
+            toggleTheme()
+        }
+        toggleTheme()
     }
     // User Signup Function
     private fun sendRegistration(username:String, password:String, firstname: TextInputEditText, surname: TextInputEditText){
@@ -186,6 +209,20 @@ class Register : AppCompatActivity() {
     private fun declinedTermsConditions() {
         checkBoxTermsConditons.isEnabled = false
         checkBoxTermsConditons.isChecked = false
+    }
+
+    private fun toggleTheme() {
+        if(themeAccessibleActive){
+            wholePage.setBackgroundColor(getResources().getColor(R.color.white))
+            cardPage.setCardBackgroundColor(getResources().getColor(R.color.off_white))
+            themeAccessibleActive = false
+            btnThemeSwitch.setChecked(false)
+        } else {
+            wholePage.setBackgroundColor(R.drawable.background_gradient)
+            cardPage.setCardBackgroundColor(getResources().getColor(R.color.accessibleYellow))
+            themeAccessibleActive = true
+            btnThemeSwitch.setChecked(true)
+        }
     }
 
 }

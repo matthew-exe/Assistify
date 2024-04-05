@@ -13,4 +13,8 @@
 
     <color name="transparent">#00FFFFFF</color>
 
+
+    <color name="accessiblePurple">#B2A7D7</color>
+    <color name="accessibleYellow">#FAF2AA</color>
+
 </resources>

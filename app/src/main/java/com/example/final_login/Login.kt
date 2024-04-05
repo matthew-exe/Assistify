@@ -15,6 +15,8 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -23,7 +25,6 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -32,7 +33,6 @@ import com.google.firebase.database.FirebaseDatabase
 class Login : AppCompatActivity() {
 
     private val formController = FormController()
-    private val security = Security()
     private val user = User()
 
     private lateinit var firebaseDatabase: FirebaseDatabase
@@ -49,7 +49,14 @@ class Login : AppCompatActivity() {
     private lateinit var btnGoogleLogin: Button
     private lateinit var btnThemeSwitch: SwitchMaterial
     private lateinit var btnLogin: Button
+
+    private var themeAccessibleActive = false
+    private lateinit var wholePage:ConstraintLayout
+    private lateinit var cardPage: CardView
+
     private val RC_SIGN_IN = 9001
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +83,10 @@ class Login : AppCompatActivity() {
         textRegister.text = setColorsOnString(R.id.textRegister, "Register Here!", R.color.blue)
         // Theme Switch
         btnThemeSwitch = findViewById(R.id.btnAccessibleTheme)
+        wholePage = findViewById(R.id.wholePage)
+        cardPage = findViewById(R.id.cardPage)
+        themeAccessibleActive = !intent.getBooleanExtra("themeAccessibleActive", false)
+        toggleTheme()
         // Forgot Password Link and Styling
         textForgotPassword = findViewById(R.id.textForgotPassword)
         textForgotPassword.text = setColorsOnString(R.id.textForgotPassword, "Reset Here.", R.color.warning)
@@ -113,22 +124,24 @@ class Login : AppCompatActivity() {
                 Toast.makeText(this@Login,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
             }
         }
-
         btnThemeSwitch.setOnClickListener{
             toggleTheme()
         }
-
+        // Google Login Btn
         btnGoogleLogin.setOnClickListener {
             // TODO: Deprecated!! Don't Know What To Replace With
             val signInIntent = googleSignInClient.signInIntent
             startActivityForResult(signInIntent, RC_SIGN_IN)
         }
-
+        // Register Text Link
         textRegister.setOnClickListener{
-            startActivity(Intent(this@Login, Register::class.java))
+            val intent = Intent(this@Login, Register::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            intent.putExtra("themeAccessibleActive", themeAccessibleActive)
+            startActivity(intent)
             finish()
         }
-
+        // Forgot Password Text
         textForgotPassword.setOnClickListener {
             showForgotPasswordDialog()
         }
@@ -209,8 +222,17 @@ class Login : AppCompatActivity() {
 
     private fun toggleTheme() {
         // TODO: Switch from accessible to normal theme just implemenmt functionality, styling can be done once designed by UI
-        // Toggles theme from accessible to normal
-        println("Toggle Theme")
+        if(themeAccessibleActive){
+            wholePage.setBackgroundColor(getResources().getColor(R.color.white))
+            cardPage.setCardBackgroundColor(getResources().getColor(R.color.off_white))
+            themeAccessibleActive = false
+            btnThemeSwitch.setChecked(false)
+        } else {
+            wholePage.setBackgroundColor(R.drawable.background_gradient)
+            cardPage.setCardBackgroundColor(getResources().getColor(R.color.accessibleYellow))
+            themeAccessibleActive = true
+            btnThemeSwitch.setChecked(true)
+        }
     }
 
     // Forgot Password Dialog
@@ -250,7 +272,5 @@ class Login : AppCompatActivity() {
 
         alertDialog.show()
     }
-
-
 
 }

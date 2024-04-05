@@ -1,9 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Final_login" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.Final_login" parent="Theme.Accessible">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/blue</item>
         <item name="colorPrimaryVariant">@color/blue</item>
         <item name="android:statusBarColor">@color/blue</item>
+        <item name="android:windowBackground">@color/accessiblePurple</item>
+        <item name="colorOnBackground">@color/accessiblePurple</item>
     </style>
+
+    <style name="Theme.Accessible" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/accessiblePurple</item>
+        <item name="android:windowBackground">@color/accessiblePurple</item>
+    </style>
+
 </resources>
