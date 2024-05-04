@@ -207,8 +207,8 @@ class Dashboard : AppCompatActivity() {
         }
     }
 
-    private fun setProfileData(user:UserData){
-        tvFirstName.text = user.firstname
+    private fun setProfileData(usersData:UserData){
+        tvFirstName.text = user.splitName(usersData.firstname).first
 //        textEmailAddress.text = user.id
 //        textSurname.text = user.surname
     }

@@ -1,8 +1,6 @@
 package com.example.final_login
 import android.content.Context
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -17,7 +15,7 @@ class User{
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val security = Security()
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
     fun checkUserExists(email: String, callback: (Boolean) -> Unit) {
         // You have to add the callback function such as
         //  checkUserExists(emailAddress) { userExists ->
@@ -38,7 +36,6 @@ class User{
         return currentUser != null
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun sendResetPasswordEmail(context: Context, emailAddress:String){
         val firebaseAuth = FirebaseAuth.getInstance()
         checkUserExists(emailAddress) { userExists ->
@@ -70,7 +67,6 @@ class User{
     fun dbCreateUser(email: String, firstname: String, surname: String):Boolean{
         var userCreated = false
         databaseReference.orderByChild("username").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
-            @RequiresApi(Build.VERSION_CODES.O)
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!dataSnapshot.exists()){
                     val id = databaseReference.child(security.enc(email)).key!!
@@ -86,6 +82,17 @@ class User{
             }
         })
         return userCreated
+    }
+
+    fun splitName(displayName:String): Pair<String, String> {
+        var firstName = displayName
+        var surname = ""
+        if(displayName.contains(" ")){
+            val parts = displayName.split(" ")
+            firstName = parts[0]
+            surname = parts.subList(1, parts.size).joinToString(" ")
+        }
+        return Pair(firstName, surname)
     }
 
 

@@ -1,7 +1,6 @@
 package com.example.final_login
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
@@ -12,7 +11,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -57,7 +55,6 @@ class Login : AppCompatActivity() {
     private val rCSignIn = 9001
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -149,7 +146,6 @@ class Login : AppCompatActivity() {
     }
 
     // Email & Password Login
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun loginUserEmailPassword(username: String, password: String) {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(username, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -165,7 +161,6 @@ class Login : AppCompatActivity() {
     }
 
     // Google Auth Login
-    @RequiresApi(Build.VERSION_CODES.O)
     // Google Auth Function
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -173,15 +168,14 @@ class Login : AppCompatActivity() {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)
-                println(account.displayName)
                 user.checkUserExists(account.email!!) { userExists ->
                     if(userExists){
                         println("User Exists")
                         firebaseAuthWithGoogle(account.idToken!!)
                     }
                     else {
-                        println("Create User")
-                        user.dbCreateUser(account.email!!, account.displayName!!, account.displayName!!)
+                        val name = user.splitName(account.displayName!!)
+                        user.dbCreateUser(account.email!!, name.first, name.second)
                         firebaseAuthWithGoogle(account.idToken!!)
                     }
                 }
@@ -195,7 +189,7 @@ class Login : AppCompatActivity() {
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val intent = Intent(this@Login, Dashboard2::class.java)
+                    val intent = Intent(this@Login, Dashboard::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                     finish()
@@ -236,7 +230,6 @@ class Login : AppCompatActivity() {
     }
 
     // Forgot Password Dialog
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun showForgotPasswordDialog() {
         val dialogView = layoutInflater.inflate(R.layout.forgot_password_dialog, null)
         val inputEmailForgotPassword = dialogView.findViewById<TextInputEditText>(R.id.inputEmailForgotPassword)
