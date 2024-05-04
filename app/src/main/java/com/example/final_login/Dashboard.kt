@@ -47,7 +47,7 @@ class Dashboard : AppCompatActivity() {
 
     private var phoneNumberToDial: String? = null
     private var notificationCount: Int = 0
-    val notifications = mutableListOf<String>()
+    private val notifications = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +82,7 @@ class Dashboard : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        emergencyCallSlider = findViewById(R.id.emergencyCallSlider);
+        emergencyCallSlider = findViewById(R.id.emergencyCallSlider)
 
 
         emergencyCallSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
@@ -91,7 +91,7 @@ class Dashboard : AppCompatActivity() {
                 if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
                 } else {
-                    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumberToDial))
+                    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
                     startActivity(intent)
                     emergencyCallSlider.resetSlider()
                 }
@@ -105,7 +105,7 @@ class Dashboard : AppCompatActivity() {
             if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
             } else {
-                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumberToDial))
+                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
                 startActivity(intent)
             }
         }
@@ -145,7 +145,7 @@ class Dashboard : AppCompatActivity() {
         dialog.setContentView(R.layout.notification_dialog)
 
         val lvNotifications = dialog.findViewById<ListView>(R.id.lvNotifications)
-        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, notifications)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, notifications)
         lvNotifications.adapter = adapter
 
         lvNotifications.setOnItemLongClickListener { _, _, position, _ ->
@@ -174,7 +174,7 @@ class Dashboard : AppCompatActivity() {
         when (requestCode) {
             REQUEST_CALL_PHONE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumberToDial))
+                    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
                     startActivity(intent)
                 } else {
                     val rootView = findViewById<View>(android.R.id.content)

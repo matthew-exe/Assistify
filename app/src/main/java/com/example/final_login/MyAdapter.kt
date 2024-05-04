@@ -85,6 +85,9 @@ class MyAdapter(
 
     private fun addItem(sensorData: SensorData) {
         data.add(sensorData)
+        println(sensorData.name)
+        println(data.indexOf(sensorData))
+        // Take data send to database
         filterData(editTextText.text.toString())
     }
 
