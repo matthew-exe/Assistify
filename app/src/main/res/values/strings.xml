@@ -23,6 +23,9 @@
     <string name="userid">User ID : %1$s</string>
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
+    <string name="account">Account</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="reset">Reset</string>
     <string name="long_terms">
         <![CDATA[
     **Terms and Conditions**
@@ -88,8 +91,5 @@
     As long as the website and the information and services on the website are provided free of charge, we will not be liable for any loss or damage of any nature.
     ]]>
     </string>
-    <string name="account">Account</string>
-    <string name="delete_account">Delete Account</string>
-    <string name="reset">Reset</string>
 
 </resources>
