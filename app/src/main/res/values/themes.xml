@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Final_login" parent="Theme.Accessible">
+    <style name="Base.Theme.Final_login" parent="Theme.Material3.Dark.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/blue</item>
         <item name="colorPrimaryVariant">@color/blue</item>
@@ -9,7 +9,7 @@
         <item name="colorOnBackground">@color/accessiblePurple</item>
     </style>
 
-    <style name="Theme.Accessible" parent="Theme.AppCompat">
+    <style name="Theme.Accessible" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/accessiblePurple</item>
         <item name="android:windowBackground">@color/accessiblePurple</item>
     </style>
