@@ -54,7 +54,7 @@ class Login : AppCompatActivity() {
     private lateinit var wholePage:ConstraintLayout
     private lateinit var cardPage: CardView
 
-    private val RC_SIGN_IN = 9001
+    private val rCSignIn = 9001
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -131,7 +131,7 @@ class Login : AppCompatActivity() {
         btnGoogleLogin.setOnClickListener {
             // TODO: Deprecated!! Don't Know What To Replace With
             val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
+            startActivityForResult(signInIntent, rCSignIn)
         }
         // Register Text Link
         textRegister.setOnClickListener{
@@ -169,14 +169,14 @@ class Login : AppCompatActivity() {
     // Google Auth Function
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == rCSignIn) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)
                 println(account.displayName)
                 user.checkUserExists(account.email!!) { userExists ->
                     if(userExists){
-                        println("User EXists")
+                        println("User Exists")
                         firebaseAuthWithGoogle(account.idToken!!)
                     }
                     else {
@@ -195,7 +195,7 @@ class Login : AppCompatActivity() {
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val intent = Intent(this@Login, Dashboard::class.java)
+                    val intent = Intent(this@Login, Dashboard2::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                     finish()
@@ -221,15 +221,15 @@ class Login : AppCompatActivity() {
     }
 
     private fun toggleTheme() {
-        // TODO: Switch from accessible to normal theme just implemenmt functionality, styling can be done once designed by UI
+        // TODO: Switch from accessible to normal theme just implement functionality, styling can be done once designed by UI
         if(themeAccessibleActive){
-            wholePage.setBackgroundColor(getResources().getColor(R.color.white))
-            cardPage.setCardBackgroundColor(getResources().getColor(R.color.off_white))
+            wholePage.setBackgroundColor(resources.getColor(R.color.white, null))
+            cardPage.setCardBackgroundColor(resources.getColor(R.color.off_white, null))
             themeAccessibleActive = false
             btnThemeSwitch.setChecked(false)
         } else {
             wholePage.setBackgroundColor(R.drawable.background_gradient)
-            cardPage.setCardBackgroundColor(getResources().getColor(R.color.accessibleYellow))
+            cardPage.setCardBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
             themeAccessibleActive = true
             btnThemeSwitch.setChecked(true)
         }
