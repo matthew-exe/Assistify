@@ -20,9 +20,10 @@ class MyAdapter(
         private const val VIEW_TYPE_SENSOR = 1
     }
 
-    private val data = mutableListOf<Any>()
+    var data = mutableListOf<SensorData>()
     private val filteredData = mutableListOf<Any>()
     private lateinit var editTextText: AppCompatEditText
+    private val user = User()
 
     init {
         filteredData.addAll(data)
@@ -85,8 +86,9 @@ class MyAdapter(
 
     private fun addItem(sensorData: SensorData) {
         data.add(sensorData)
-        println(sensorData.name)
-        println(data.indexOf(sensorData))
+        user.sendDashboardToDatabase(data)
+//        println(sensorData.name)
+//        println(data.indexOf(sensorData))
         // Take data send to database
         filterData(editTextText.text.toString())
     }
@@ -127,7 +129,9 @@ class MyAdapter(
     }
 
     private fun deleteItem(position: Int) {
+//        println(data[position])
         data.removeAt(position)
+        user.sendDashboardToDatabase(data)
         filterData(editTextText.text.toString())
     }
 

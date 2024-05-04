@@ -15,6 +15,56 @@ class User{
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val security = Security()
 
+    fun getDashboard(adapter: MyAdapter){
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val dashboardRef = userRef.child("dashboard")
+            dashboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val dashboardData = dataSnapshot.value
+                    adapter.data = createDashboard(dashboardData)
+                    adapter.filterData("")
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("Error: ${databaseError.message}")
+                }
+            })
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+    }
+
+    fun createDashboard(dashboard: Any?): MutableList<SensorData> {
+        val returnList = mutableListOf<SensorData>()
+        if (dashboard is Iterable<*>) {
+            for (item in dashboard) {
+                returnList.add(SensorData(item.toString(), if (item.toString() == "Pulse") R.drawable.pulse else if (item.toString() == "Steps") R.drawable.steps else R.drawable.calories))
+            }
+        }
+        return returnList
+    }
+
+    fun sendDashboardToDatabase(dashboard: MutableList<SensorData>){
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val dashboardRef = userRef.child("dashboard")
+            val x = HashMap<String, String>()
+            for(item in dashboard){
+                x[dashboard.indexOf(item).toString()] = item.name
+            }
+            dashboardRef.setValue(x)
+                .addOnSuccessListener {
+                    println("Dashboard Saved")
+                }
+                .addOnFailureListener {
+                    println("Dashboard Failed")
+                }
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+
+    }
 
     fun checkUserExists(email: String, callback: (Boolean) -> Unit) {
         // You have to add the callback function such as
@@ -94,7 +144,4 @@ class User{
         }
         return Pair(firstName, surname)
     }
-
-
-
 }

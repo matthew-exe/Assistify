@@ -74,12 +74,6 @@ class Register : AppCompatActivity() {
         textTermsConditons = findViewById(R.id.textTermsConditions)
         textTermsConditons.text = setColorsOnString(R.id.textTermsConditions, "Terms and Conditions.", R.color.warning)
 
-
-
-
-
-
-
         // Input on Change Events
         inputFirstname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {

@@ -60,16 +60,17 @@ class Dashboard : AppCompatActivity() {
             finish()
         }
 
-        val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
-        adapter = MyAdapter(this, ::generateDummySensorData)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
         firebaseDatabase = FirebaseDatabase.getInstance()
         databaseReference = firebaseDatabase.reference.child("users")
         firebaseAuth = FirebaseAuth.getInstance()
-
         currentUser = firebaseAuth.currentUser!!
+
+        val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
+        adapter = MyAdapter(this, ::generateDummySensorData)
+        user.getDashboard(adapter)
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
 
         editTextText = findViewById(R.id.editTextText)
         editTextText.addTextChangedListener(object : TextWatcher {
