@@ -22,6 +22,10 @@ import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 
 class Dashboard : AppCompatActivity() {
@@ -31,6 +35,15 @@ class Dashboard : AppCompatActivity() {
     private lateinit var btnCallUser: ImageButton
     private lateinit var btnNotifications: ImageButton
     private lateinit var tvNotificationCount: TextView
+    private lateinit var tvFirstName: TextView
+
+    private lateinit var firebaseDatabase: FirebaseDatabase
+    private lateinit var databaseReference: DatabaseReference
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var currentUser: FirebaseUser
+    private val user = User()
+    private val security = Security()
+
 
     private var phoneNumberToDial: String? = null
     private var notificationCount: Int = 0
@@ -41,10 +54,22 @@ class Dashboard : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_dashboard)
 
+        if(!user.isUserLoggedIn()){
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
         adapter = MyAdapter(this, ::generateDummySensorData)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        firebaseDatabase = FirebaseDatabase.getInstance()
+        databaseReference = firebaseDatabase.reference.child("users")
+        firebaseAuth = FirebaseAuth.getInstance()
+
+        currentUser = firebaseAuth.currentUser!!
 
         editTextText = findViewById(R.id.editTextText)
         editTextText.addTextChangedListener(object : TextWatcher {
@@ -96,6 +121,9 @@ class Dashboard : AppCompatActivity() {
             showNotificationsDialog()
             updateNotificationCount()
         }
+
+        tvFirstName = findViewById(R.id.tvFirstName)
+        loadUserProfile()
 
     }
 
@@ -163,4 +191,26 @@ class Dashboard : AppCompatActivity() {
     companion object {
         private const val REQUEST_CALL_PHONE = 1
     }
+
+    private fun loadUserProfile(){
+        databaseReference.child(security.enc(currentUser.email!!)).get().addOnSuccessListener { dataSnapshot ->
+            if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                val id = dataSnapshot.child("id").getValue(String::class.java)!!
+                val firstname = security.dec(dataSnapshot.child("firstname").getValue(String::class.java))
+                val surname = security.dec(dataSnapshot.child("surname").getValue(String::class.java))
+                setProfileData(UserData(id, firstname, surname))
+            } else {
+                println("firebase Error: Data not found or empty")
+            }
+        }.addOnFailureListener { exception ->
+            println("firebase Error getting data: $exception")
+        }
+    }
+
+    private fun setProfileData(user:UserData){
+        tvFirstName.text = user.firstname
+//        textEmailAddress.text = user.id
+//        textSurname.text = user.surname
+    }
+
 }

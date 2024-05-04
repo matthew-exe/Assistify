@@ -35,7 +35,6 @@
 
 
 
-
     <ImageButton
         android:id="@+id/btnNotifications"
         android:layout_width="48dp"
