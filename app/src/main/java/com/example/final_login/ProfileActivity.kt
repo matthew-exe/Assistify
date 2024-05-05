@@ -69,6 +69,8 @@ class ProfileActivity: AppCompatActivity() {
         findViewById<TextView>(R.id.pre_link_text_1).visibility = View.GONE
         findViewById<TextView>(R.id.pre_link_text_2).visibility = View.GONE
 
+        Toast.makeText(this, "Successfully linked with ${userDetails.name}", Toast.LENGTH_SHORT).show()
+
         val dob = "Date of Birth: ${userDetails.dateOfBirth}"
         val age = "Age: ${userDetails.age}"
         val bloodType = "Blood Type: ${userDetails.bloodType}"
