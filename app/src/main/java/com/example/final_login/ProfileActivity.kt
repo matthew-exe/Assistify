@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
@@ -68,6 +69,9 @@ class ProfileActivity: AppCompatActivity() {
         findViewById<Button>(R.id.linkButton).visibility = View.GONE
         findViewById<TextView>(R.id.pre_link_text_1).visibility = View.GONE
         findViewById<TextView>(R.id.pre_link_text_2).visibility = View.GONE
+
+        val linearLayout = findViewById<LinearLayout>(R.id.linearLayout)
+        linearLayout.setBackgroundResource(R.drawable.border)
 
         Toast.makeText(this, "Successfully linked with ${userDetails.name}", Toast.LENGTH_SHORT).show()
 
