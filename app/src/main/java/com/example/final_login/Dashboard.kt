@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.TextView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
@@ -36,6 +37,7 @@ class Dashboard : AppCompatActivity() {
     private lateinit var btnNotifications: ImageButton
     private lateinit var tvNotificationCount: TextView
     private lateinit var tvFirstName: TextView
+    private lateinit var bottomNavigationView: BottomNavigationView
 
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var databaseReference: DatabaseReference
@@ -48,6 +50,7 @@ class Dashboard : AppCompatActivity() {
     private var phoneNumberToDial: String? = null
     private var notificationCount: Int = 0
     private val notifications = mutableListOf<String>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,6 +114,29 @@ class Dashboard : AppCompatActivity() {
             }
         }
 
+        bottomNavigationView = findViewById(R.id.bottom_navigation)
+        bottomNavigationView.selectedItemId = R.id.nav_home
+
+        bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_home -> {
+                    val intent = Intent(this, Dashboard::class.java)
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_profile -> {
+                    true
+                    TODO("Redirect to the profile activity when it exists")
+                }
+                R.id.nav_settings -> {
+                    val intent = Intent(this, SettingsActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                else -> false
+            }
+        }
+
         tvNotificationCount = findViewById(R.id.tvNotificationCount)
 
         // Add some dummy notifications
@@ -139,6 +165,7 @@ class Dashboard : AppCompatActivity() {
             }
         }
         return dummyDataList
+        TODO("Need to implement the logic to get the sensor data from the database / from the API")
     }
 
     private fun showNotificationsDialog() {

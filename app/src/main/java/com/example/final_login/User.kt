@@ -114,6 +114,10 @@ class User{
         }
     }
 
+    fun signOut(){
+        firebaseAuth.signOut()
+    }
+
     fun dbCreateUser(email: String, firstname: String, surname: String):Boolean{
         var userCreated = false
         databaseReference.orderByChild("username").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
