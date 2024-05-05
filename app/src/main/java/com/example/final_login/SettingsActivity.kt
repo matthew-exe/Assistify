@@ -16,14 +16,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-private lateinit var bottomNavigationView: BottomNavigationView
-private lateinit var sign_out_button: Button
-private lateinit var expandableListView: ExpandableListView
-
-private val user = User()
-
 class SettingsActivity : AppCompatActivity() {
+    private val user = User()
 
+    private lateinit var bottomNavigationView: BottomNavigationView
+    private lateinit var signOutButton: Button
+    private lateinit var expandableListView: ExpandableListView
     private lateinit var adapter: MyExpandableListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,8 +35,8 @@ class SettingsActivity : AppCompatActivity() {
             finish()
         }
 
-        sign_out_button = findViewById(R.id.sign_out_button)
-        sign_out_button.setOnClickListener {
+        signOutButton = findViewById(R.id.sign_out_button)
+        signOutButton.setOnClickListener {
             user.signOut()
             val intent = Intent(this, Login::class.java)
             startActivity(intent)
@@ -56,7 +54,8 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
-                    // Redirect to the profile activity when it exists
+                    val intent = Intent( this, ProfileActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.nav_settings -> {
@@ -70,7 +69,6 @@ class SettingsActivity : AppCompatActivity() {
 
         expandableListView = findViewById(R.id.expandable_list_view)
         expandableListView.setGroupIndicator(null)
-
 
         // Create the adapter and set it up
         val sections = listOf(
@@ -120,10 +118,7 @@ class SettingsActivity : AppCompatActivity() {
         )
         adapter = MyExpandableListAdapter(this, sections)
         expandableListView.setAdapter(adapter)
-
-
     }
-
 
     private fun showEditDialog(
         title: String,
