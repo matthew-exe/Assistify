@@ -2,9 +2,19 @@ package com.example.final_login
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract.Profile
+import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.ListView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class ProfileActivity: AppCompatActivity() {
     private val user = User()
@@ -45,5 +55,29 @@ class ProfileActivity: AppCompatActivity() {
                 else -> false
             }
         }
+
+        findViewById<Button>(R.id.linkButton).setOnClickListener {
+            val userList = arrayOf(
+                ProfileData("Yvonne", R.drawable.profile, "1951-11-30", 73, "A+"),
+            )
+            updateUserProfile(userList[0])
+        }
+    }
+
+    private fun updateUserProfile(userDetails: ProfileData) {
+        findViewById<Button>(R.id.linkButton).visibility = View.GONE
+        findViewById<TextView>(R.id.pre_link_text_1).visibility = View.GONE
+        findViewById<TextView>(R.id.pre_link_text_2).visibility = View.GONE
+
+        val dob = "Date of Birth: ${userDetails.dateOfBirth}"
+        val age = "Age: ${userDetails.age}"
+        val bloodType = "Blood Type: ${userDetails.bloodType}"
+
+        // Update the UI with the user's details
+        findViewById<ImageView>(R.id.profile_picture).setImageResource(userDetails.profilePicture)
+        findViewById<TextView>(R.id.name_text).text = userDetails.name
+        findViewById<TextView>(R.id.dob_text).text = dob
+        findViewById<TextView>(R.id.age_text).text = age
+        findViewById<TextView>(R.id.blood_type_text).text = bloodType
     }
 }
