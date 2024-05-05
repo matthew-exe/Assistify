@@ -33,6 +33,8 @@
         <activity
             android:name=".Dashboard"
             android:exported="false" />
+        <activity
+            android:name=".SettingsActivity" />
     </application>
 
 </manifest>

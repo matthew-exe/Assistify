@@ -1,0 +1,242 @@
+package com.example.final_login
+
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.widget.BaseExpandableListAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ExpandableListView
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
+
+private lateinit var bottomNavigationView: BottomNavigationView
+private lateinit var sign_out_button: Button
+private lateinit var expandableListView: ExpandableListView
+
+private val user = User()
+
+class SettingsActivity : AppCompatActivity() {
+
+    private lateinit var adapter: MyExpandableListAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_settings)
+
+        if (!user.isUserLoggedIn()) {
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        sign_out_button = findViewById(R.id.sign_out_button)
+        sign_out_button.setOnClickListener {
+            user.signOut()
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation)
+        bottomNavigationView.selectedItemId = R.id.nav_settings
+
+        bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_home -> {
+                    val intent = Intent(this, Dashboard::class.java)
+                    startActivity(intent)
+                    true
+                }
+                R.id.nav_profile -> {
+                    // Redirect to the profile activity when it exists
+                    true
+                }
+                R.id.nav_settings -> {
+                    val intent = Intent(this, SettingsActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        expandableListView = findViewById(R.id.expandable_list_view)
+        expandableListView.setGroupIndicator(null)
+
+
+        // Create the adapter and set it up
+        val sections = listOf(
+            SettingsItem(
+                "First Name",
+                null,
+                "John"
+            ),
+            SettingsItem(
+                "Surname",
+                null,
+                "Doe"
+            ),
+            SettingsItem(
+                "Email Address",
+                null,
+                "e***********@gmail.com"
+            ),
+            SettingsItem(
+                "Phone Number",
+                null,
+                "07*********61"
+            ),
+            SettingsItem("Change Password", null),
+            SettingsItem("Notifications", null),
+            SettingsItem(
+                "Privacy Policy",
+                listOf(
+                    "This is a sample privacy policy for our app. We respect your privacy and are committed to protecting it through our compliance with this policy. This policy describes the types of information we may collect from you or that you may provide when you use our app and our practices for collecting, using, maintaining, protecting, and disclosing that information.\n\nPlease read this policy carefully to understand our policies and practices regarding your information and how we will treat it. If you do not agree with our policies and practices, your choice is not to use our app."
+                )
+            ),
+            SettingsItem("About App",
+                listOf(
+                    "This app is simply amazing!"
+                )
+            ),
+            SettingsItem("How to use", listOf(
+                "You can follow this tutorial on Youtube to learn how to use the app:\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            )
+            ),
+            SettingsItem("Contact us",
+                listOf(
+                    "Our customer service team is available Monday - Friday, 9am - 5pm to help you with any questions or concerns you may have.\n\nYou can reach us by phone (0735027350) or email (example@gmail.com).\n\nWe look forward to hearing from you!"
+                )
+            ),
+        )
+        adapter = MyExpandableListAdapter(this, sections)
+        expandableListView.setAdapter(adapter)
+        TODO("Make it so that the user's details are displayed in the settings list and the notifications item shows button toggles for each type of notification.")
+    }
+
+
+    private fun showEditDialog(
+        title: String,
+        initialValue: String,
+        onSave: (String) -> Unit
+    ) {
+        val editText = EditText(this)
+        editText.setText(initialValue)
+
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(editText)
+            .setPositiveButton("Save") { _, _ ->
+                val newValue = editText.text.toString()
+                onSave(newValue)
+                TODO("Save the new value to the database")
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    // Custom ExpandableListAdapter implementation
+    private inner class MyExpandableListAdapter(
+        private val context: Context,
+        private val sections: List<SettingsItem>
+    ) : BaseExpandableListAdapter() {
+
+        override fun getGroupCount(): Int = sections.size
+
+        override fun getChildrenCount(groupPosition: Int): Int =
+            sections[groupPosition].children?.size ?: 0
+
+        override fun getGroup(groupPosition: Int): Any = sections[groupPosition]
+
+        override fun getChild(groupPosition: Int, childPosition: Int): Any =
+            sections[groupPosition].children!![childPosition]
+
+        override fun getGroupId(groupPosition: Int): Long = groupPosition.toLong()
+
+        override fun getChildId(groupPosition: Int, childPosition: Int): Long =
+            childPosition.toLong()
+
+        override fun hasStableIds(): Boolean = true
+
+        override fun getGroupView(
+            groupPosition: Int,
+            isExpanded: Boolean,
+            convertView: View?,
+            parent: ViewGroup?
+        ): View {
+            val itemView = convertView ?: layoutInflater.inflate(
+                R.layout.item_group,
+                parent,
+                false
+            )
+            val titleTextView = itemView.findViewById<TextView>(R.id.tv_group_title)
+            val valueTextView = itemView.findViewById<TextView>(R.id.tv_group_value)
+            val indicatorImageView = itemView.findViewById<ImageView>(R.id.iv_group_indicator)
+
+            val section = sections[groupPosition]
+            titleTextView.text = section.title
+            valueTextView.text = section.displayValue ?: ""
+
+            // Show or hide the group value TextView based on whether the group item has a display value
+            valueTextView.visibility = if (section.displayValue != null) View.VISIBLE else View.GONE
+
+            // Show or hide the group indicator ImageView based on whether the group item has children
+            indicatorImageView.visibility = if (section.children != null) View.VISIBLE else View.GONE
+
+            // Set the group indicator image based on whether the group item is expanded or not
+            indicatorImageView.setImageResource(if (isExpanded) R.drawable.expand_less else R.drawable.expand_more)
+
+            // Add a click listener to the entire item view to expand or collapse the group item
+            itemView.setOnClickListener {
+                if (isExpanded) {
+                    expandableListView.collapseGroup(groupPosition)
+                } else {
+                    expandableListView.expandGroup(groupPosition)
+                }
+
+                // Add click listeners for editing
+                when (section.title) {
+                    "First Name" -> showEditDialog("Edit First Name", section.displayValue ?: "") { newValue ->
+                    }
+                    "Surname" -> showEditDialog("Edit Surname", section.displayValue ?: "") { newValue ->
+                    }
+                    "Email Address" -> showEditDialog("Edit Email Address", "") { newValue ->
+                    }
+                    "Phone Number" -> showEditDialog("Edit Phone Number", "") { newValue ->
+                    }
+                    "Change Password" -> showEditDialog("Change Password", "") { newValue ->
+                    }
+                }
+            }
+
+            return itemView
+        }
+
+        override fun getChildView(
+            groupPosition: Int,
+            childPosition: Int,
+            isLastChild: Boolean,
+            convertView: View?,
+            parent: ViewGroup?
+        ): View {
+            val itemView = convertView ?: layoutInflater.inflate(
+                android.R.layout.simple_list_item_1,
+                parent,
+                false
+            )
+            val textView = itemView.findViewById<TextView>(android.R.id.text1)
+            textView.text = getChild(groupPosition, childPosition) as String
+            return itemView
+        }
+
+        override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean = true
+    }
+}
