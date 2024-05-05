@@ -5,5 +5,8 @@ data class ProfileData (
     val profilePicture: Int,
     val dateOfBirth: String,
     val age: Int,
-    val bloodType: String
+    val bloodType: String,
+    val emergencyContact: String,
+    val emergencyRelation: String,
+    val emergencyNumber: String
 )

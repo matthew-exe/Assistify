@@ -13,5 +13,4 @@
         <item name="colorPrimary">@color/accessiblePurple</item>
         <item name="android:windowBackground">@color/accessiblePurple</item>
     </style>
-
 </resources>

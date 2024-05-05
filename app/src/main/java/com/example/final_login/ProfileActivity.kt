@@ -58,8 +58,10 @@ class ProfileActivity: AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.linkButton).setOnClickListener {
+            // TODO("This is where data about the client is retrieved")
             val userList = arrayOf(
-                ProfileData("Yvonne", R.drawable.profile, "1951-11-30", 73, "A+"),
+                ProfileData("Yvonne", R.drawable.yvonne, "1951-11-30", 73, "A+",
+                    "Teresa", "Daughter", "07777123456"),
             )
             updateUserProfile(userList[0])
         }
@@ -75,15 +77,25 @@ class ProfileActivity: AppCompatActivity() {
 
         Toast.makeText(this, "Successfully linked with ${userDetails.name}", Toast.LENGTH_SHORT).show()
 
-        val dob = "Date of Birth: ${userDetails.dateOfBirth}"
+        val dob = "Date of birth: ${userDetails.dateOfBirth}"
         val age = "Age: ${userDetails.age}"
-        val bloodType = "Blood Type: ${userDetails.bloodType}"
+        val bloodType = "Blood type: ${userDetails.bloodType}"
+        val details = "Details:"
+        val contactInfo = "Contact Information:"
+        val emergencyContact = "Emergency contact: ${userDetails.emergencyContact}"
+        val emergencyRelation = "Relation to client: ${userDetails.emergencyRelation}"
+        val emergencyNumber = "Emergency contact number: ${userDetails.emergencyNumber}"
 
         // Update the UI with the user's details
-        findViewById<ImageView>(R.id.profile_picture).setImageResource(userDetails.profilePicture)
+        findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.profile_picture).setImageResource(userDetails.profilePicture)
         findViewById<TextView>(R.id.name_text).text = userDetails.name
         findViewById<TextView>(R.id.dob_text).text = dob
         findViewById<TextView>(R.id.age_text).text = age
         findViewById<TextView>(R.id.blood_type_text).text = bloodType
+        findViewById<TextView>(R.id.details_text).text = details
+        findViewById<TextView>(R.id.info_text).text = contactInfo
+        findViewById<TextView>(R.id.emergency_contact_text).text = emergencyContact
+        findViewById<TextView>(R.id.emergency_relation_text).text = emergencyRelation
+        findViewById<TextView>(R.id.emergency_number_text).text = emergencyNumber
     }
 }
