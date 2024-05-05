@@ -74,6 +74,7 @@ class SettingsActivity : AppCompatActivity() {
 
         // Create the adapter and set it up
         val sections = listOf(
+            // TODO Make it so that the user's details are displayed in the settings list and the notifications item shows button toggles for each type of notification.
             SettingsItem(
                 "First Name",
                 null,
@@ -119,7 +120,8 @@ class SettingsActivity : AppCompatActivity() {
         )
         adapter = MyExpandableListAdapter(this, sections)
         expandableListView.setAdapter(adapter)
-        TODO("Make it so that the user's details are displayed in the settings list and the notifications item shows button toggles for each type of notification.")
+
+
     }
 
 
@@ -137,7 +139,7 @@ class SettingsActivity : AppCompatActivity() {
             .setPositiveButton("Save") { _, _ ->
                 val newValue = editText.text.toString()
                 onSave(newValue)
-                TODO("Save the new value to the database")
+                // TODO "Save the new value to the database"
             }
             .setNegativeButton("Cancel", null)
             .show()

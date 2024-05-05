@@ -94,6 +94,7 @@ class Dashboard : AppCompatActivity() {
                 phoneNumberToDial = "07450272350" // Should be 999 in production
                 if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
+                    emergencyCallSlider.resetSlider()
                 } else {
                     val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
                     startActivity(intent)
@@ -126,7 +127,7 @@ class Dashboard : AppCompatActivity() {
                 }
                 R.id.nav_profile -> {
                     true
-                    TODO("Redirect to the profile activity when it exists")
+                    // TODO Redirect to the profile activity when it exists
                 }
                 R.id.nav_settings -> {
                     val intent = Intent(this, SettingsActivity::class.java)
@@ -165,10 +166,11 @@ class Dashboard : AppCompatActivity() {
             }
         }
         return dummyDataList
-        TODO("Need to implement the logic to get the sensor data from the database / from the API")
+        // TODO Need to implement the logic to get the sensor data from the database / from the API
     }
 
     private fun showNotificationsDialog() {
+        // TODO Set up real notifications and remove the dummy ones
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.notification_dialog)
 
