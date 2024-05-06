@@ -35,6 +35,8 @@
             android:exported="false" />
         <activity
             android:name=".SettingsActivity" />
+        <activity
+            android:name=".ProfileActivity" />
     </application>
 
 </manifest>

@@ -88,7 +88,6 @@ class Dashboard : AppCompatActivity() {
 
         emergencyCallSlider = findViewById(R.id.emergencyCallSlider)
 
-
         emergencyCallSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
             override fun onSlideComplete(view: SlideToActView) {
                 phoneNumberToDial = "07450272350" // Should be 999 in production
@@ -126,8 +125,9 @@ class Dashboard : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
+                    val intent = Intent( this, ProfileActivity::class.java)
+                    startActivity(intent)
                     true
-                    // TODO Redirect to the profile activity when it exists
                 }
                 R.id.nav_settings -> {
                     val intent = Intent(this, SettingsActivity::class.java)
