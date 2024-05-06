@@ -19,14 +19,12 @@ class Security {
     private val fixedIv = iv.hexStringToByteArray()
     private val cipher: Cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun enc(data: String): String {
         cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(secretKey, "AES"), IvParameterSpec(fixedIv))
         val encryptedData = cipher.doFinal(data.toByteArray())
         return getUrlEncoder().encodeToString(encryptedData)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun dec(encData: String?): String {
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(secretKey, "AES"), IvParameterSpec(fixedIv))
         val decryptedData = cipher.doFinal(Base64.getUrlDecoder().decode(encData))
@@ -44,7 +42,6 @@ class Security {
         return data
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun generateSecureKey(length: Int): String {
         val random = SecureRandom()
         val keyBytes = ByteArray(length)

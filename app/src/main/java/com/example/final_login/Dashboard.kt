@@ -88,12 +88,12 @@ class Dashboard : AppCompatActivity() {
 
         emergencyCallSlider = findViewById(R.id.emergencyCallSlider)
 
-
         emergencyCallSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
             override fun onSlideComplete(view: SlideToActView) {
                 phoneNumberToDial = "07450272350" // Should be 999 in production
                 if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
+                    emergencyCallSlider.resetSlider()
                 } else {
                     val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
                     startActivity(intent)
@@ -125,8 +125,9 @@ class Dashboard : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
+                    val intent = Intent( this, ProfileActivity::class.java)
+                    startActivity(intent)
                     true
-                    TODO("Redirect to the profile activity when it exists")
                 }
                 R.id.nav_settings -> {
                     val intent = Intent(this, SettingsActivity::class.java)
@@ -165,10 +166,11 @@ class Dashboard : AppCompatActivity() {
             }
         }
         return dummyDataList
-        TODO("Need to implement the logic to get the sensor data from the database / from the API")
+        // TODO Need to implement the logic to get the sensor data from the database / from the API
     }
 
     private fun showNotificationsDialog() {
+        // TODO Set up real notifications and remove the dummy ones
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.notification_dialog)
 
@@ -226,7 +228,9 @@ class Dashboard : AppCompatActivity() {
                 val id = dataSnapshot.child("id").getValue(String::class.java)!!
                 val firstname = security.dec(dataSnapshot.child("firstname").getValue(String::class.java))
                 val surname = security.dec(dataSnapshot.child("surname").getValue(String::class.java))
-                setProfileData(UserData(id, firstname, surname))
+                val phoneNumber = security.dec(dataSnapshot.child("surname").getValue(String::class.java))
+                println("Phone Number $phoneNumber")
+                setProfileData(UserData(id, firstname, surname, if(phoneNumber=="")"07908548845" else phoneNumber))
             } else {
                 println("firebase Error: Data not found or empty")
             }

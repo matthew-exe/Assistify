@@ -47,7 +47,6 @@ class Register : AppCompatActivity() {
     private val formController = FormController()
     private val user = User()
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
@@ -207,13 +206,13 @@ class Register : AppCompatActivity() {
 
     private fun toggleTheme() {
         if(themeAccessibleActive){
-            wholePage.setBackgroundColor(getResources().getColor(R.color.white))
-            cardPage.setCardBackgroundColor(getResources().getColor(R.color.off_white))
+            wholePage.setBackgroundColor(resources.getColor(R.color.white, null))
+            cardPage.setCardBackgroundColor(resources.getColor(R.color.off_white, null))
             themeAccessibleActive = false
             btnThemeSwitch.setChecked(false)
         } else {
             wholePage.setBackgroundColor(R.drawable.background_gradient)
-            cardPage.setCardBackgroundColor(getResources().getColor(R.color.accessibleYellow))
+            cardPage.setCardBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
             themeAccessibleActive = true
             btnThemeSwitch.setChecked(true)
         }

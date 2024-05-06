@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
@@ -72,6 +73,11 @@ class MyAdapter(
                 holder.name.text = sensor.name
                 holder.image.setImageResource(sensor.image)
 
+                if(sensor.name == "Pulse"){
+                    val heartAnimation = AnimationUtils.loadAnimation(context, R.anim.anim_pulse)
+                    holder.image.startAnimation(heartAnimation)
+                }
+
                 holder.itemView.setOnLongClickListener {
                     showDeleteConfirmationDialog(position)
                     true
@@ -87,9 +93,6 @@ class MyAdapter(
     private fun addItem(sensorData: SensorData) {
         data.add(sensorData)
         user.sendDashboardToDatabase(data)
-//        println(sensorData.name)
-//        println(data.indexOf(sensorData))
-        // Take data send to database
         filterData(editTextText.text.toString())
     }
 
@@ -102,17 +105,35 @@ class MyAdapter(
             SensorData(name, image)
         }
 
-        val adapter = ArrayAdapter(
+        val adapter = SensorArrayAdapter(
             context,
             android.R.layout.simple_list_item_1,
-            sensorItems.map { it.name }
+            sensorItems.map { it.name },
+            sensorItems.filter{it in filteredData }.map{ it.name } // Passes in a list of currently selected sensors on the dashboard so that no dashboard can have or store two of the same sensors
         )
+
+        if(sensorItems.filter{it in filteredData }.map{ it.name } == sensorItems.map{it.name}){
+//            TODO("Show text instead of sensor options, saying something like 'MORE COMING SOON....'")
+        }
 
         builder.setAdapter(adapter) { _, which ->
             addItem(sensorItems[which])
         }
 
         builder.create().show()
+    }
+
+    class SensorArrayAdapter(
+        context: Context,
+        resource: Int,
+        objects: List<String>,
+        private val disabledItems: List<String>
+    ) : ArrayAdapter<String>(context, resource, objects) {
+
+        override fun isEnabled(position: Int): Boolean {
+            // disables any inputs that are already assigned to users dashboard
+            return getItem(position) !in disabledItems
+        }
     }
 
     private fun showDeleteConfirmationDialog(position: Int) {
@@ -129,7 +150,6 @@ class MyAdapter(
     }
 
     private fun deleteItem(position: Int) {
-//        println(data[position])
         data.removeAt(position)
         user.sendDashboardToDatabase(data)
         filterData(editTextText.text.toString())

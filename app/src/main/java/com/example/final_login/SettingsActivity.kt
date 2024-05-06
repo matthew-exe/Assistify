@@ -15,21 +15,33 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
-
-private lateinit var bottomNavigationView: BottomNavigationView
-private lateinit var sign_out_button: Button
-private lateinit var expandableListView: ExpandableListView
-
-private val user = User()
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class SettingsActivity : AppCompatActivity() {
-
+    private val user = User()
+    private val security = Security()
     private lateinit var adapter: MyExpandableListAdapter
+    private lateinit var bottomNavigationView: BottomNavigationView
+    private lateinit var signOutButton: Button
+    private lateinit var expandableListView: ExpandableListView
+    private lateinit var firebaseDatabase: FirebaseDatabase
+    private lateinit var databaseReference: DatabaseReference
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var currentUser: FirebaseUser
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_settings)
+
+        firebaseDatabase = FirebaseDatabase.getInstance()
+        databaseReference = firebaseDatabase.reference.child("users")
+        firebaseAuth = FirebaseAuth.getInstance()
+        currentUser = firebaseAuth.currentUser!!
 
         if (!user.isUserLoggedIn()) {
             val intent = Intent(this, Login::class.java)
@@ -37,8 +49,8 @@ class SettingsActivity : AppCompatActivity() {
             finish()
         }
 
-        sign_out_button = findViewById(R.id.sign_out_button)
-        sign_out_button.setOnClickListener {
+        signOutButton = findViewById(R.id.sign_out_button)
+        signOutButton.setOnClickListener {
             user.signOut()
             val intent = Intent(this, Login::class.java)
             startActivity(intent)
@@ -55,15 +67,19 @@ class SettingsActivity : AppCompatActivity() {
                     startActivity(intent)
                     true
                 }
+
                 R.id.nav_profile -> {
-                    // Redirect to the profile activity when it exists
+                    val intent = Intent(this, ProfileActivity::class.java)
+                    startActivity(intent)
                     true
                 }
+
                 R.id.nav_settings -> {
                     val intent = Intent(this, SettingsActivity::class.java)
                     startActivity(intent)
                     true
                 }
+
                 else -> false
             }
         }
@@ -71,9 +87,9 @@ class SettingsActivity : AppCompatActivity() {
         expandableListView = findViewById(R.id.expandable_list_view)
         expandableListView.setGroupIndicator(null)
 
-
         // Create the adapter and set it up
         val sections = listOf(
+            // TODO Make it so that the user's details are displayed in the settings list and the notifications item shows button toggles for each type of notification.
             SettingsItem(
                 "First Name",
                 null,
@@ -102,31 +118,83 @@ class SettingsActivity : AppCompatActivity() {
                     "This is a sample privacy policy for our app. We respect your privacy and are committed to protecting it through our compliance with this policy. This policy describes the types of information we may collect from you or that you may provide when you use our app and our practices for collecting, using, maintaining, protecting, and disclosing that information.\n\nPlease read this policy carefully to understand our policies and practices regarding your information and how we will treat it. If you do not agree with our policies and practices, your choice is not to use our app."
                 )
             ),
-            SettingsItem("About App",
+            SettingsItem(
+                "About App",
                 listOf(
                     "This app is simply amazing!"
                 )
             ),
-            SettingsItem("How to use", listOf(
-                "You can follow this tutorial on Youtube to learn how to use the app:\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ"
-            )
+            SettingsItem(
+                "How to use", listOf(
+                    "You can follow this tutorial on Youtube to learn how to use the app:\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                )
             ),
-            SettingsItem("Contact us",
+            SettingsItem(
+                "Contact us",
                 listOf(
                     "Our customer service team is available Monday - Friday, 9am - 5pm to help you with any questions or concerns you may have.\n\nYou can reach us by phone (0735027350) or email (example@gmail.com).\n\nWe look forward to hearing from you!"
                 )
             ),
         )
-        adapter = MyExpandableListAdapter(this, sections)
-        expandableListView.setAdapter(adapter)
-        TODO("Make it so that the user's details are displayed in the settings list and the notifications item shows button toggles for each type of notification.")
+//        adapter = MyExpandableListAdapter(this, sections)
+//        expandableListView.setAdapter(adapter)
+        populateUserDetails(sections)
     }
+
+//        adapter = MyExpandableListAdapter(this, sections)
+//        expandableListView.setAdapter(adapter)
+    // Just moved the code above to inside the populateUserDetails section so that it can be called
+    //after read from database
+
+    private fun populateUserDetails(sections: List<SettingsItem>) {
+        databaseReference.child(security.enc(currentUser.email!!)).get()
+            .addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                    val email = security.dec(dataSnapshot.child("id").getValue(String::class.java)!!) ?.let { security.dec(it) } ?: ""
+                    val firstname = security.dec(dataSnapshot.child("firstname").getValue(String::class.java)) ?.let { security.dec(it) } ?: ""
+                    val surname = security.dec(dataSnapshot.child("surname").getValue(String::class.java)) ?.let { security.dec(it) } ?: ""
+                    val phoneNumber = dataSnapshot.child("phoneNumber").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                    sections[0].displayValue = firstname
+                    sections[1].displayValue = surname
+                    sections[2].displayValue = email
+                    sections[3].displayValue = phoneNumber
+
+                    adapter = MyExpandableListAdapter(this, sections)
+                    expandableListView.setAdapter(adapter)
+                } else {
+                    println("firebase Error: Data not found or empty")
+                }
+            }.addOnFailureListener { exception ->
+                println("firebase Error getting data: $exception")
+            }
+    }
+
+    private fun updateUserDetails(valueToUpdate: String, value: String) {
+        databaseReference.child(security.enc(currentUser.email!!)).get()
+            .addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                    databaseReference.child(security.enc(currentUser.email!!)).updateChildren(
+                        mapOf(
+                            valueToUpdate to security.enc(value)
+                        )
+                    )
+                } else {
+                    println("firebase Error: Data not found or empty")
+                }
+            }
+    }
+//    not sure if the code above is over kill the code below is the orginal code
+//        databaseReference.child(security.enc(currentUser.email!!)).updateChildren(
+//            mapOf(
+//                "firstname" to security.enc(firstname)
+//            )
+//        )
 
 
     private fun showEditDialog(
         title: String,
         initialValue: String,
-        onSave: (String) -> Unit
+        valueToUpdate: String,
     ) {
         val editText = EditText(this)
         editText.setText(initialValue)
@@ -136,8 +204,7 @@ class SettingsActivity : AppCompatActivity() {
             .setView(editText)
             .setPositiveButton("Save") { _, _ ->
                 val newValue = editText.text.toString()
-                onSave(newValue)
-                TODO("Save the new value to the database")
+                updateUserDetails(valueToUpdate, newValue)
             }
             .setNegativeButton("Cancel", null)
             .show()
@@ -204,16 +271,13 @@ class SettingsActivity : AppCompatActivity() {
 
                 // Add click listeners for editing
                 when (section.title) {
-                    "First Name" -> showEditDialog("Edit First Name", section.displayValue ?: "") { newValue ->
-                    }
-                    "Surname" -> showEditDialog("Edit Surname", section.displayValue ?: "") { newValue ->
-                    }
-                    "Email Address" -> showEditDialog("Edit Email Address", "") { newValue ->
-                    }
-                    "Phone Number" -> showEditDialog("Edit Phone Number", "") { newValue ->
-                    }
-                    "Change Password" -> showEditDialog("Change Password", "") { newValue ->
-                    }
+                    "First Name" -> showEditDialog("Edit First Name", section.displayValue ?: "", "firstname")
+                    "Surname" -> showEditDialog("Edit Surname", section.displayValue ?: "", "surname")
+                    // Not working for email
+                    "Email Address" -> showEditDialog("Edit Email Address", "", "email")
+                    "Phone Number" -> showEditDialog("Edit Phone Number", "", "phoneNumber")
+                    // Not working for password
+                    "Change Password" -> showEditDialog("Change Password", "", "password")
                 }
             }
 

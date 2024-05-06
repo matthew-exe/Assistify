@@ -4,10 +4,17 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
+<<<<<<< Updated upstream
         <DropdownSelection timestamp="2024-05-05T01:39:00.917503500Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\matth\.android\avd\Medium_Phone_API_32.avd" />
+=======
+        <DropdownSelection timestamp="2024-05-06T19:08:56.305036100Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\matth\.android\avd\Pixel_3a_API_34_extension_level_7_x86_64.avd" />
+>>>>>>> Stashed changes
             </handle>
           </Target>
         </DropdownSelection>
