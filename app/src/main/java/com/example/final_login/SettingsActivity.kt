@@ -15,19 +15,33 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class SettingsActivity : AppCompatActivity() {
     private val user = User()
-
+    private val security = Security()
+    private lateinit var adapter: MyExpandableListAdapter
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var signOutButton: Button
     private lateinit var expandableListView: ExpandableListView
-    private lateinit var adapter: MyExpandableListAdapter
+    private lateinit var firebaseDatabase: FirebaseDatabase
+    private lateinit var databaseReference: DatabaseReference
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var currentUser: FirebaseUser
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_settings)
+
+        firebaseDatabase = FirebaseDatabase.getInstance()
+        databaseReference = firebaseDatabase.reference.child("users")
+        firebaseAuth = FirebaseAuth.getInstance()
+        currentUser = firebaseAuth.currentUser!!
 
         if (!user.isUserLoggedIn()) {
             val intent = Intent(this, Login::class.java)
@@ -118,6 +132,34 @@ class SettingsActivity : AppCompatActivity() {
         )
         adapter = MyExpandableListAdapter(this, sections)
         expandableListView.setAdapter(adapter)
+        populateUserDetails(sections)
+    }
+
+//        adapter = MyExpandableListAdapter(this, sections)
+//        expandableListView.setAdapter(adapter)
+        // Just moved the code above to inside the populateUserDetails section so that it can be called
+        //after read from database
+
+    private fun populateUserDetails(sections:List<SettingsItem>){
+        databaseReference.child(security.enc(currentUser.email!!)).get().addOnSuccessListener { dataSnapshot ->
+            if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                val email = security.dec(dataSnapshot.child("id").getValue(String::class.java)!!)
+                val firstname = security.dec(dataSnapshot.child("firstname").getValue(String::class.java))
+                val surname = security.dec(dataSnapshot.child("surname").getValue(String::class.java))
+                val phoneNumber = security.dec(dataSnapshot.child("phoneNumber").getValue(String::class.java))
+                println("Phone Number $phoneNumber")
+                sections[0].displayValue = firstname
+                sections[1].displayValue = surname
+                sections[2].displayValue = email
+                sections[3].displayValue = if(phoneNumber=="")"07908548845" else phoneNumber
+                adapter = MyExpandableListAdapter(this, sections)
+                expandableListView.setAdapter(adapter)
+            } else {
+                println("firebase Error: Data not found or empty")
+            }
+        }.addOnFailureListener { exception ->
+            println("firebase Error getting data: $exception")
+        }
     }
 
     private fun showEditDialog(

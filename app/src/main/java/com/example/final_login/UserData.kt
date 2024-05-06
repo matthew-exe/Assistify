@@ -4,5 +4,6 @@ data class UserData(
     val id:String,
     val firstname:String,
     val surname:String,
+    val phoneNumber:String
 )
 

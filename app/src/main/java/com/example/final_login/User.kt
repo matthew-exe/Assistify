@@ -1,5 +1,6 @@
 package com.example.final_login
 import android.content.Context
+import android.widget.ExpandableListView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -18,7 +19,7 @@ class User{
     fun getDashboard(adapter: MyAdapter){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
-            val dashboardRef = userRef.child("dashboard")
+            val dashboardRef = userRef.child(security.enc("dashboard"))
             dashboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val dashboardData = dataSnapshot.value
@@ -39,7 +40,8 @@ class User{
         val returnList = mutableListOf<SensorData>()
         if (dashboard is Iterable<*>) {
             for (item in dashboard) {
-                returnList.add(SensorData(item.toString(), if (item.toString() == "Pulse") R.drawable.pulse else if (item.toString() == "Steps") R.drawable.steps else R.drawable.calories))
+                val decryptedString = security.dec(item?.toString())
+                returnList.add(SensorData(decryptedString, if(decryptedString == "Pulse") R.drawable.pulse else if (decryptedString == "Steps") R.drawable.steps else R.drawable.calories))
             }
         }
         return returnList
@@ -48,10 +50,10 @@ class User{
     fun sendDashboardToDatabase(dashboard: MutableList<SensorData>){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
-            val dashboardRef = userRef.child("dashboard")
+            val dashboardRef = userRef.child(security.enc("dashboard"))
             val x = HashMap<String, String>()
             for(item in dashboard){
-                x[dashboard.indexOf(item).toString()] = item.name
+                x[dashboard.indexOf(item).toString()] = security.enc(item.name)
             }
             dashboardRef.setValue(x)
                 .addOnSuccessListener {
@@ -124,7 +126,7 @@ class User{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!dataSnapshot.exists()){
                     val id = databaseReference.child(security.enc(email)).key!!
-                    val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname))
+                    val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc("07777555566"))
                     databaseReference.child(id).setValue(userData)
                     userCreated = true
                 } else {
@@ -148,4 +150,10 @@ class User{
         }
         return Pair(firstName, surname)
     }
+
+    fun populateUserSettingsList(list:ExpandableListView){
+
+    }
+
+
 }
