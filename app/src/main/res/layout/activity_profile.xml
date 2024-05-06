@@ -13,7 +13,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="64dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="8dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
@@ -84,6 +84,28 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/nhs_number_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:fontFamily="@font/lexend"
+            android:padding="8dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/medical_conditions_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:fontFamily="@font/lexend"
+            android:padding="8dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <TextView
             android:id="@+id/info_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -127,6 +149,50 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/white"
             android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="5dp" />
+
+            <Button
+                android:id="@+id/unlink_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:text="Unlink Client"
+                android:fontFamily="@font/lexend"
+                android:textColor="@color/white"
+                android:backgroundTint="#371f61"
+                android:visibility="gone" />
+
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="5dp" />
+
+            <Button
+                android:id="@+id/call_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:text="Call Client"
+                android:fontFamily="@font/lexend"
+                android:textColor="@color/white"
+                android:backgroundTint="#371f61"
+                android:visibility="gone" />
+
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="5dp" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <TextView

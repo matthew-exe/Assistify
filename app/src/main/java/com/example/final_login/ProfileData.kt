@@ -6,6 +6,8 @@ data class ProfileData (
     val dateOfBirth: String,
     val age: Int,
     val bloodType: String,
+    val nhsNumber: String,
+    val medConditions: List<String>,
     val emergencyContact: String,
     val emergencyRelation: String,
     val emergencyNumber: String
