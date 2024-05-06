@@ -136,6 +136,7 @@ class MyAdapter(
         }
     }
 
+
     private fun showDeleteConfirmationDialog(position: Int) {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Delete Sensor")
@@ -169,4 +170,5 @@ class MyAdapter(
         filteredData.add("Add") // Add the "Add" button at the end
         notifyDataSetChanged()
     }
+
 }

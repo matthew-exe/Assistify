@@ -150,9 +150,9 @@ class SettingsActivity : AppCompatActivity() {
         databaseReference.child(security.enc(currentUser.email!!)).get()
             .addOnSuccessListener { dataSnapshot ->
                 if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
-                    val email = security.dec(dataSnapshot.child("id").getValue(String::class.java)!!) ?.let { security.dec(it) } ?: ""
-                    val firstname = security.dec(dataSnapshot.child("firstname").getValue(String::class.java)) ?.let { security.dec(it) } ?: ""
-                    val surname = security.dec(dataSnapshot.child("surname").getValue(String::class.java)) ?.let { security.dec(it) } ?: ""
+                    val email = dataSnapshot.child("id").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                    val firstname = dataSnapshot.child("firstname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                    val surname = dataSnapshot.child("surname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
                     val phoneNumber = dataSnapshot.child("phoneNumber").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
                     sections[0].displayValue = firstname
                     sections[1].displayValue = surname
