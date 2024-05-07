@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ViewFlipper
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +34,8 @@ class ProfileActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_profile)
+
+        val viewFlipper = findViewById<ViewFlipper>(R.id.viewFlipper)
 
         if (!user.isUserLoggedIn()) {
             val intent = Intent(this, Login::class.java)
@@ -73,10 +76,15 @@ class ProfileActivity: AppCompatActivity() {
                     "Daughter", "07777123456"),
             )
             updateUserProfile(userList[0])
+
+            viewFlipper.flipInterval = 2000
+            viewFlipper.isAutoStart = true
+            viewFlipper.startFlipping()
         }
 
         findViewById<Button>(R.id.unlink_button).setOnClickListener {
             unlinkUserProfile()
+            viewFlipper.stopFlipping()
         }
 
         findViewById<Button>(R.id.call_button).setOnClickListener {
