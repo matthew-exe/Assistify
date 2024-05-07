@@ -1,9 +1,9 @@
 package com.example.final_login
 
 data class UserData(
-    val id:String,
-    val firstname:String,
-    val surname:String,
-    val phoneNumber:String
+    var email: String = "",
+    var firstname: String = "",
+    var surname: String = "",
+    var phoneNumber: String = ""
 )
 

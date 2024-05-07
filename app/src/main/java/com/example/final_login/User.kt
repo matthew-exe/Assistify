@@ -18,7 +18,7 @@ class User{
 
     fun getDashboard(adapter: MyAdapter){
         if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
             val dashboardRef = userRef.child(security.enc("dashboard"))
             dashboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -49,7 +49,7 @@ class User{
 
     fun sendDashboardToDatabase(dashboard: MutableList<SensorData>){
         if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
             val dashboardRef = userRef.child(security.enc("dashboard"))
             val x = HashMap<String, String>()
             for(item in dashboard){
@@ -69,18 +69,17 @@ class User{
     }
 
     fun checkUserExists(email: String, callback: (Boolean) -> Unit) {
-        // You have to add the callback function such as
-        //  checkUserExists(emailAddress) { userExists ->
-        //      if(userExists){ }
-        //          else{ }
-        //  }
-        databaseReference.child(security.enc(email)).get().addOnSuccessListener { dataSnapshot ->
-            val exists = dataSnapshot.exists() && dataSnapshot.hasChildren()
-            callback(exists)
-        }.addOnFailureListener { exception ->
-            println("Firebase Error getting data: $exception")
-            callback(false)
-        }
+        databaseReference.orderByChild("email").equalTo(security.enc(email)).addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val exists = dataSnapshot.exists() && dataSnapshot.hasChildren()
+                callback(exists)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                println("Firebase Error getting data: $databaseError")
+                callback(false)
+            }
+        })
     }
 
     fun isUserLoggedIn(): Boolean {
@@ -107,6 +106,23 @@ class User{
             }
         }
     }
+
+    fun updateEmail(newEmail: String, callback: (Boolean) -> Unit) {
+        val currentUser = firebaseAuth.currentUser
+        currentUser?.verifyBeforeUpdateEmail(newEmail)?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                println("User email address verification email sent.")
+                callback(true)
+            } else {
+                println("Failed to update user email address.")
+                callback(false)
+            }
+        }?.addOnFailureListener { exception ->
+            println("Update email failed with exception: ${exception.message}")
+            callback(false)
+        }
+    }
+
     private fun deleteAccount(){
         val currentUser = firebaseAuth.currentUser
         currentUser?.delete()?.addOnCompleteListener { task ->
@@ -122,11 +138,11 @@ class User{
 
     fun dbCreateUser(email: String, firstname: String, surname: String):Boolean{
         var userCreated = false
-        databaseReference.orderByChild("username").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
+        databaseReference.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!dataSnapshot.exists()){
-                    val id = databaseReference.child(security.enc(email)).key!!
-                    val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc("07777555566"))
+                    val id = security.enc(FirebaseAuth.getInstance().currentUser!!.uid!!)
+                    val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(""))
                     databaseReference.child(id).setValue(userData)
                     userCreated = true
                 } else {

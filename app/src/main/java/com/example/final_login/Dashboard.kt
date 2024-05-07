@@ -223,14 +223,14 @@ class Dashboard : AppCompatActivity() {
     }
 
     private fun loadUserProfile(){
-        databaseReference.child(security.enc(currentUser.email!!)).get().addOnSuccessListener { dataSnapshot ->
+        databaseReference.child(security.enc(currentUser.uid!!)).get().addOnSuccessListener { dataSnapshot ->
             if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
-                val id = dataSnapshot.child("id").getValue(String::class.java)!!
-                val firstname = security.dec(dataSnapshot.child("firstname").getValue(String::class.java))
-                val surname = security.dec(dataSnapshot.child("surname").getValue(String::class.java))
-                val phoneNumber = security.dec(dataSnapshot.child("surname").getValue(String::class.java))
+                val email = dataSnapshot.child("email").getValue(String::class.java)!! ?.let { security.dec(it) } ?: ""
+                val firstname = dataSnapshot.child("firstname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                val surname = dataSnapshot.child("surname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                val phoneNumber = dataSnapshot.child("phoneNumber").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
                 println("Phone Number $phoneNumber")
-                setProfileData(UserData(id, firstname, surname, if(phoneNumber=="")"07908548845" else phoneNumber))
+                setProfileData(UserData(email, firstname, surname, if(phoneNumber=="")"07908548845" else phoneNumber))
             } else {
                 println("firebase Error: Data not found or empty")
             }
@@ -241,8 +241,6 @@ class Dashboard : AppCompatActivity() {
 
     private fun setProfileData(usersData:UserData){
         tvFirstName.text = user.splitName(usersData.firstname).first
-//        textEmailAddress.text = user.id
-//        textSurname.text = user.surname
     }
 
 }

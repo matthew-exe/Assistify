@@ -20,6 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
@@ -32,6 +33,7 @@ class Login : AppCompatActivity() {
 
     private val formController = FormController()
     private val user = User()
+    private val security = Security()
 
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var databaseReference: DatabaseReference
@@ -95,6 +97,11 @@ class Login : AppCompatActivity() {
             }
         }
 
+        if (intent.getBooleanExtra("verificationEmailSent", false)) {
+            val rootView = findViewById<View>(android.R.id.content)
+            Snackbar.make(rootView, "Verification email to your new address. Please check your inbox and click the link to complete the change.", Snackbar.LENGTH_LONG).show()
+        }
+
         inputPassword.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 btnLogin.isEnabled = formController.isValidPassword(inputPassword) && formController.isValidEmail(inputEmail)
@@ -149,6 +156,7 @@ class Login : AppCompatActivity() {
     private fun loginUserEmailPassword(username: String, password: String) {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(username, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
+                checkIfEmailUpdated()
                 Toast.makeText(this@Login,"You are Logged In.",Toast.LENGTH_SHORT).show()
                 val intent = Intent(this@Login, Dashboard::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -197,6 +205,22 @@ class Login : AppCompatActivity() {
                     Toast.makeText(this@Login, "Authentication Failed.", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    private fun checkIfEmailUpdated() {
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser != null) {
+            databaseReference.child(security.enc(currentUser.uid)).get().addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                    val email = security.dec(dataSnapshot.child("email").getValue(String::class.java))
+                    if (email != currentUser.email) {
+                        databaseReference.child(security.enc(currentUser.uid)).child("email").setValue(security.enc(currentUser.email!!))
+                    }
+                } else {
+                    println("firebase Error: Data not found or empty")
+                }
+            }
+        }
     }
 
     // Split Colors On String

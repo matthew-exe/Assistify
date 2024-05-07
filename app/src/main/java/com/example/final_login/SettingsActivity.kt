@@ -15,6 +15,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
@@ -67,16 +68,19 @@ class SettingsActivity : AppCompatActivity() {
                     startActivity(intent)
                     true
                 }
+
                 R.id.nav_profile -> {
-                    val intent = Intent( this, ProfileActivity::class.java)
+                    val intent = Intent(this, ProfileActivity::class.java)
                     startActivity(intent)
                     true
                 }
+
                 R.id.nav_settings -> {
                     val intent = Intent(this, SettingsActivity::class.java)
                     startActivity(intent)
                     true
                 }
+
                 else -> false
             }
         }
@@ -115,51 +119,66 @@ class SettingsActivity : AppCompatActivity() {
                     "This is a sample privacy policy for our app. We respect your privacy and are committed to protecting it through our compliance with this policy. This policy describes the types of information we may collect from you or that you may provide when you use our app and our practices for collecting, using, maintaining, protecting, and disclosing that information.\n\nPlease read this policy carefully to understand our policies and practices regarding your information and how we will treat it. If you do not agree with our policies and practices, your choice is not to use our app."
                 )
             ),
-            SettingsItem("About App",
+            SettingsItem(
+                "About App",
                 listOf(
                     "This app is simply amazing!"
                 )
             ),
-            SettingsItem("How to use", listOf(
-                "You can follow this tutorial on Youtube to learn how to use the app:\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ"
-            )
+            SettingsItem(
+                "How to use", listOf(
+                    "You can follow this tutorial on Youtube to learn how to use the app:\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                )
             ),
-            SettingsItem("Contact us",
+            SettingsItem(
+                "Contact us",
                 listOf(
                     "Our customer service team is available Monday - Friday, 9am - 5pm to help you with any questions or concerns you may have.\n\nYou can reach us by phone (0735027350) or email (example@gmail.com).\n\nWe look forward to hearing from you!"
                 )
             ),
         )
-        adapter = MyExpandableListAdapter(this, sections)
-        expandableListView.setAdapter(adapter)
+
         populateUserDetails(sections)
     }
 
-//        adapter = MyExpandableListAdapter(this, sections)
-//        expandableListView.setAdapter(adapter)
-        // Just moved the code above to inside the populateUserDetails section so that it can be called
-        //after read from database
+    private fun populateUserDetails(sections: List<SettingsItem>) {
+        databaseReference.child(security.enc(currentUser.uid!!)).get()
+            .addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                    val email = dataSnapshot.child("email").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                    val firstname = dataSnapshot.child("firstname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                    val surname = dataSnapshot.child("surname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                    val phoneNumber = dataSnapshot.child("phoneNumber").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                    sections[0].displayValue = firstname
+                    sections[1].displayValue = surname
+                    sections[2].displayValue = email
+                    sections[3].displayValue = phoneNumber
 
-    private fun populateUserDetails(sections:List<SettingsItem>){
-        databaseReference.child(security.enc(currentUser.email!!)).get().addOnSuccessListener { dataSnapshot ->
-            if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
-                val email = security.dec(dataSnapshot.child("id").getValue(String::class.java)!!)
-                val firstname = security.dec(dataSnapshot.child("firstname").getValue(String::class.java))
-                val surname = security.dec(dataSnapshot.child("surname").getValue(String::class.java))
-                val phoneNumber = security.dec(dataSnapshot.child("phoneNumber").getValue(String::class.java))
-                println("Phone Number $phoneNumber")
-                sections[0].displayValue = firstname
-                sections[1].displayValue = surname
-                sections[2].displayValue = email
-                sections[3].displayValue = if(phoneNumber=="")"07908548845" else phoneNumber
-                adapter = MyExpandableListAdapter(this, sections)
-                expandableListView.setAdapter(adapter)
-            } else {
-                println("firebase Error: Data not found or empty")
+                    adapter = MyExpandableListAdapter(this, sections)
+                    expandableListView.setAdapter(adapter)
+                } else {
+                    println("firebase Error: Data not found or empty")
+                }
+            }.addOnFailureListener { exception ->
+                println("firebase Error getting data: $exception")
             }
-        }.addOnFailureListener { exception ->
-            println("firebase Error getting data: $exception")
-        }
+    }
+
+    private fun updateUserDetails(valueToUpdate: String, value: String, onSuccess: () -> Unit) {
+        databaseReference.child(security.enc(currentUser.uid!!)).get()
+            .addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                    databaseReference.child(security.enc(currentUser.uid!!)).updateChildren(
+                        mapOf(
+                            valueToUpdate to security.enc(value)
+                        )
+                    ).addOnSuccessListener {
+                        onSuccess()
+                    }
+                } else {
+                    println("firebase Error: Data not found or empty")
+                }
+            }
     }
 
     private fun showEditDialog(
@@ -176,9 +195,19 @@ class SettingsActivity : AppCompatActivity() {
             .setPositiveButton("Save") { _, _ ->
                 val newValue = editText.text.toString()
                 onSave(newValue)
-                // TODO "Save the new value to the database"
             }
             .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showResetPasswordDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Change Password")
+            .setMessage("Do you want us to send you an email to reset your password?")
+            .setPositiveButton("Yes") { _, _ ->
+                user.sendResetPasswordEmail(this, currentUser.email!!)
+            }
+            .setNegativeButton("No", null)
             .show()
     }
 
@@ -244,15 +273,33 @@ class SettingsActivity : AppCompatActivity() {
                 // Add click listeners for editing
                 when (section.title) {
                     "First Name" -> showEditDialog("Edit First Name", section.displayValue ?: "") { newValue ->
+                        updateUserDetails("firstname", newValue) {
+                            populateUserDetails(sections)
+                        }
                     }
                     "Surname" -> showEditDialog("Edit Surname", section.displayValue ?: "") { newValue ->
+                        updateUserDetails("surname", newValue) {
+                            populateUserDetails(sections)
+                        }
                     }
                     "Email Address" -> showEditDialog("Edit Email Address", "") { newValue ->
+                        user.updateEmail(newValue) { success ->
+                            if (success) {
+                                val intent = Intent(this@SettingsActivity, Login::class.java)
+                                intent.putExtra("verificationEmailSent", true)
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                // Handle the failure case
+                            }
+                        }
                     }
                     "Phone Number" -> showEditDialog("Edit Phone Number", "") { newValue ->
+                        updateUserDetails("phoneNumber", newValue) {
+                            populateUserDetails(sections)
+                        }
                     }
-                    "Change Password" -> showEditDialog("Change Password", "") { newValue ->
-                    }
+                    "Change Password" -> showResetPasswordDialog()
                 }
             }
 
@@ -279,3 +326,4 @@ class SettingsActivity : AppCompatActivity() {
         override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean = true
     }
 }
+

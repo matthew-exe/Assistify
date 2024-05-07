@@ -108,10 +108,10 @@ class Register : AppCompatActivity() {
 
         // Button Clicks
         btnRegister.setOnClickListener{
-            val signupUsername = inputEmail.text.toString()
+            val signupEmail = inputEmail.text.toString()
             val signupPassword = inputPassword.text.toString()
             if(isAllInputsValid(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)){
-                sendRegistration(signupUsername,signupPassword, inputFirstname, inputSurname)
+                sendRegistration(signupEmail,signupPassword, inputFirstname, inputSurname)
             } else {
                 // TODO: Implement some kind of messaging system between the form controller and here to show why it failed such as incorrect email format
                 Toast.makeText(this@Register,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
@@ -136,10 +136,10 @@ class Register : AppCompatActivity() {
         toggleTheme()
     }
     // User Signup Function
-    private fun sendRegistration(username:String, password:String, firstname: TextInputEditText, surname: TextInputEditText){
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(username, password).addOnCompleteListener { task ->
+    private fun sendRegistration(email:String, password:String, firstname: TextInputEditText, surname: TextInputEditText){
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                user.dbCreateUser(username,firstname.text.toString(), surname.text.toString())
+                user.dbCreateUser(email,firstname.text.toString(), surname.text.toString())
                 Toast.makeText(this@Register,"You are Registered.",Toast.LENGTH_SHORT).show()
                 val intent = Intent(this@Register, Login::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
