@@ -149,10 +149,14 @@ class SettingsActivity : AppCompatActivity() {
                     val firstname = dataSnapshot.child("firstname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
                     val surname = dataSnapshot.child("surname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
                     val phoneNumber = dataSnapshot.child("phoneNumber").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+
+                    val maskedEmail = email.replace(Regex("""^(\w{1})(\w+)(@\w+\.\w+)$"""), "$1******$3")
+                    val maskedPhoneNumber = phoneNumber.replace(Regex("""^(\d{2})(\d+)(\d{2})$"""), "$1******$3")
+
                     sections[0].displayValue = firstname
                     sections[1].displayValue = surname
-                    sections[2].displayValue = email
-                    sections[3].displayValue = phoneNumber
+                    sections[2].displayValue = maskedEmail
+                    sections[3].displayValue = maskedPhoneNumber
 
                     adapter = MyExpandableListAdapter(this, sections)
                     expandableListView.setAdapter(adapter)
@@ -184,20 +188,28 @@ class SettingsActivity : AppCompatActivity() {
     private fun showEditDialog(
         title: String,
         initialValue: String,
+        validateInput: (String) -> Boolean,
         onSave: (String) -> Unit
     ) {
         val editText = EditText(this)
         editText.setText(initialValue)
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle(title)
             .setView(editText)
             .setPositiveButton("Save") { _, _ ->
                 val newValue = editText.text.toString()
-                onSave(newValue)
+                if (validateInput(newValue)) {
+                    onSave(newValue)
+                } else {
+                    val rootView = findViewById<View>(android.R.id.content)
+                    Snackbar.make(rootView, "Invalid input", Snackbar.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+
+        dialog.show()
     }
 
     private fun showResetPasswordDialog() {
@@ -272,33 +284,45 @@ class SettingsActivity : AppCompatActivity() {
 
                 // Add click listeners for editing
                 when (section.title) {
-                    "First Name" -> showEditDialog("Edit First Name", section.displayValue ?: "") { newValue ->
-                        updateUserDetails("firstname", newValue) {
-                            populateUserDetails(sections)
-                        }
-                    }
-                    "Surname" -> showEditDialog("Edit Surname", section.displayValue ?: "") { newValue ->
-                        updateUserDetails("surname", newValue) {
-                            populateUserDetails(sections)
-                        }
-                    }
-                    "Email Address" -> showEditDialog("Edit Email Address", "") { newValue ->
-                        user.updateEmail(newValue) { success ->
-                            if (success) {
-                                val intent = Intent(this@SettingsActivity, Login::class.java)
-                                intent.putExtra("verificationEmailSent", true)
-                                startActivity(intent)
-                                finish()
-                            } else {
-                                // Handle the failure case
+                    "First Name" -> showEditDialog("Edit First Name", section.displayValue ?: "",
+                        validateInput = { !it.isBlank() },
+                        onSave = { validValue ->
+                            updateUserDetails("firstname", validValue) {
+                                populateUserDetails(sections)
                             }
                         }
-                    }
-                    "Phone Number" -> showEditDialog("Edit Phone Number", "") { newValue ->
-                        updateUserDetails("phoneNumber", newValue) {
-                            populateUserDetails(sections)
+                    )
+                    "Surname" -> showEditDialog("Edit Surname", section.displayValue ?: "",
+                        validateInput = { !it.isBlank() },
+                        onSave = { validValue ->
+                            updateUserDetails("surname", validValue) {
+                                populateUserDetails(sections)
+                            }
                         }
-                    }
+                    )
+                    "Email Address" -> showEditDialog("Edit Email Address", "",
+                        validateInput = { android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches() },
+                        onSave = { validValue ->
+                            user.updateEmail(validValue) { success ->
+                                if (success) {
+                                    val intent = Intent(this@SettingsActivity, Login::class.java)
+                                    intent.putExtra("verificationEmailSent", true)
+                                    startActivity(intent)
+                                    finish()
+                                } else {
+                                    // Handle the failure case
+                                }
+                            }
+                        }
+                    )
+                    "Phone Number" -> showEditDialog("Edit Phone Number", "",
+                        validateInput = { it.matches(Regex("""^\+?\d{10,13}$""")) },
+                        onSave = { validValue ->
+                            updateUserDetails("phoneNumber", validValue) {
+                                populateUserDetails(sections)
+                            }
+                        }
+                    )
                     "Change Password" -> showResetPasswordDialog()
                 }
             }
