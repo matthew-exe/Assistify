@@ -244,6 +244,8 @@ class SettingsActivity : AppCompatActivity() {
                 // Add click listeners for editing
                 when (section.title) {
                     "First Name" -> showEditDialog("Edit First Name", section.displayValue ?: "") { newValue ->
+                        user.updateProfileInDatabase("firstname", newValue)
+                        section.displayValue = newValue
                     }
                     "Surname" -> showEditDialog("Edit Surname", section.displayValue ?: "") { newValue ->
                     }

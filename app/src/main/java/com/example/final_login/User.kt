@@ -19,6 +19,22 @@ class User{
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val security = Security()
 
+    fun updateProfileInDatabase(name:String, value:String){
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val sectionToUpdate = userRef.child(name)
+            sectionToUpdate.setValue(security.enc(value))
+                .addOnSuccessListener {
+                    println("Profile Updated")
+                }
+                .addOnFailureListener {
+                    println("Profile Update Failed")
+                }
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+    }
+
     fun getDashboard(adapter: MyAdapter){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
@@ -99,8 +115,10 @@ class User{
             totalSteps.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val totalStepsData = dataSnapshot.value
-                    myAdapter.data.filter{it.name == "Steps"}[0].stat = totalStepsData.toString()
-                    myAdapter.filterData("")
+                    if(myAdapter.data.filter{it.name == "Steps"}.size > 0){
+                        myAdapter.data.filter{it.name == "Steps"}[0].stat = totalStepsData.toString()
+                        myAdapter.filterData("")
+                    }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
                     println("Error: ${databaseError.message}")
@@ -181,8 +199,10 @@ class User{
             mostRecent.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val mostRecentBpm = dataSnapshot.value
-                    myAdapter.data.filter{it.name == "Pulse"}[0].stat = "${mostRecentBpm}bpm"
-                    println("Most Recent BPM From Database ${mostRecentBpm}bpm")
+                    if(myAdapter.data.filter{it.name == "Pulse"}.size > 0) {
+                        myAdapter.data.filter { it.name == "Pulse" }[0].stat = "${mostRecentBpm}bpm"
+                        println("Most Recent BPM From Database ${mostRecentBpm}bpm")
+                    }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
                     println("Error: ${databaseError.message}")

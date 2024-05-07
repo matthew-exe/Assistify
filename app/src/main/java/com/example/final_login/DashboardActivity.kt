@@ -276,12 +276,14 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun loadUserProfile(){
+        println(security.enc(currentUser.email!!))
         databaseReference.child(security.enc(currentUser.email!!)).get().addOnSuccessListener { dataSnapshot ->
             if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
                 val id = dataSnapshot.child("id").getValue(String::class.java)!!
                 val firstname = security.dec(dataSnapshot.child("firstname").getValue(String::class.java))
                 val surname = security.dec(dataSnapshot.child("surname").getValue(String::class.java))
-                val phoneNumber = security.dec(dataSnapshot.child("phoneNumber").getValue(String::class.java))
+                val phoneNumber = ""
+//                security.dec(dataSnapshot.child("phoneNumber").getValue(String::class.java))
                 setProfileData(UserData(id, firstname, surname, if(phoneNumber=="")"07908548845" else phoneNumber))
             } else {
                 println("firebase Error: Data not found or empty")

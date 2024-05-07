@@ -74,7 +74,7 @@ class MyAdapter(
                 val sensor = filteredData[position] as SensorData
                 holder.name.text = sensor.name
                 holder.image.setImageResource(sensor.image)
-                holder.stat.text = if(sensor.stat != "0") sensor.stat else "0"
+                holder.stat.text = if(sensor.stat != "0") sensor.stat else ""
 
                 if(sensor.name == "Pulse"){
                     val heartAnimation = AnimationUtils.loadAnimation(context, R.anim.anim_pulse)
