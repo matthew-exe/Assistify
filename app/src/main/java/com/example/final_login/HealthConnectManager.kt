@@ -136,7 +136,6 @@ class HealthConnectManager(private val context: Context) {
                 println(e)
             }
         }
-
     private fun returnTimeLast24():Pair<Instant, Instant>{
         val currentDate = LocalDate.now()
         val startDateTime = LocalDateTime.of(currentDate, LocalTime.MIDNIGHT.plusMinutes(1))

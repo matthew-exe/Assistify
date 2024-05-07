@@ -135,11 +135,6 @@ class SettingsActivity : AppCompatActivity() {
         populateUserDetails(sections)
     }
 
-//        adapter = MyExpandableListAdapter(this, sections)
-//        expandableListView.setAdapter(adapter)
-        // Just moved the code above to inside the populateUserDetails section so that it can be called
-        //after read from database
-
     private fun populateUserDetails(sections:List<SettingsItem>){
         databaseReference.child(security.enc(currentUser.email!!)).get().addOnSuccessListener { dataSnapshot ->
             if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
@@ -248,10 +243,12 @@ class SettingsActivity : AppCompatActivity() {
                         section.displayValue = newValue
                     }
                     "Surname" -> showEditDialog("Edit Surname", section.displayValue ?: "") { newValue ->
+                        user.updateProfileInDatabase("surname", newValue)
                     }
                     "Email Address" -> showEditDialog("Edit Email Address", "") { newValue ->
                     }
                     "Phone Number" -> showEditDialog("Edit Phone Number", "") { newValue ->
+                        user.updateProfileInDatabase("phoneNumber", newValue)
                     }
                     "Change Password" -> showEditDialog("Change Password", "") { newValue ->
                     }

@@ -2,7 +2,6 @@ package com.example.final_login
 
 import android.content.Context
 import android.widget.ExpandableListView
-import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -16,7 +15,7 @@ class User{
 
     private val firebaseDatabase = FirebaseDatabase.getInstance()
     private val databaseReference = firebaseDatabase.reference.child("users")
-    private val firebaseAuth = FirebaseAuth.getInstance()
+    val firebaseAuth = FirebaseAuth.getInstance()
     private val security = Security()
 
     fun updateProfileInDatabase(name:String, value:String){
