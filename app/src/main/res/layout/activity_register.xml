@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    tools:context=".Login"
+    tools:context=".LoginActivity"
     android:id="@+id/wholePage">
 
     <androidx.cardview.widget.CardView

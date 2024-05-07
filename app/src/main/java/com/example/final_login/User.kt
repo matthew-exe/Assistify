@@ -1,12 +1,15 @@
 package com.example.final_login
+
 import android.content.Context
 import android.widget.ExpandableListView
+import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.time.Instant
 
 
 class User{
@@ -41,7 +44,7 @@ class User{
         if (dashboard is Iterable<*>) {
             for (item in dashboard) {
                 val decryptedString = security.dec(item?.toString())
-                returnList.add(SensorData(decryptedString, if(decryptedString == "Pulse") R.drawable.pulse else if (decryptedString == "Steps") R.drawable.steps else R.drawable.calories))
+                returnList.add(SensorData(decryptedString, if(decryptedString == "Pulse") R.drawable.pulse else if (decryptedString == "Steps") R.drawable.steps else R.drawable.calories, "0"))
             }
         }
         return returnList
@@ -51,11 +54,11 @@ class User{
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
             val dashboardRef = userRef.child(security.enc("dashboard"))
-            val x = HashMap<String, String>()
+            val hMap = HashMap<String, String>()
             for(item in dashboard){
-                x[dashboard.indexOf(item).toString()] = security.enc(item.name)
+                hMap[dashboard.indexOf(item).toString()] = security.enc(item.name)
             }
-            dashboardRef.setValue(x)
+            dashboardRef.setValue(hMap)
                 .addOnSuccessListener {
                     println("Dashboard Saved")
                 }
@@ -65,8 +68,131 @@ class User{
         } else {
             TODO("RETURN TO LOGIN")
         }
-
     }
+
+    fun sendStepsToDatabase(timeWoke: Instant, total:Int, lastMovement:Instant){
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val stepsRef = userRef.child("health").child("steps")
+            val hMap = HashMap<String, String>()
+            hMap["total"] = total.toString()
+            hMap["timeWoke"] = timeWoke.toString()
+            hMap["lastMovement"] = lastMovement.toString()
+            stepsRef.setValue(hMap)
+                .addOnSuccessListener {
+                    println("Steps Saved")
+                }
+                .addOnFailureListener {
+                    println("Steps Failed To Save")
+                }
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+    }
+
+    fun readStepsFromDatabase(user:String, myAdapter: MyAdapter){
+        // Take what object in as param and then assign totalStepsData to the text value
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(user))
+            val totalSteps = userRef.child("health").child("steps").child("total")
+            val lastMovement = userRef.child("health").child("steps").child("lastMovement")
+            totalSteps.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val totalStepsData = dataSnapshot.value
+                    myAdapter.data.filter{it.name == "Steps"}[0].stat = totalStepsData.toString()
+                    myAdapter.filterData("")
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("Error: ${databaseError.message}")
+                }
+            })
+            lastMovement.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val lastMoved = dataSnapshot.value
+                    println("Last Movement Detected From Database $lastMoved")
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("Error: ${databaseError.message}")
+                }
+            })
+
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+    }
+
+    fun sendHeartRateAggregateToDatabase(min:Long, max:Long, avg:Long){
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val stepsRef = userRef.child("health").child("heart").child("aggregate")
+            val hMap = HashMap<String, String>()
+            hMap["min"] = min.toString()
+            hMap["max"] = max.toString()
+            hMap["avg"] = avg.toString()
+            stepsRef.setValue(hMap)
+                .addOnSuccessListener {
+                    println("Heart Rate Saved")
+                }
+                .addOnFailureListener {
+                    println("Heart Rate Failed To Save")
+                }
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+    }
+
+
+    fun sendHeartRateToDatabase(avgBPM: Int, mostRecent: Long, lastTaken:Instant){
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val stepsRef = userRef.child("health").child("heart").child("now")
+            val hMap = HashMap<String, String>()
+            hMap["avg"] = avgBPM.toString()
+            hMap["mostRecent"] = mostRecent.toString()
+            hMap["lastTaken"] = lastTaken.toString()
+            stepsRef.setValue(hMap)
+                .addOnSuccessListener {
+                    println("Heart Rate Saved")
+                }
+                .addOnFailureListener {
+                    println("Heart Rate Failed To Save")
+                }
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+    }
+
+    fun readHeartRateFromDatabase(user:String, myAdapter: MyAdapter){
+        // Pass in sensor
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(user))
+            val avgBPM = userRef.child("health").child("heart").child("avg")
+            avgBPM.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val avg = dataSnapshot.value
+                    println("Average BPM From Database ${avg}bpm")
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("Error: ${databaseError.message}")
+                }
+            })
+
+            val mostRecent = userRef.child("health").child("heart").child("now").child("mostRecent")
+            mostRecent.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val mostRecentBpm = dataSnapshot.value
+                    myAdapter.data.filter{it.name == "Pulse"}[0].stat = "${mostRecentBpm}bpm"
+                    println("Most Recent BPM From Database ${mostRecentBpm}bpm")
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("Error: ${databaseError.message}")
+                }
+            })
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+    }
+
 
     fun checkUserExists(email: String, callback: (Boolean) -> Unit) {
         // You have to add the callback function such as

@@ -44,7 +44,7 @@ class SettingsActivity : AppCompatActivity() {
         currentUser = firebaseAuth.currentUser!!
 
         if (!user.isUserLoggedIn()) {
-            val intent = Intent(this, Login::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }
@@ -52,7 +52,7 @@ class SettingsActivity : AppCompatActivity() {
         signOutButton = findViewById(R.id.sign_out_button)
         signOutButton.setOnClickListener {
             user.signOut()
-            val intent = Intent(this, Login::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }
@@ -63,7 +63,7 @@ class SettingsActivity : AppCompatActivity() {
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_home -> {
-                    val intent = Intent(this, Dashboard::class.java)
+                    val intent = Intent(this, DashboardActivity::class.java)
                     startActivity(intent)
                     true
                 }

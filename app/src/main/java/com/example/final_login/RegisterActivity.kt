@@ -1,7 +1,6 @@
 package com.example.final_login
 
 import android.content.Intent
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Spannable
@@ -12,7 +11,6 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
-class Register : AppCompatActivity() {
+class RegisterActivity : AppCompatActivity() {
 
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var databaseReference: DatabaseReference
@@ -114,13 +112,13 @@ class Register : AppCompatActivity() {
                 sendRegistration(signupUsername,signupPassword, inputFirstname, inputSurname)
             } else {
                 // TODO: Implement some kind of messaging system between the form controller and here to show why it failed such as incorrect email format
-                Toast.makeText(this@Register,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@RegisterActivity,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
             }
         }
         // Link Clicks
         textLogin.setOnClickListener{
 
-            val intent = Intent(this@Register, Login::class.java)
+            val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             intent.putExtra("themeAccessibleActive", themeAccessibleActive)
             startActivity(intent)
@@ -140,13 +138,13 @@ class Register : AppCompatActivity() {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(username, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 user.dbCreateUser(username,firstname.text.toString(), surname.text.toString())
-                Toast.makeText(this@Register,"You are Registered.",Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@Register, Login::class.java)
+                Toast.makeText(this@RegisterActivity,"You are Registered.",Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
             } else {
-                Toast.makeText(this@Register,"Failed To Create User Please Try Again.",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@RegisterActivity,"Failed To Create User Please Try Again.",Toast.LENGTH_SHORT).show()
             }
         }
     }
