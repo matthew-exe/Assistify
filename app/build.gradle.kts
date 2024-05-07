@@ -55,5 +55,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
     implementation("com.google.android.gms:play-services-auth:21.1.1")
     implementation("de.hdodenhof:circleimageview:1.2.1")
+    implementation("com.tbuonomo:dotsindicator:4.3")
 }
 
