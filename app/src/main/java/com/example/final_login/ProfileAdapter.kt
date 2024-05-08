@@ -12,10 +12,22 @@ import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.viewpager.widget.PagerAdapter
 
 class ProfileAdapter(private val context: Context) : PagerAdapter() {
-    private var layouts = mutableListOf<Pair<Int, ProfileData?>>()
+    private var layouts = mutableListOf<Pair<Int, ProfileData>>()
 
     init {
-        layouts.add(Pair(R.layout.activity_link_profile, null))
+        val sampleUserDetails = ProfileData(
+            "",
+            R.drawable.profile,
+            "",
+            0,
+            "",
+            "",
+            listOf(""),
+            "",
+            "",
+            ""
+        )
+        layouts.add(Pair(R.layout.activity_link_profile, sampleUserDetails))
     }
 
     override fun getCount(): Int {
@@ -55,7 +67,7 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
             }
         } else {
             // This is the activity_linked_profile layout
-            userDetails?.let { updateUserProfile(layout, it) }
+            updateUserProfile(layout, userDetails)
         }
 
         container.addView(layout)
@@ -99,7 +111,15 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
     }
 
     fun addLinkedProfileLayout(userDetails: ProfileData) {
-        layouts.add(0, Pair(R.layout.activity_linked_profile, userDetails))
+        val tempLayouts = layouts
+
+        layouts.clear()
+        layouts.add(Pair(R.layout.activity_linked_profile, userDetails))
+
+        for (i in tempLayouts) {
+            layouts.add(i)
+        }
+
         notifyDataSetChanged()
     }
 }
