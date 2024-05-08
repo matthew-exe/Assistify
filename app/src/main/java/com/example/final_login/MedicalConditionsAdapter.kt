@@ -1,6 +1,8 @@
 package com.example.final_login
 
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +10,10 @@ import android.widget.EditText
 import android.widget.ImageButton
 import androidx.recyclerview.widget.RecyclerView
 
-class MedicalConditionsAdapter(private val context: Context) :
+class MedicalConditionsAdapter(private val context: Context, initialConditions: List<String> = emptyList()) :
     RecyclerView.Adapter<MedicalConditionsAdapter.ViewHolder>() {
 
-    val medicalConditions = mutableListOf<String>()
+    val medicalConditions = initialConditions.toMutableList()
 
     fun addCondition(condition: String) {
         medicalConditions.add(condition)
@@ -40,6 +42,21 @@ class MedicalConditionsAdapter(private val context: Context) :
 
         fun bind(condition: String) {
             etMedicalCondition.setText(condition)
+
+            etMedicalCondition.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    medicalConditions[adapterPosition] = s.toString()
+                }
+
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                    // No action needed here
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    // No action needed here
+                }
+            })
+
             btnRemoveCondition.setOnClickListener {
                 removeCondition(adapterPosition)
             }
