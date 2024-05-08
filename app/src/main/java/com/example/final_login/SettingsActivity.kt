@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.BaseExpandableListAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -14,12 +15,15 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.GenericTypeIndicator
 
 class SettingsActivity : AppCompatActivity() {
     private val user = User()
@@ -32,6 +36,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var currentUser: FirebaseUser
+    private lateinit var rootView: View
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +48,8 @@ class SettingsActivity : AppCompatActivity() {
         databaseReference = firebaseDatabase.reference.child("users")
         firebaseAuth = FirebaseAuth.getInstance()
         currentUser = firebaseAuth.currentUser!!
+        rootView = findViewById(android.R.id.content)
+
 
         if (!user.isUserLoggedIn()) {
             val intent = Intent(this, LoginActivity::class.java)
@@ -90,7 +97,6 @@ class SettingsActivity : AppCompatActivity() {
 
         // Create the adapter and set it up
         val sections = listOf(
-            // TODO Make it so that the user's details are displayed in the settings list and the notifications item shows button toggles for each type of notification.
             SettingsItem(
                 "First Name",
                 null,
@@ -111,8 +117,20 @@ class SettingsActivity : AppCompatActivity() {
                 null,
                 "07*********61"
             ),
+            SettingsItem(
+                "Personal Details",
+                listOf(
+                    "Age",
+                    "Date of Birth",
+                    "Blood Type",
+                    "NHS Number",
+                    "View Medical Conditions"
+                ),
+                null,
+                PersonalDetails()
+            ),
             SettingsItem("Change Password", null),
-            SettingsItem("Notifications", null),
+            SettingsItem("Generate Monitor Key", null),
             SettingsItem(
                 "Privacy Policy",
                 listOf(
@@ -144,10 +162,11 @@ class SettingsActivity : AppCompatActivity() {
         databaseReference.child(security.enc(currentUser.uid!!)).get()
             .addOnSuccessListener { dataSnapshot ->
                 if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
-                    val email = dataSnapshot.child("email").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
-                    val firstname = dataSnapshot.child("firstname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
-                    val surname = dataSnapshot.child("surname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
-                    val phoneNumber = dataSnapshot.child("phoneNumber").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
+                    // Retrieve and display the basic user details
+                    val email = dataSnapshot.child("email").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                    val firstname = dataSnapshot.child("firstname").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                    val surname = dataSnapshot.child("surname").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                    val phoneNumber = dataSnapshot.child("phoneNumber").getValue(String::class.java)?.let { security.dec(it) } ?: ""
 
                     val maskedEmail = email.replace(Regex("""^(\w{1})(\w+)(@\w+\.\w+)$"""), "$1******$3")
                     val maskedPhoneNumber = phoneNumber.replace(Regex("""^(\d{2})(\d+)(\d{2})$"""), "$1******$3")
@@ -156,6 +175,44 @@ class SettingsActivity : AppCompatActivity() {
                     sections[1].displayValue = surname
                     sections[2].displayValue = maskedEmail
                     sections[3].displayValue = maskedPhoneNumber
+
+                    var age: String
+                    var dateOfBirth: String
+                    var bloodType: String
+                    var nhsNumber: String
+                    var medicalConditions: List<String>
+
+                    val personalDetailsSnapshot = dataSnapshot.child("personalDetails")
+                    if (personalDetailsSnapshot.exists()) {
+                        age = personalDetailsSnapshot.child("age").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                        dateOfBirth = personalDetailsSnapshot.child("dateOfBirth").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                        bloodType = personalDetailsSnapshot.child("bloodType").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                        nhsNumber = personalDetailsSnapshot.child("nhsNumber").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                        val genericTypeIndicator : GenericTypeIndicator<List<String>> = object : GenericTypeIndicator<List<String>>() {}
+                        val medicalConditionsSnapshot = personalDetailsSnapshot.child("medicalConditions").getValue(genericTypeIndicator)
+                        medicalConditions = medicalConditionsSnapshot?.map { security.dec(it) } ?: emptyList()
+                    } else {
+                        age = ""
+                        dateOfBirth = ""
+                        bloodType = ""
+                        nhsNumber = ""
+                        medicalConditions = emptyList()
+                    }
+
+
+                    val personalDetails = PersonalDetails(age, dateOfBirth, bloodType, nhsNumber, medicalConditions)
+
+                    sections[4].children = listOf(
+                        "Age: $age",
+                        "Date of Birth: $dateOfBirth",
+                        "Blood Type: $bloodType",
+                        "NHS Number: $nhsNumber",
+                        "View Medical Conditions"
+                    )
+
+                    sections[4].personalDetails = personalDetails
+
+
 
                     adapter = MyExpandableListAdapter(this, sections)
                     expandableListView.setAdapter(adapter)
@@ -184,6 +241,24 @@ class SettingsActivity : AppCompatActivity() {
             }
     }
 
+    private fun updateUserPersonalDetails(valueToUpdate: String, value: String, onSuccess: () -> Unit) {
+        databaseReference.child(security.enc(currentUser.uid!!)).child("personalDetails").get()
+            .addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                    databaseReference.child(security.enc(currentUser.uid!!)).child("personalDetails").updateChildren(
+                        mapOf(
+                            valueToUpdate to security.enc(value)
+                        )
+                    ).addOnSuccessListener {
+                        onSuccess()
+                    }
+                } else {
+                    println("firebase Error: Data not found or empty")
+                }
+            }
+    }
+
+
     private fun showEditDialog(
         title: String,
         initialValue: String,
@@ -200,8 +275,8 @@ class SettingsActivity : AppCompatActivity() {
                 val newValue = editText.text.toString()
                 if (validateInput(newValue)) {
                     onSave(newValue)
+                    Snackbar.make(rootView, "User settings updated successfully", Snackbar.LENGTH_SHORT).show()
                 } else {
-                    val rootView = findViewById<View>(android.R.id.content)
                     Snackbar.make(rootView, "Invalid input", Snackbar.LENGTH_SHORT).show()
                 }
             }
@@ -211,12 +286,71 @@ class SettingsActivity : AppCompatActivity() {
         dialog.show()
     }
 
+
+    private fun showMedicalConditionsDialog(sections: MutableList<SettingsItem>, groupPosition: Int) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_medical_conditions, null)
+        val rvMedicalConditions = dialogView.findViewById<RecyclerView>(R.id.rv_medical_conditions)
+        val etMedicalCondition = dialogView.findViewById<EditText>(R.id.et_medical_condition)
+
+        val personalDetails = sections[groupPosition].personalDetails ?: PersonalDetails()
+        val medicalConditionsAdapter = MedicalConditionsAdapter(this, personalDetails.medicalConditions ?: emptyList())
+        rvMedicalConditions.adapter = medicalConditionsAdapter
+        rvMedicalConditions.layoutManager = LinearLayoutManager(this)
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Medical Conditions")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                // Save the medical conditions to the database
+                val conditions = medicalConditionsAdapter.medicalConditions
+                databaseReference.child(security.enc(currentUser.uid!!)).child("personalDetails").child("medicalConditions")
+                    .setValue(conditions.map { security.enc(it) })
+                    .addOnSuccessListener {
+                        sections[groupPosition].personalDetails = personalDetails.copy(medicalConditions = conditions)
+                        adapter.notifyDataSetChanged()
+                        Snackbar.make(rootView, "Medical conditions saved successfully", Snackbar.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { exception ->
+                        println("firebase Error saving medical conditions: $exception")
+                    }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+
+        etMedicalCondition.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val condition = etMedicalCondition.text.toString().trim()
+                if (condition.isNotBlank()) {
+                    medicalConditionsAdapter.addCondition(condition)
+                    etMedicalCondition.setText("")
+                }
+                true
+            } else {
+                false
+            }
+        }
+    }
+
     private fun showResetPasswordDialog() {
         AlertDialog.Builder(this)
             .setTitle("Change Password")
             .setMessage("Do you want us to send you an email to reset your password?")
             .setPositiveButton("Yes") { _, _ ->
                 user.sendResetPasswordEmail(this, currentUser.email!!)
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    private fun showGenerateMonitorKeyDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Generate Monitor Key")
+            .setMessage("Do you want to generate a new monitor key?")
+            .setPositiveButton("Yes") { _, _ ->
+                // TODO Implement monitor key generation
+                Snackbar.make(rootView, "Pretend a key was generated!", Snackbar.LENGTH_SHORT).show()
             }
             .setNegativeButton("No", null)
             .show()
@@ -323,6 +457,7 @@ class SettingsActivity : AppCompatActivity() {
                         }
                     )
                     "Change Password" -> showResetPasswordDialog()
+                    "Generate Monitor Key" -> showGenerateMonitorKeyDialog()
                 }
             }
 
@@ -342,7 +477,63 @@ class SettingsActivity : AppCompatActivity() {
                 false
             )
             val textView = itemView.findViewById<TextView>(android.R.id.text1)
-            textView.text = getChild(groupPosition, childPosition) as String
+            val childItem = getChild(groupPosition, childPosition) as String
+            textView.text = childItem
+
+            itemView.setOnClickListener {
+                val personalDetails = sections[groupPosition].personalDetails
+                when (sections[groupPosition].title) {
+                    "Personal Details" -> {
+                        val childItemTitle = childItem.split(":")[0]
+                        when (childItemTitle) {
+                            "Age" -> showEditDialog("Edit Age", personalDetails?.age ?: "",
+                                validateInput = { it.isNotBlank() && it.toIntOrNull() != null && it.toInt() >= 0 },
+                                onSave = { validValue ->
+                                    updateUserPersonalDetails("age", validValue) {
+                                        populateUserDetails(sections)
+                                    }
+                                }
+                            )
+                            "Date of Birth" -> showEditDialog("Edit Date of Birth (DD/MM/YYYY)", personalDetails?.dateOfBirth ?: "",
+                                validateInput = { input ->
+                                    val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.UK)
+                                    dateFormat.isLenient = false
+                                    try {
+                                        dateFormat.parse(input)
+                                        true
+                                    } catch (e: java.text.ParseException) {
+                                        false
+                                    }
+                                },
+                                onSave = { validValue ->
+                                    updateUserPersonalDetails("dateOfBirth", validValue) {
+                                        populateUserDetails(sections)
+                                    }
+                                }
+                            )
+                            "Blood Type" -> showEditDialog("Edit Blood Type", personalDetails?.bloodType ?: "",
+                                validateInput = { it.isNotBlank() },
+                                onSave = { validValue ->
+                                    updateUserPersonalDetails("bloodType", validValue) {
+                                        populateUserDetails(sections)
+                                    }
+                                }
+                            )
+                            "NHS Number" -> showEditDialog("Edit NHS Number", personalDetails?.nhsNumber ?: "",
+                                validateInput = { it.isNotBlank() && it.toIntOrNull() != null && it.length == 10 },
+                                onSave = { validValue ->
+                                    updateUserPersonalDetails("nhsNumber", validValue) {
+                                        populateUserDetails(sections)
+                                    }
+                                }
+                            )
+                            "View Medical Conditions" -> showMedicalConditionsDialog(sections.toMutableList(), groupPosition)
+                        }
+                    }
+                }
+            }
+
+
             return itemView
         }
 
