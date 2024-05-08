@@ -138,21 +138,23 @@ class User{
 
     fun dbCreateUser(email: String, firstname: String, surname: String):Boolean{
         var userCreated = false
-        databaseReference.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (!dataSnapshot.exists()){
-                    val id = security.enc(FirebaseAuth.getInstance().currentUser!!.uid!!)
-                    val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(""))
-                    databaseReference.child(id).setValue(userData)
-                    userCreated = true
-                } else {
-                    userCreated = true
-                }
-            }
-            override fun onCancelled(databaseError: DatabaseError){
-                userCreated = false
-            }
-        })
+        val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(""))
+        databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!)).setValue(userData)
+//        databaseReference.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
+//            override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                if (!dataSnapshot.exists()){
+//                    val id = security.enc(FirebaseAuth.getInstance().currentUser!!.uid!!)
+//
+//                    databaseReference.child(id).setValue(userData)
+//                    userCreated = true
+//                } else {
+//                    userCreated = true
+//                }
+//            }
+//            override fun onCancelled(databaseError: DatabaseError){
+//                userCreated = false
+//            }
+//        })
         return userCreated
     }
 
