@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.LayoutRes
@@ -26,7 +27,15 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
             listOf(""),
             "",
             "",
-            ""
+            "",
+            0,
+            0,
+            0,
+            0,
+            0,
+            "",
+            "",
+            0
         )
         layouts.add(Pair(R.layout.activity_link_profile, sampleUserDetails))
     }
@@ -66,7 +75,15 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
                     listOf("Hip replacement", "Arthritis"),
                     "Teresa",
                     "Daughter",
-                    "07777123456"
+                    "07777123456",
+                    75,
+                    55,
+                    105,
+                    85,
+                    1435,
+                    "20:45",
+                    "07:15",
+                    578
                 )
                 (context as ProfileActivity).linkUserProfile(sampleUserDetails)
             }
@@ -77,9 +94,11 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
             } else {
                 preLinkText1.text = "It appears you are not yet linked to a client."
             }
-        } else {
+        } else if (layoutResId == R.layout.activity_linked_profile) {
             // This is the activity_linked_profile layout
             updateUserProfile(layout, userDetails)
+        } else {
+            updateStatProfile(layout, userDetails)
         }
 
         container.addView(layout)
@@ -104,7 +123,7 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         val contactInfo = "Contact Information:"
         val emergencyContact = "Emergency contact: ${userDetails.emergencyContact}"
         val emergencyRelation = "Relation to client: ${userDetails.emergencyRelation}"
-        val emergencyNumber = "Emergency contact number: ${userDetails.emergencyNumber}"
+        val emergencyNumber = "Emergency contact no. ${userDetails.emergencyNumber}"
 
         // Update the UI with the user's details
         layout.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.profile_picture)
@@ -126,6 +145,40 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         }
     }
 
+    private fun updateStatProfile(layout: View, userDetails: ProfileData) {
+        val linearLayout = layout.findViewById<LinearLayout>(R.id.linearLayoutStat)
+        linearLayout.setBackgroundResource(R.drawable.border)
+
+        val statPicture = R.drawable.statistics
+        val statText = "Statistics:"
+        val heartRate = "Heart Rate:"
+        val currentBPM = "Current BPM: ${userDetails.currentBPM}"
+        val minBPM = "Min. BPM: ${userDetails.minBPM}"
+        val maxBPM = "Max. BPM: ${userDetails.maxBPM}"
+        val avgBPM = "Avg. BPM: ${userDetails.avgBPM}"
+        val stepsText = "Steps:"
+        val steps24hTotal = "Total in past 24 hours: ${userDetails.steps24hTotal}"
+        val stepsLastDetected = "Time last detected: ${userDetails.stepsLastDetected}"
+        val stepsFirstDetected = "Time first detected: ${userDetails.stepsFirstDetected}"
+        val caloriesText = "Calories:"
+        val caloriesSpent = "Total spent: ${userDetails.caloriesTotalSpent}"
+
+        layout.findViewById<ImageView>(R.id.statistics_picture)
+            .setImageResource(statPicture)
+        layout.findViewById<TextView>(R.id.statistics_text).text = statText
+        layout.findViewById<TextView>(R.id.heartRate_text).text = heartRate
+        layout.findViewById<TextView>(R.id.currBPM_text).text = currentBPM
+        layout.findViewById<TextView>(R.id.minBPM_text).text = minBPM
+        layout.findViewById<TextView>(R.id.maxBPM_text).text = maxBPM
+        layout.findViewById<TextView>(R.id.averageBPM_text).text = avgBPM
+        layout.findViewById<TextView>(R.id.steps_text).text = stepsText
+        layout.findViewById<TextView>(R.id.steps24hTotal_text).text = steps24hTotal
+        layout.findViewById<TextView>(R.id.stepsLastDetected_text).text = stepsLastDetected
+        layout.findViewById<TextView>(R.id.stepsFirstDetected_text).text = stepsFirstDetected
+        layout.findViewById<TextView>(R.id.calories_text).text = caloriesText
+        layout.findViewById<TextView>(R.id.caloriesTotalSpent_text).text = caloriesSpent
+    }
+
     fun addLinkedProfileLayout(userDetails: ProfileData) {
         layouts.add(0, Pair(R.layout.activity_linked_profile, userDetails))
         layouts.add(1, Pair(R.layout.activity_stat_profile, userDetails))
@@ -134,8 +187,12 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
 
     private fun removeLayout(userDetails: ProfileData) {
         val layoutToRemove = layouts.find { it.second == userDetails }
+        val statIndex = layouts.indexOf(layoutToRemove)
+        val statToRemove = layouts[statIndex + 1]
+
         if (layoutToRemove != null) {
             layouts.remove(layoutToRemove)
+            layouts.remove(statToRemove)
             notifyDataSetChanged()
             (context as ProfileActivity).unlinkSnackBar(userDetails)
         }
