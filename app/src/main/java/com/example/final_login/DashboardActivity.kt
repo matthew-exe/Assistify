@@ -273,7 +273,7 @@ class DashboardActivity : AppCompatActivity() {
         databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!)).get()
             .addOnSuccessListener { dataSnapshot ->
                 if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
-                    println(dataSnapshot.child("firstname").exists())
+                    tvFirstName.text = security.dec(dataSnapshot.child("firstname").value.toString())
                 } else {
                     println("firebase Error: Data not found or empty")
                 }
