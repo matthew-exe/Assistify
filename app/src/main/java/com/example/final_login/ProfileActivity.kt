@@ -65,36 +65,16 @@ class ProfileActivity: AppCompatActivity() {
                 else -> false
             }
         }
-
-//        findViewById<Button>(R.id.linkButton).setOnClickListener {
-//            // Check ProfileData to see the format of data
-//            val userList = arrayOf(
-//                ProfileData("Yvonne", R.drawable.yvonne, "1951-11-30", 73, "A+",
-//                    "4857773456", listOf("Hip replacement", "Arthritis"), "Teresa",
-//                    "Daughter", "07777123456"),
-//            )
-//            updateUserProfile(userList[0])
-//        }
-//
-//        findViewById<Button>(R.id.unlink_button).setOnClickListener {
-//            unlinkUserProfile()
-//        }
-//
-//        findViewById<Button>(R.id.call_button).setOnClickListener {
-//            val phoneNumberToDial = "07450272352"
-//
-//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-//                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
-//            } else {
-//                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
-//                startActivity(intent)
-//            }
-//        }
     }
 
     fun linkUserProfile(userDetails: ProfileData) {
         adapter.addLinkedProfileLayout(userDetails)
         viewPager.adapter?.notifyDataSetChanged()
+        Snackbar.make(viewPager, "Successfully linked with ${userDetails.name}", Snackbar.LENGTH_SHORT).show()
+    }
+
+    fun unlinkSnackBar(userDetails: ProfileData) {
+        Snackbar.make(viewPager, "Unlinked from ${userDetails.name}", Snackbar.LENGTH_SHORT).show()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {

@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.viewpager.widget.PagerAdapter
+import com.google.android.material.snackbar.Snackbar
 
 class ProfileAdapter(private val context: Context) : PagerAdapter() {
     private var layouts = mutableListOf<Pair<Int, ProfileData>>()
@@ -42,6 +43,10 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         return view == `object`
     }
 
+    override fun getItemPosition(`object`: Any): Int {
+        return POSITION_NONE
+    }
+
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val inflater = LayoutInflater.from(context)
         val (layoutResId, userDetails) = layouts[position]
@@ -64,6 +69,13 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
                     "07777123456"
                 )
                 (context as ProfileActivity).linkUserProfile(sampleUserDetails)
+            }
+
+            val preLinkText1 = layout.findViewById<TextView>(R.id.pre_link_text_1)
+            if (layouts.size > 1) {
+                preLinkText1.text = "You can link with another client."
+            } else {
+                preLinkText1.text = "It appears you are not yet linked to a client."
             }
         } else {
             // This is the activity_linked_profile layout
@@ -108,18 +120,23 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         layout.findViewById<TextView>(R.id.emergency_contact_text).text = emergencyContact
         layout.findViewById<TextView>(R.id.emergency_relation_text).text = emergencyRelation
         layout.findViewById<TextView>(R.id.emergency_number_text).text = emergencyNumber
+
+        layout.findViewById<Button>(R.id.unlink_button)?.setOnClickListener {
+            removeLayout(userDetails)
+        }
     }
 
     fun addLinkedProfileLayout(userDetails: ProfileData) {
-        val tempLayouts = layouts
-
-        layouts.clear()
-        layouts.add(Pair(R.layout.activity_linked_profile, userDetails))
-
-        for (i in tempLayouts) {
-            layouts.add(i)
-        }
-
+        layouts.add(0, Pair(R.layout.activity_linked_profile, userDetails))
         notifyDataSetChanged()
+    }
+
+    private fun removeLayout(userDetails: ProfileData) {
+        val layoutToRemove = layouts.find { it.second == userDetails }
+        if (layoutToRemove != null) {
+            layouts.remove(layoutToRemove)
+            notifyDataSetChanged()
+            (context as ProfileActivity).unlinkSnackBar(userDetails)
+        }
     }
 }
