@@ -38,7 +38,9 @@ class MyAdapter(
     inner class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.tvSensorName)
         val image: ImageView = view.findViewById(R.id.ivSensorImage)
+        val stat: TextView = view.findViewById(R.id.tvSensorStat)
     }
+
 
     override fun getItemViewType(position: Int): Int {
         return if (position == itemCount - 1) VIEW_TYPE_BUTTON else VIEW_TYPE_SENSOR
@@ -72,6 +74,7 @@ class MyAdapter(
                 val sensor = filteredData[position] as SensorData
                 holder.name.text = sensor.name
                 holder.image.setImageResource(sensor.image)
+                holder.stat.text = if(sensor.stat != "0") sensor.stat else ""
 
                 if(sensor.name == "Pulse"){
                     val heartAnimation = AnimationUtils.loadAnimation(context, R.anim.anim_pulse)
@@ -102,7 +105,7 @@ class MyAdapter(
 
         val sensorItems = SensorRepository.sensorName.map { (id, name) ->
             val image = SensorRepository.structures[id] ?: 0
-            SensorData(name, image)
+            SensorData(name, image, "0")
         }
 
         val adapter = SensorArrayAdapter(

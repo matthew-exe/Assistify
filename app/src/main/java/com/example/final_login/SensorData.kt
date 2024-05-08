@@ -4,5 +4,6 @@ import androidx.annotation.DrawableRes
 
 data class SensorData(
     val name: String,
-    @DrawableRes val image: Int
+    @DrawableRes val image: Int,
+    var stat: String
 )

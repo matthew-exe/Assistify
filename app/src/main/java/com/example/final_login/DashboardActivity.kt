@@ -22,14 +22,24 @@ import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.TextView
+import androidx.health.connect.client.HealthConnectClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 
 
-class Dashboard : AppCompatActivity() {
+class DashboardActivity : AppCompatActivity() {
     private lateinit var adapter: MyAdapter
     private lateinit var editTextText: AppCompatEditText
     private lateinit var emergencyCallSlider: SlideToActView
@@ -43,6 +53,8 @@ class Dashboard : AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var currentUser: FirebaseUser
+
+    private lateinit var  healthConnectManager: HealthConnectManager
     private val user = User()
     private val security = Security()
 
@@ -58,7 +70,7 @@ class Dashboard : AppCompatActivity() {
         setContentView(R.layout.activity_dashboard)
 
         if(!user.isUserLoggedIn()){
-            val intent = Intent(this, Login::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }
@@ -67,6 +79,36 @@ class Dashboard : AppCompatActivity() {
         databaseReference = firebaseDatabase.reference.child("users")
         firebaseAuth = FirebaseAuth.getInstance()
         currentUser = firebaseAuth.currentUser!!
+        healthConnectManager = HealthConnectManager(this)
+
+
+        val scope1 = CoroutineScope(Dispatchers.Main)
+        scope1.launch {
+            try {
+                healthConnectManager.readStepsLast24()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
+        val scope2 = CoroutineScope(Dispatchers.Main)
+        scope2.launch {
+            try {
+                healthConnectManager.readHeartRate()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
+        val scope3 = CoroutineScope(Dispatchers.Main)
+        scope3.launch {
+            try {
+                healthConnectManager.aggregateHeartRate()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
 
         val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
         adapter = MyAdapter(this, ::generateDummySensorData)
@@ -74,6 +116,9 @@ class Dashboard : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+
+        user.readStepsFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
+        user.readHeartRateFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
 
         editTextText = findViewById(R.id.editTextText)
         editTextText.addTextChangedListener(object : TextWatcher {
@@ -91,8 +136,8 @@ class Dashboard : AppCompatActivity() {
         emergencyCallSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
             override fun onSlideComplete(view: SlideToActView) {
                 phoneNumberToDial = "07450272350" // Should be 999 in production
-                if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
+                if (ContextCompat.checkSelfPermission(this@DashboardActivity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this@DashboardActivity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
                     emergencyCallSlider.resetSlider()
                 } else {
                     val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
@@ -106,8 +151,8 @@ class Dashboard : AppCompatActivity() {
 
         btnCallUser.setOnClickListener {
             phoneNumberToDial = "07450272351" // Should be connected users number in production
-            if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
+            if (ContextCompat.checkSelfPermission(this@DashboardActivity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this@DashboardActivity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
             } else {
                 val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
                 startActivity(intent)
@@ -120,7 +165,7 @@ class Dashboard : AppCompatActivity() {
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_home -> {
-                    val intent = Intent(this, Dashboard::class.java)
+                    val intent = Intent(this, DashboardActivity::class.java)
                     startActivity(intent)
                     true
                 }
@@ -151,7 +196,7 @@ class Dashboard : AppCompatActivity() {
         }
 
         tvFirstName = findViewById(R.id.tvFirstName)
-        loadUserProfile()
+        loadUsersName()
 
     }
 
@@ -162,9 +207,10 @@ class Dashboard : AppCompatActivity() {
             SensorRepository.sensorName.forEach { (sensorId, sensorName) ->
                 val imageRes = SensorRepository.structures[sensorId]
                     ?: throw IllegalArgumentException("Image resource not found for sensor ID: $sensorId")
-                dummyDataList.add(SensorData(sensorName, imageRes))
+                dummyDataList.add(SensorData(sensorName, imageRes, "0"))
             }
         }
+        // user.readStepsFromDatabase() // TODO("")Pass In whatever object here
         return dummyDataList
         // TODO Need to implement the logic to get the sensor data from the database / from the API
     }
@@ -222,25 +268,17 @@ class Dashboard : AppCompatActivity() {
         private const val REQUEST_CALL_PHONE = 1
     }
 
-    private fun loadUserProfile(){
-        databaseReference.child(security.enc(currentUser.uid!!)).get().addOnSuccessListener { dataSnapshot ->
-            if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
-                val email = dataSnapshot.child("email").getValue(String::class.java)!! ?.let { security.dec(it) } ?: ""
-                val firstname = dataSnapshot.child("firstname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
-                val surname = dataSnapshot.child("surname").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
-                val phoneNumber = dataSnapshot.child("phoneNumber").getValue(String::class.java) ?.let { security.dec(it) } ?: ""
-                println("Phone Number $phoneNumber")
-                setProfileData(UserData(email, firstname, surname, if(phoneNumber=="")"07908548845" else phoneNumber))
-            } else {
-                println("firebase Error: Data not found or empty")
+    private fun loadUsersName(){
+        println(security.enc(firebaseAuth.currentUser!!.uid!!))
+        databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!)).get()
+            .addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                    println(dataSnapshot.child("firstname").exists())
+                } else {
+                    println("firebase Error: Data not found or empty")
+                }
+            }.addOnFailureListener { exception ->
+                println("firebase Error getting data: $exception")
             }
-        }.addOnFailureListener { exception ->
-            println("firebase Error getting data: $exception")
-        }
     }
-
-    private fun setProfileData(usersData:UserData){
-        tvFirstName.text = user.splitName(usersData.firstname).first
-    }
-
 }

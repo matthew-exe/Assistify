@@ -5,22 +5,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.ContactsContract.Profile
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 
 class ProfileActivity: AppCompatActivity() {
@@ -35,7 +29,7 @@ class ProfileActivity: AppCompatActivity() {
         setContentView(R.layout.activity_profile)
 
         if (!user.isUserLoggedIn()) {
-            val intent = Intent(this, Login::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }
@@ -46,7 +40,7 @@ class ProfileActivity: AppCompatActivity() {
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_home -> {
-                    val intent = Intent(this, Dashboard::class.java)
+                    val intent = Intent(this, DashboardActivity::class.java)
                     startActivity(intent)
                     true
                 }
