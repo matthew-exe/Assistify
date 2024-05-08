@@ -10,12 +10,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.time.Instant
 
-
 class User{
 
     private val firebaseDatabase = FirebaseDatabase.getInstance()
     private val databaseReference = firebaseDatabase.reference.child("users")
-    val firebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseAuth = FirebaseAuth.getInstance()
     private val security = Security()
 
     fun updateProfileInDatabase(name:String, value:String){
@@ -36,7 +35,7 @@ class User{
 
     fun getDashboard(adapter: MyAdapter){
         if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val dashboardRef = userRef.child(security.enc("dashboard"))
             dashboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -44,7 +43,6 @@ class User{
                     adapter.data = createDashboard(dashboardData)
                     adapter.filterData("")
                 }
-
                 override fun onCancelled(databaseError: DatabaseError) {
                     println("Error: ${databaseError.message}")
                 }
@@ -67,7 +65,7 @@ class User{
 
     fun sendDashboardToDatabase(dashboard: MutableList<SensorData>){
         if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val dashboardRef = userRef.child(security.enc("dashboard"))
             val hMap = HashMap<String, String>()
             for(item in dashboard){
@@ -87,7 +85,7 @@ class User{
 
     fun sendStepsToDatabase(timeWoke: Instant, total:Int, lastMovement:Instant){
         if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val stepsRef = userRef.child("health").child("steps")
             val hMap = HashMap<String, String>()
             hMap["total"] = total.toString()
@@ -108,13 +106,13 @@ class User{
     fun readStepsFromDatabase(user:String, myAdapter: MyAdapter){
         // Take what object in as param and then assign totalStepsData to the text value
         if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(user))
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val totalSteps = userRef.child("health").child("steps").child("total")
             val lastMovement = userRef.child("health").child("steps").child("lastMovement")
             totalSteps.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val totalStepsData = dataSnapshot.value
-                    if(myAdapter.data.filter{it.name == "Steps"}.size > 0){
+                    if(myAdapter.data.filter{it.name == "Steps"}.isNotEmpty()){
                         myAdapter.data.filter{it.name == "Steps"}[0].stat = totalStepsData.toString()
                         myAdapter.filterData("")
                     }
@@ -140,7 +138,7 @@ class User{
 
     fun sendHeartRateAggregateToDatabase(min:Long, max:Long, avg:Long){
         if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val stepsRef = userRef.child("health").child("heart").child("aggregate")
             val hMap = HashMap<String, String>()
             hMap["min"] = min.toString()
@@ -198,7 +196,7 @@ class User{
             mostRecent.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val mostRecentBpm = dataSnapshot.value
-                    if(myAdapter.data.filter{it.name == "Pulse"}.size > 0) {
+                    if(myAdapter.data.filter{it.name == "Pulse"}.isNotEmpty()) {
                         myAdapter.data.filter { it.name == "Pulse" }[0].stat = "${mostRecentBpm}bpm"
                         println("Most Recent BPM From Database ${mostRecentBpm}bpm")
                     }
@@ -270,8 +268,8 @@ class User{
         databaseReference.orderByChild("username").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!dataSnapshot.exists()){
-                    val id = databaseReference.child(security.enc(email)).key!!
-                    val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc("07777555566"))
+                    val id = security.enc(FirebaseAuth.getInstance().currentUser!!.uid)
+                    val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(""))
                     databaseReference.child(id).setValue(userData)
                     userCreated = true
                 } else {
