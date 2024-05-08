@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.BaseExpandableListAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -14,6 +15,8 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -110,6 +113,16 @@ class SettingsActivity : AppCompatActivity() {
                 "Phone Number",
                 null,
                 "07*********61"
+            ),
+            SettingsItem(
+                "Person Details",
+                listOf(
+                    "Age",
+                    "Date of Birth",
+                    "Blood Type",
+                    "NHS Number",
+                    "Medical Conditions"
+                )
             ),
             SettingsItem("Change Password", null),
             SettingsItem("Notifications", null),
@@ -210,6 +223,78 @@ class SettingsActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+    }
+
+    private fun showPersonalDetailsDialog(section: SettingsItem) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_personal_details, null)
+        val etAge = dialogView.findViewById<EditText>(R.id.et_age)
+        val etBloodType = dialogView.findViewById<EditText>(R.id.et_blood_type)
+        val etDateOfBirth = dialogView.findViewById<EditText>(R.id.et_date_of_birth)
+        val etNhsNumber = dialogView.findViewById<EditText>(R.id.et_nhs_number)
+        val rvMedicalConditions = dialogView.findViewById<RecyclerView>(R.id.rv_medical_conditions)
+
+        val medicalConditionsAdapter = MedicalConditionsAdapter(this)
+        rvMedicalConditions.adapter = medicalConditionsAdapter
+        rvMedicalConditions.layoutManager = LinearLayoutManager(this)
+
+        // TODO: Populate the EditText fields with the user's existing personal details
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Personal Details")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                val age = etAge.text.toString()
+                val bloodType = etBloodType.text.toString()
+                val dateOfBirth = etDateOfBirth.text.toString()
+                val nhsNumber = etNhsNumber.text.toString()
+                val medicalConditions = medicalConditionsAdapter.medicalConditions
+
+                // TODO: Save the personal details to the database
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun showMedicalConditionsDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_medical_conditions, null)
+        val rvMedicalConditions = dialogView.findViewById<RecyclerView>(R.id.rv_medical_conditions)
+        val etMedicalCondition = dialogView.findViewById<EditText>(R.id.et_medical_condition)
+
+        val medicalConditionsAdapter = MedicalConditionsAdapter(this)
+        rvMedicalConditions.adapter = medicalConditionsAdapter
+        rvMedicalConditions.layoutManager = LinearLayoutManager(this)
+
+        // Set some dummy data for medical conditions
+        medicalConditionsAdapter.addCondition("Asthma")
+        medicalConditionsAdapter.addCondition("Diabetes")
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Medical Conditions")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                // Save the medical conditions to the database
+                val conditions = medicalConditionsAdapter.medicalConditions
+                // ...
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+
+        etMedicalCondition.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val condition = etMedicalCondition.text.toString().trim()
+                if (condition.isNotBlank()) {
+                    medicalConditionsAdapter.addCondition(condition)
+                    etMedicalCondition.setText("")
+                }
+                true
+            } else {
+                false
+            }
+        }
     }
 
     private fun showResetPasswordDialog() {
@@ -343,7 +428,23 @@ class SettingsActivity : AppCompatActivity() {
                 false
             )
             val textView = itemView.findViewById<TextView>(android.R.id.text1)
-            textView.text = getChild(groupPosition, childPosition) as String
+            val childItem = getChild(groupPosition, childPosition) as String
+            textView.text = childItem
+
+            itemView.setOnClickListener {
+                when (sections[groupPosition].title) {
+                    "Person Details" -> {
+                        when (childItem) {
+                            "Age" -> showEditDialog("Edit Age", "", validateInput = { it.isNotBlank() }, onSave = { /* Save age */ })
+                            "Date of Birth" -> showEditDialog("Edit Date of Birth", "", validateInput = { /* Validate date */ true }, onSave = { /* Save date of birth */ })
+                            "Blood Type" -> showEditDialog("Edit Blood Type", "", validateInput = { it.isNotBlank() }, onSave = { /* Save blood type */ })
+                            "NHS Number" -> showEditDialog("Edit NHS Number", "", validateInput = { /* Validate NHS number */ true }, onSave = { /* Save NHS number */ })
+                            "Medical Conditions" -> showMedicalConditionsDialog()
+                        }
+                    }
+                }
+            }
+
             return itemView
         }
 
