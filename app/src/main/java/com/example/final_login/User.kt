@@ -15,21 +15,7 @@ class User{
     private val databaseReference = firebaseDatabase.reference.child("users")
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val security = Security()
-
-
-//    fun updateProfileInDatabase(name:String, value:String){
-//        if(isUserLoggedIn()){
-//            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.email!!))
-//            val sectionToUpdate = userRef.child(name)
-//            sectionToUpdate.setValue(security.enc(value))
-//                .addOnSuccessListener {
-//                    println("Profile Updated")
-//                }
-//                .addOnFailureListener {
-//            TODO("RETURN TO LOGIN")
-//        }
-//    }
-
+    
     fun getDashboard(adapter: MyAdapter){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
