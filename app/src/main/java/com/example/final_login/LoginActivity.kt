@@ -29,7 +29,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
 
-class Login : AppCompatActivity() {
+class LoginActivity : AppCompatActivity() {
 
     private val formController = FormController()
     private val user = User()
@@ -125,7 +125,7 @@ class Login : AppCompatActivity() {
             if(formController.isValidEmail(inputEmail) && loginPassword.isNotEmpty()){
                 loginUserEmailPassword(loginEmail, loginPassword)
             } else {
-                Toast.makeText(this@Login,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
             }
         }
         btnThemeSwitch.setOnClickListener{
@@ -139,7 +139,7 @@ class Login : AppCompatActivity() {
         }
         // Register Text Link
         textRegister.setOnClickListener{
-            val intent = Intent(this@Login, Register::class.java)
+            val intent = Intent(this@LoginActivity, RegisterActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             intent.putExtra("themeAccessibleActive", themeAccessibleActive)
             startActivity(intent)
@@ -157,13 +157,13 @@ class Login : AppCompatActivity() {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(username, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 checkIfEmailUpdated()
-                Toast.makeText(this@Login,"You are Logged In.",Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@Login, Dashboard::class.java)
+                Toast.makeText(this@LoginActivity,"You are Logged In.",Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
             } else {
-                Toast.makeText(this@Login, "Login Failed! Please try again shortly.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, "Login Failed! Please try again shortly.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -197,12 +197,12 @@ class Login : AppCompatActivity() {
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val intent = Intent(this@Login, Dashboard::class.java)
+                    val intent = Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                     finish()
                 } else {
-                    Toast.makeText(this@Login, "Authentication Failed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, "Authentication Failed.", Toast.LENGTH_SHORT).show()
                 }
             }
     }
