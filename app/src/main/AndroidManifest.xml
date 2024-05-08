@@ -65,6 +65,7 @@
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity-alias>
+        <service android:name=".BackgroundWorker" />
     </application>
 
 </manifest>

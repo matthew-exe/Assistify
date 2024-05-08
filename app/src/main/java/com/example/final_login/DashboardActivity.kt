@@ -109,6 +109,10 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
 
+        //TODO("Uncomment to run background service")
+//        val serviceIntent = Intent(this, BackgroundWorker::class.java)
+//        startService(serviceIntent)
+
 
         val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
         adapter = MyAdapter(this, ::generateDummySensorData)

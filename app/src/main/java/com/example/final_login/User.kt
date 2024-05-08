@@ -278,7 +278,6 @@ class User{
     }
 
     fun readHeartRateFromDatabase(user:String, myAdapter: MyAdapter){
-        // Pass in sensor
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(user)
             val avgBPM = userRef.child("health").child("heart").child("avg")
