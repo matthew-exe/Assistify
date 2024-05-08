@@ -350,4 +350,3 @@ class SettingsActivity : AppCompatActivity() {
         override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean = true
     }
 }
-
