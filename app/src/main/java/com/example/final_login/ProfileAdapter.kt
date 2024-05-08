@@ -128,6 +128,7 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
 
     fun addLinkedProfileLayout(userDetails: ProfileData) {
         layouts.add(0, Pair(R.layout.activity_linked_profile, userDetails))
+        layouts.add(1, Pair(R.layout.activity_stat_profile, userDetails))
         notifyDataSetChanged()
     }
 
