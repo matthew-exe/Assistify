@@ -25,8 +25,11 @@ import android.widget.TextView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 
 class Dashboard : AppCompatActivity() {
@@ -49,7 +52,7 @@ class Dashboard : AppCompatActivity() {
 
     private var phoneNumberToDial: String? = null
     private var notificationCount: Int = 0
-    private val notifications = mutableListOf<String>()
+    private var notifications = mutableListOf<Pair<String, String>>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,13 +108,14 @@ class Dashboard : AppCompatActivity() {
         btnCallUser = findViewById(R.id.btnCallUser)
 
         btnCallUser.setOnClickListener {
-            phoneNumberToDial = "07450272351" // Should be connected users number in production
-            if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
-            } else {
-                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
-                startActivity(intent)
-            }
+            user.addUserNotification("You have been called by a user")
+//            phoneNumberToDial = "07450272351" // Should be connected users number in production
+//            if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+//                ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
+//            } else {
+//                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
+//                startActivity(intent)
+//            }
         }
 
         bottomNavigationView = findViewById(R.id.bottom_navigation)
@@ -140,9 +144,12 @@ class Dashboard : AppCompatActivity() {
 
         tvNotificationCount = findViewById(R.id.tvNotificationCount)
 
-        // Add some dummy notifications
-        notifications.addAll(listOf("Notification 1", "Notification 2", "Notification 3"))
-        updateNotificationCount()
+
+        user.getUserNotifications { retrievedNotifications ->
+            notifications = retrievedNotifications.toMutableList()
+            updateNotificationCount()
+            setupNotificationsListener()
+        }
 
         btnNotifications = findViewById(R.id.btnNotifications)
         btnNotifications.setOnClickListener {
@@ -170,18 +177,20 @@ class Dashboard : AppCompatActivity() {
     }
 
     private fun showNotificationsDialog() {
-        // TODO Set up real notifications and remove the dummy ones
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.notification_dialog)
 
         val lvNotifications = dialog.findViewById<ListView>(R.id.lvNotifications)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, notifications)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, notifications.map { it.second })
         lvNotifications.adapter = adapter
 
-        lvNotifications.setOnItemLongClickListener { _, _, position, _ ->
-            notifications.removeAt(position)
-            adapter.notifyDataSetChanged()
-            updateNotificationCount()
+        lvNotifications.setOnItemClickListener { _, _, position, _ ->
+            val notificationToDeleteId = notifications[position].first
+            user.deleteUserNotification(notificationToDeleteId) { success ->
+                if (success) {
+                    adapter.notifyDataSetChanged()
+                }
+            }
             true
         }
 
@@ -197,6 +206,25 @@ class Dashboard : AppCompatActivity() {
         } else {
             tvNotificationCount.visibility = View.VISIBLE
         }
+    }
+
+    private fun setupNotificationsListener() {
+        val userRef = databaseReference.child(security.enc(currentUser.uid!!))
+        val notificationsRef = userRef.child("notifications")
+
+        // Add a listener to listen for changes in notifications
+        notificationsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                user.getUserNotifications { retrievedNotifications ->
+                    notifications = retrievedNotifications.toMutableList()
+                    updateNotificationCount()
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                println("Error getting notifications: ${databaseError.message}")
+            }
+        })
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
