@@ -8,10 +8,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.LayoutRes
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.viewpager.widget.PagerAdapter
-import com.google.android.material.snackbar.Snackbar
 
 class ProfileAdapter(private val context: Context) : PagerAdapter() {
     private var layouts = mutableListOf<Pair<Int, ProfileData>>()
@@ -142,6 +139,10 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
 
         layout.findViewById<Button>(R.id.unlink_button)?.setOnClickListener {
             removeLayout(userDetails)
+        }
+
+        layout.findViewById<Button>(R.id.call_button)?.setOnClickListener {
+            (context as ProfileActivity).callClient()
         }
     }
 
