@@ -246,7 +246,6 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateUserPersonalDetails(valueToUpdate: String, value: String, onSuccess: () -> Unit) {
         databaseReference.child(security.enc(currentUser.uid!!)).child("personalDetails").get()
             .addOnSuccessListener { dataSnapshot ->
-                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
                     databaseReference.child(security.enc(currentUser.uid!!)).child("personalDetails").updateChildren(
                         mapOf(
                             valueToUpdate to security.enc(value)
@@ -254,10 +253,7 @@ class SettingsActivity : AppCompatActivity() {
                     ).addOnSuccessListener {
                         onSuccess()
                     }
-                } else {
-                    println("firebase Error: Data not found or empty")
                 }
-            }
     }
 
 
