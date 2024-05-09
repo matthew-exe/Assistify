@@ -129,7 +129,10 @@ class DashboardActivity : AppCompatActivity() {
 //        startService(serviceIntent)
 
         val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
-        adapter = MyAdapter(this, ::generateDummySensorData)
+
+        val isUserDashboard = if (security.dec(user.getUserUidToLoad()) == currentUser.uid) true else false
+
+        adapter = MyAdapter(this, ::generateDummySensorData, isUserDashboard)
         user.getDashboard(adapter)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -138,7 +141,7 @@ class DashboardActivity : AppCompatActivity() {
 
         }
 
-        user.populateDashboard(adapter)
+        user.populateDashboard(adapter, user.getUserUidToLoad())
 
         editTextText = findViewById(R.id.editTextText)
         editTextText.addTextChangedListener(object : TextWatcher {
@@ -315,8 +318,7 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun loadUsersName(){
-        println(security.enc(firebaseAuth.currentUser!!.uid!!))
-        databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!)).get()
+        databaseReference.child(user.getUserUidToLoad()).get()
             .addOnSuccessListener { dataSnapshot ->
                 if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
                     tvFirstName.text = security.dec(dataSnapshot.child("firstname").value.toString())

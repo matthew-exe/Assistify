@@ -11,6 +11,6 @@ object SensorRepository {
         SensorID.PULSE to R.drawable.pulse,
         SensorID.STEPS to R.drawable.steps,
         SensorID.CALORIES to R.drawable.calories,
-        SensorID.SLEEP to R.drawable.steps
+        SensorID.SLEEP to R.drawable.sleep
     )
 }

@@ -14,7 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 class MyAdapter(
     private val context: Context,
-    private val generateDummySensorData: (Int) -> List<SensorData>
+    private val generateDummySensorData: (Int) -> List<SensorData>,
+    private val isUserDashboard: Boolean
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
         private const val VIEW_TYPE_BUTTON = 0
@@ -28,7 +29,9 @@ class MyAdapter(
 
     init {
         filteredData.addAll(data)
-        filteredData.add("Add") // Add the "Add" button at the end
+        if (isUserDashboard) {
+            filteredData.add("Add") // Add the "Add" button at the end if it's the user's dashboard
+        }
     }
 
     inner class ButtonViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -43,7 +46,7 @@ class MyAdapter(
 
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == itemCount - 1) VIEW_TYPE_BUTTON else VIEW_TYPE_SENSOR
+        return if (position == itemCount - 1 && isUserDashboard) VIEW_TYPE_BUTTON else VIEW_TYPE_SENSOR
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -66,24 +69,32 @@ class MyAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ButtonViewHolder -> {
-                holder.button.setOnClickListener {
-                    showSensorSelectionPopup()
+                if (isUserDashboard) {
+                    holder.button.setOnClickListener {
+                        showSensorSelectionPopup()
+                    }
+                } else {
+                    holder.button.isEnabled = false
                 }
             }
             is ItemViewHolder -> {
                 val sensor = filteredData[position] as SensorData
                 holder.name.text = sensor.name
                 holder.image.setImageResource(sensor.image)
-                holder.stat.text = if(sensor.stat != "0") sensor.stat else ""
+                holder.stat.text = if (sensor.stat != "0") sensor.stat else ""
 
-                if(sensor.name == "Pulse"){
+                if (sensor.name == "Pulse") {
                     val heartAnimation = AnimationUtils.loadAnimation(context, R.anim.anim_pulse)
                     holder.image.startAnimation(heartAnimation)
                 }
 
-                holder.itemView.setOnLongClickListener {
-                    showDeleteConfirmationDialog(position)
-                    true
+                if (isUserDashboard) {
+                    holder.itemView.setOnLongClickListener {
+                        showDeleteConfirmationDialog(position)
+                        true
+                    }
+                } else {
+                    holder.itemView.isLongClickable = false
                 }
             }
         }
@@ -94,7 +105,7 @@ class MyAdapter(
     }
 
     private fun addItem(sensorData: SensorData) {
-        user.populateDashboard(this)
+        user.populateDashboard(this, user.getUserUidToLoad())
         data.add(sensorData)
         user.sendDashboardToDatabase(data)
         filterData(editTextText.text.toString())
@@ -171,7 +182,9 @@ class MyAdapter(
                 }
             }
         }
-        filteredData.add("Add")
+        if (isUserDashboard) {
+            filteredData.add("Add")
+        }
         notifyDataSetChanged()
     }
 }

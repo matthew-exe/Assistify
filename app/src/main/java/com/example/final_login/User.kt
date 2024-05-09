@@ -9,6 +9,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -21,15 +25,46 @@ class User{
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val security = Security()
 
-    fun getDashboard(adapter: MyAdapter){
-        if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
-            val dashboardRef = userRef.child(security.enc("dashboard"))
-            dashboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
+    fun getDashboard(adapter: MyAdapter) {
+        if (isUserLoggedIn()) {
+            val currentUserRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
+            currentUserRef.child("children").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val dashboardData = dataSnapshot.value
-                    adapter.data = createDashboard(dashboardData)
-                    adapter.filterData("")
+                    if (dataSnapshot.exists()) {
+                        // User is linked as a guardian to another user
+                        val linkedUserKey = dataSnapshot.getValue(String::class.java)
+                        if (linkedUserKey != null) {
+                            val linkedUserRef = databaseReference.child(linkedUserKey)
+                            val dashboardRef = linkedUserRef.child(security.enc("dashboard"))
+                            dashboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                    val dashboardData = dataSnapshot.value
+                                    adapter.data = createDashboard(dashboardData)
+                                    adapter.filterData("")
+                                    populateDashboard(adapter, linkedUserKey) // Call populateDashboard with the linked user's key
+                                }
+
+                                override fun onCancelled(databaseError: DatabaseError) {
+                                    println("Error: ${databaseError.message}")
+                                }
+                            })
+                        }
+                    } else {
+                        // User is not linked as a guardian, retrieve their own dashboard
+                        val dashboardRef = currentUserRef.child(security.enc("dashboard"))
+                        dashboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                val dashboardData = dataSnapshot.value
+                                adapter.data = createDashboard(dashboardData)
+                                adapter.filterData("")
+                                populateDashboard(adapter, security.enc(firebaseAuth.currentUser!!.uid!!)) // Call populateDashboard with the current user's key
+                            }
+
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                println("Error: ${databaseError.message}")
+                            }
+                        })
+                    }
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -41,11 +76,42 @@ class User{
         }
     }
 
-    fun populateDashboard(adapter: MyAdapter){
-        readStepsFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
-        readHeartRateFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
-        readCaloriesFromDatabase(adapter)
-        readSleepFromDatabase(adapter)
+
+
+
+    fun getUserUidToLoad(): String {
+        return runBlocking {
+            if (isUserLoggedIn()) {
+                val currentUserRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
+                var userIdForDashboard = security.enc(firebaseAuth.currentUser!!.uid!!)
+
+                withContext(Dispatchers.IO) {
+                    val dataSnapshot = currentUserRef.child("children").get().await()
+                    if (dataSnapshot.exists()) {
+                        // User is linked as a guardian to another user
+                        userIdForDashboard = dataSnapshot.getValue(String::class.java).toString()
+                    }
+                }
+
+                userIdForDashboard
+            } else {
+                // Handle case where user is not logged in
+                TODO("RETURN TO LOGIN")
+            }
+        }
+    }
+
+
+
+
+
+
+
+    fun populateDashboard(adapter: MyAdapter, user: String){
+        readStepsFromDatabase(adapter, user)
+        readHeartRateFromDatabase(adapter, user)
+        readCaloriesFromDatabase(adapter, user)
+        readSleepFromDatabase(adapter, user)
     }
 
     fun createDashboard(dashboard: Any?): MutableList<SensorData> {
@@ -53,7 +119,7 @@ class User{
         if (dashboard is Iterable<*>) {
             for (item in dashboard) {
                 val decryptedString = security.dec(item?.toString())
-                returnList.add(SensorData(decryptedString, if(decryptedString == "Pulse") R.drawable.pulse else if (decryptedString == "Steps") R.drawable.steps else R.drawable.calories, "0"))
+                returnList.add(SensorData(decryptedString, if(decryptedString == "Pulse") R.drawable.pulse else if (decryptedString == "Steps") R.drawable.steps else if (decryptedString == "Calories") R.drawable.calories else R.drawable.sleep, "0"))
             }
         }
         return returnList
@@ -290,10 +356,10 @@ class User{
         }
     }
 
-    fun readStepsFromDatabase(user:String, myAdapter: MyAdapter){
+    fun readStepsFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         // Take what object in as param and then assign totalStepsData to the text value
         if(isUserLoggedIn()){
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+            val userRef = databaseReference.child(user)
             val totalSteps = userRef.child("health").child("steps").child("total")
             val lastMovement = userRef.child("health").child("steps").child("lastMovement")
             totalSteps.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -402,9 +468,9 @@ class User{
         }
     }
 
-    fun readSleepFromDatabase(myAdapter: MyAdapter){
+    fun readSleepFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()) {
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+            val userRef = databaseReference.child(user)
             val mostRecentRef = userRef.child("health").child("sleep").child("mostRecent")
             mostRecentRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -421,9 +487,9 @@ class User{
         }
     }
 
-    fun readCaloriesFromDatabase(myAdapter: MyAdapter){
+    fun readCaloriesFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()) {
-            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+            val userRef = databaseReference.child(user)
             val avgBPM = userRef.child("health").child("calories").child("last24")
             avgBPM.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -441,7 +507,7 @@ class User{
         }
     }
 
-    fun readHeartRateFromDatabase(user:String, myAdapter: MyAdapter){
+    fun readHeartRateFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(user)
             val avgBPM = userRef.child("health").child("heart").child("avg")
