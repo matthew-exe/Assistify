@@ -69,10 +69,15 @@ class ProfileActivity: AppCompatActivity() {
         }
     }
 
-    fun linkUserProfile(userData: ProfileData) {
+    fun linkUserProfile(userData: ProfileData, displaySnackbar: Boolean) {
         adapter.addLinkedProfileLayout(userData)
+        if(adapter.layouts.size < 3){
+            adapter.loadNoProfile()
+        }
         viewPager.adapter?.notifyDataSetChanged()
-        Snackbar.make(viewPager, "Successfully linked with ${userData.name}", Snackbar.LENGTH_SHORT).show()
+        if(displaySnackbar){
+            Snackbar.make(viewPager, "Successfully linked with ${userData.name}", Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     fun unlinkSnackBar(userDetails: ProfileData) {
@@ -116,7 +121,7 @@ class ProfileActivity: AppCompatActivity() {
             .setView(editText)
             .setPositiveButton("OK") { _, _ ->
                 val enteredKey = editText.text.toString()
-                user.checkAccessIsPermittedBeforeLink(viewPager, enteredKey)
+                user.checkAccessIsPermittedBeforeLink(viewPager, enteredKey, true)
 //                linkUserProfile(enteredKey)
                 println("Entered string: $enteredKey")
             }

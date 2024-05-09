@@ -11,11 +11,11 @@ import android.widget.TextView
 import androidx.viewpager.widget.PagerAdapter
 
 class ProfileAdapter(private val context: Context) : PagerAdapter() {
-    private var layouts = mutableListOf<Pair<Int, ProfileData>>()
+    var layouts = mutableListOf<Pair<Int, ProfileData>>()
     private val user = User()
 
     init {
-        user.checkAndGetChildFromDatabase(context, this)
+        user.checkAndGetChildFromDatabase(context, this, false)
     }
 
     fun loadNoProfile(){
@@ -52,10 +52,16 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
             }
 
             val preLinkText1 = layout.findViewById<TextView>(R.id.pre_link_text_1)
+            val preLinkText2 = layout.findViewById<TextView>(R.id.pre_link_text_2)
+            val linkButton = layout.findViewById<TextView>(R.id.linkButton)
             if (layouts.size > 1) {
-                preLinkText1.text = "You can link with another client."
+                preLinkText1.text = ""
+                preLinkText2.text = "Multi-account Monitoring Coming Soon."
+                linkButton.isEnabled = false
             } else {
                 preLinkText1.text = "It appears you are not yet linked to a client."
+                preLinkText2.text = "Please tap the button below to link."
+                linkButton.isEnabled = true
             }
         } else if (layoutResId == R.layout.activity_linked_profile) {
             // This is the activity_linked_profile layout

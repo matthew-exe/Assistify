@@ -454,7 +454,7 @@ class User{
         })
     }
 
-    fun checkAccessIsPermittedBeforeLink(view: ViewPager, secureKey: String){
+    fun checkAccessIsPermittedBeforeLink(view: ViewPager, secureKey: String, displaySnackbar: Boolean){
         if (isUserLoggedIn()) {
             val monitoredRef = databaseReference.child(secureKey)
             monitoredRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -464,7 +464,7 @@ class User{
                         if (accessPermitted == "true") {
                             monitoredRef.child("accessPermitted").setValue(security.enc(firebaseAuth.currentUser!!.uid))
                             setGuardianAccount(secureKey, view)
-                            checkAndGetChildFromDatabase(view.context, view.adapter as ProfileAdapter)
+                            checkAndGetChildFromDatabase(view.context, view.adapter as ProfileAdapter, displaySnackbar)
                         } else {
                             Snackbar.make(view, "Invalid Key! Please Try Again.", Snackbar.LENGTH_SHORT).show()
                         }
@@ -482,13 +482,13 @@ class User{
         }
     }
 
-    fun checkAndGetChildFromDatabase(context: Context, profileAdapter: ProfileAdapter) {
+    fun checkAndGetChildFromDatabase(context: Context, profileAdapter: ProfileAdapter, displaySnackbar:Boolean) {
         val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid)).child("children")
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     println(dataSnapshot.getValue(true))
-                    readProfileOfMonitored(dataSnapshot.getValue(true).toString(), context)
+                    readProfileOfMonitored(dataSnapshot.getValue(true).toString(), context, displaySnackbar)
                 } else {
                     profileAdapter.loadNoProfile()
                 }
@@ -515,15 +515,15 @@ class User{
     }
 
 
-    private fun readProfileOfMonitored(secureKey:String, context: Context){
+    private fun readProfileOfMonitored(secureKey:String, context: Context, displaySnackbar: Boolean){
         val monitoredRef = databaseReference.child(secureKey).child("accessPermitted")
         monitoredRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if(dataSnapshot.value.toString() == security.enc(firebaseAuth.currentUser!!.uid)){
                     println("YES KEYS MATCH")
-                    loadProfileOfMonitored(secureKey, context)
+                    loadProfileOfMonitored(secureKey, context, displaySnackbar)
                 } else {
-                    (context as ProfileActivity).linkUserProfile(emptyUserDetails)
+                    (context as ProfileActivity).linkUserProfile(emptyUserDetails, false)
                 }
             }
             override fun onCancelled(databaseError: DatabaseError) {
@@ -532,7 +532,7 @@ class User{
         })
     }
 
-    private fun loadProfileOfMonitored(secureKey:String, context: Context){
+    private fun loadProfileOfMonitored(secureKey:String, context: Context, displaySnackbar: Boolean){
         val monitoredRef = databaseReference.child(secureKey)
         monitoredRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -572,19 +572,39 @@ class User{
                     }
                     if(healthSnapShot.hasChild("calories")){
                         val calSnapshot = healthSnapShot.child("calories")
-                        if(calSnapshot.hasChild("last24")){}
-                        emptyUser.caloriesTotalSpent = calSnapshot.child("last24").value.toString() + "Kcal"
+                        if(calSnapshot.hasChild("last24")){
+                            emptyUser.caloriesTotalSpent = calSnapshot.child("last24").value.toString() + "Kcal"
+                        }
+
                     }
                     if(healthSnapShot.hasChild("sleep")){
                         val sleepSnapshot = healthSnapShot.child("sleep")
-                        if(sleepSnapshot.hasChild("mostRecent")){}
-                        emptyUser.sleepTotal = sleepSnapshot.child("mostRecent").value.toString()
+                        if(sleepSnapshot.hasChild("mostRecent")){
+                            emptyUser.sleepTotal = sleepSnapshot.child("mostRecent").value.toString()
+                        }
+
                     }
                 }
                 if(dataSnapshot.hasChild("personalDetails")){
                     val detailsSnapshot = dataSnapshot.child("personalDetails")
+                    if(detailsSnapshot.hasChild("age")){
+                        emptyUser.age = detailsSnapshot.child("age").value.toString()
+                    }
+                    if(detailsSnapshot.hasChild("dateOfBirth")){
+                        emptyUser.dateOfBirth = detailsSnapshot.child("dateOfBirth").value.toString()
+                    }
+                    if(detailsSnapshot.hasChild("bloodType")){
+                        emptyUser.bloodType = detailsSnapshot.child("bloodType").value.toString()
+                    }
+                    if(detailsSnapshot.hasChild("nhsNumber")){
+                        emptyUser.bloodType = detailsSnapshot.child("nhsNumber").value.toString()
+                    }
+                   if(detailsSnapshot.hasChild("medicalConditions")){
+                       val medConditions = detailsSnapshot.child("medicalConditions").children
+                       emptyUser.medConditions = medConditions.map{it.value.toString()}
+                   }
                 }
-                (context as ProfileActivity).linkUserProfile(emptyUser)
+                (context as ProfileActivity).linkUserProfile(emptyUser, displaySnackbar)
             }
             override fun onCancelled(databaseError: DatabaseError) {
                 println("Error: ${databaseError.message}")
@@ -604,7 +624,7 @@ class User{
         "Yvonne",
         R.drawable.yvonne,
         "1951-11-30",
-        73,
+        "73",
         "A+",
         "4857773456",
         listOf("Hip replacement", "Arthritis"),
