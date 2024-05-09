@@ -25,5 +25,7 @@ data class ProfileData (
     var stepsLastDetected: String,
     var stepsFirstDetected: String,
 
-    var caloriesTotalSpent: String
+    var caloriesTotalSpent: String,
+
+    var sleepTotal: String
 )

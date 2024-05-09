@@ -11,6 +11,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 class User{
@@ -38,6 +40,13 @@ class User{
         } else {
             TODO("RETURN TO LOGIN")
         }
+    }
+
+    fun populateDashboard(adapter: MyAdapter){
+        readStepsFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
+        readHeartRateFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
+        readCaloriesFromDatabase(adapter)
+        readSleepFromDatabase(adapter)
     }
 
     fun createDashboard(dashboard: Any?): MutableList<SensorData> {
@@ -302,6 +311,41 @@ class User{
         }
     }
 
+    fun sendSleepToDatabase(totalTime: String){
+        if(isUserLoggedIn()){
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+            val lastSleepRef = userRef.child("health").child("sleep").child("mostRecent")
+            lastSleepRef.setValue(totalTime)
+                .addOnSuccessListener {
+                    println("Sleep Saved To Database")
+                }
+                .addOnFailureListener {
+                    println("Sleep Failed To Saved To Database")
+                }
+        } else {
+            TODO("RETURN TO LOGIN")
+        }
+    }
+
+    fun readSleepFromDatabase(myAdapter: MyAdapter){
+        if(isUserLoggedIn()) {
+            val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+            val mostRecentRef = userRef.child("health").child("sleep").child("mostRecent")
+            mostRecentRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val sleepTotal = dataSnapshot.value.toString()
+                    if(myAdapter.data.filter{it.name == "Sleep"}.isNotEmpty()){
+                        myAdapter.data.filter{it.name == "Sleep"}[0].stat = sleepTotal
+                        myAdapter.filterData("")
+                    }
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("Error: ${databaseError.message}")
+                }
+            })
+        }
+    }
+
     fun readCaloriesFromDatabase(myAdapter: MyAdapter){
         if(isUserLoggedIn()) {
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
@@ -494,7 +538,6 @@ class User{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val emptyUser = emptyUserDetails.copy()
                 if(dataSnapshot.hasChild("firstname")){
-                    println("Has first name")
                     emptyUser.name = security.dec(dataSnapshot.child("firstname").value.toString())
                     println(security.dec(dataSnapshot.child("firstname").value.toString()))
                 }
@@ -517,13 +560,14 @@ class User{
                     if(healthSnapShot.hasChild("steps")){
                         val stepsSnapshot = healthSnapShot.child("steps")
                         if(stepsSnapshot.hasChild("lastMovement")){
-                            emptyUser.stepsLastDetected = stepsSnapshot.child("lastMovement").value.toString()
+                            emptyUser.stepsLastDetected = formatTimeString(stepsSnapshot.child("lastMovement").value.toString())
                         }
                         if(stepsSnapshot.hasChild("timeWoke")){
-                            emptyUser.stepsFirstDetected = stepsSnapshot.child("timeWoke").value.toString()
+                            println(formatTimeString(stepsSnapshot.child("timeWoke").value.toString()))
+                            emptyUser.stepsFirstDetected = formatTimeString(stepsSnapshot.child("timeWoke").value.toString())
                         }
                         if(stepsSnapshot.hasChild("total")){
-                            emptyUser.steps24hTotal = stepsSnapshot.child("timeWoke").value.toString()
+                            emptyUser.steps24hTotal = stepsSnapshot.child("total").value.toString()
                         }
                     }
                     if(healthSnapShot.hasChild("calories")){
@@ -531,8 +575,14 @@ class User{
                         if(calSnapshot.hasChild("last24")){}
                         emptyUser.caloriesTotalSpent = calSnapshot.child("last24").value.toString() + "Kcal"
                     }
-
-
+                    if(healthSnapShot.hasChild("sleep")){
+                        val sleepSnapshot = healthSnapShot.child("sleep")
+                        if(sleepSnapshot.hasChild("mostRecent")){}
+                        emptyUser.sleepTotal = sleepSnapshot.child("mostRecent").value.toString()
+                    }
+                }
+                if(dataSnapshot.hasChild("personalDetails")){
+                    val detailsSnapshot = dataSnapshot.child("personalDetails")
                 }
                 (context as ProfileActivity).linkUserProfile(emptyUser)
             }
@@ -542,26 +592,34 @@ class User{
         })
     }
 
+    private fun formatTimeString(timeString: String): String {
+        val formatter = DateTimeFormatter.ofPattern("HH:mm EEE dd/MM/uu")
+        val dateTime = LocalDateTime.parse(timeString, DateTimeFormatter.ISO_DATE_TIME)
+        val formattedDateTime = dateTime.format(formatter)
+        return formattedDateTime
+    }
+
 
     val emptyUserDetails = ProfileData(
-                    "Yvonne",
-                    R.drawable.yvonne,
-                    "1951-11-30",
-                    73,
-                    "A+",
-                    "4857773456",
-                    listOf("Hip replacement", "Arthritis"),
-                    "Teresa",
-                    "Daughter",
-                    "07777123456",
-                    "75",
-                    "55",
-                    "105",
-                    "85",
-                    "1435",
-                    "20:45",
-                    "07:15",
-                    "578"
-                )
+        "Yvonne",
+        R.drawable.yvonne,
+        "1951-11-30",
+        73,
+        "A+",
+        "4857773456",
+        listOf("Hip replacement", "Arthritis"),
+        "Teresa",
+        "Daughter",
+        "07777123456",
+        "75",
+        "55",
+        "105",
+        "85",
+        "1435",
+        "20:45",
+        "07:15",
+        "578",
+        "4h 34m"
+        )
 
 }

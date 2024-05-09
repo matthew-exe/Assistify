@@ -120,16 +120,18 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         val statPicture = R.drawable.statistics
         val statText = "Statistics:"
         val heartRate = "Heart Rate:"
-        val currentBPM = "Current BPM: ${userDetails.currentBPM}"
-        val minBPM = "Min. BPM: ${userDetails.minBPM}"
-        val maxBPM = "Max. BPM: ${userDetails.maxBPM}"
-        val avgBPM = "Avg. BPM: ${userDetails.avgBPM}"
-        val stepsText = "Steps:"
-        val steps24hTotal = "Total in past 24 hours: ${userDetails.steps24hTotal}"
-        val stepsLastDetected = "Time last detected: ${userDetails.stepsLastDetected}"
-        val stepsFirstDetected = "Time first detected: ${userDetails.stepsFirstDetected}"
+        val currentBPM = "Current: ${userDetails.currentBPM}bpm"
+        val minBPM = "Min: ${userDetails.minBPM}bpm"
+        val maxBPM = "Max: ${userDetails.maxBPM}bpm"
+        val avgBPM = "Avg: ${userDetails.avgBPM}bpm"
+        val stepsText = "Movement:"
+        val stepsLastDetected = "Last Movements: ${userDetails.stepsLastDetected}"
+        val steps24hTotal = "Total Steps Today: ${userDetails.steps24hTotal}"
+        val stepsFirstDetected = "Woke Up: ${userDetails.stepsFirstDetected}"
         val caloriesText = "Calories:"
-        val caloriesSpent = "Total spent: ${userDetails.caloriesTotalSpent}"
+        val caloriesSpent = "Total Today: ${userDetails.caloriesTotalSpent}"
+        val sleepText = "Sleep:"
+        val totalSleep = "Total ${userDetails.sleepTotal}"
 
         layout.findViewById<ImageView>(R.id.statistics_picture)
             .setImageResource(statPicture)
@@ -143,6 +145,8 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         layout.findViewById<TextView>(R.id.steps24hTotal_text).text = steps24hTotal
         layout.findViewById<TextView>(R.id.stepsLastDetected_text).text = stepsLastDetected
         layout.findViewById<TextView>(R.id.stepsFirstDetected_text).text = stepsFirstDetected
+        layout.findViewById<TextView>(R.id.sleep_text).text = sleepText
+        layout.findViewById<TextView>(R.id.sleep_total_text).text = totalSleep
         layout.findViewById<TextView>(R.id.calories_text).text = caloriesText
         layout.findViewById<TextView>(R.id.caloriesTotalSpent_text).text = caloriesSpent
     }
@@ -159,8 +163,9 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         val statToRemove = layouts[statIndex + 1]
 
         if (layoutToRemove != null) {
-            layouts.remove(layoutToRemove)
-            layouts.remove(statToRemove)
+//            layouts.remove(layoutToRemove)
+//            layouts.remove(statToRemove)
+            layouts.clear()
             (context as ProfileActivity).unlinkSnackBar(userDetails)
             loadNoProfile()
             notifyDataSetChanged()

@@ -171,8 +171,7 @@ class HealthConnectManager(private val context: Context) {
             val sleepRecordTotal = response[SleepSessionRecord.SLEEP_DURATION_TOTAL]
             if (sleepRecordTotal != null){
                 println("SLEEP OKAY")
-                println(sleepRecordTotal.toKotlinDuration())
-//                println(sleepRecordTotal.toKotlinDuration().toComponents { hours, minutes, seconds, nanoseconds ->  })
+                user.sendSleepToDatabase(sleepRecordTotal.toKotlinDuration().toString())
             } else {
                 println("NOOOOOOOOOOOOOO Sleeep")
             }

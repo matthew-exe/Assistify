@@ -94,9 +94,11 @@ class MyAdapter(
     }
 
     private fun addItem(sensorData: SensorData) {
+        user.populateDashboard(this)
         data.add(sensorData)
         user.sendDashboardToDatabase(data)
         filterData(editTextText.text.toString())
+
     }
 
     private fun showSensorSelectionPopup() {
@@ -169,7 +171,7 @@ class MyAdapter(
                 }
             }
         }
-        filteredData.add("Add") // Add the "Add" button at the end
+        filteredData.add("Add")
         notifyDataSetChanged()
     }
 }

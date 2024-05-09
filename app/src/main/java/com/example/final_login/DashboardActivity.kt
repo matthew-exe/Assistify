@@ -131,10 +131,11 @@ class DashboardActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        if(adapter.data.filter{ it.name == "Steps" }.size > 0){
 
-        user.readStepsFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
-        user.readHeartRateFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
-        user.readCaloriesFromDatabase(adapter)
+        }
+
+        user.populateDashboard(adapter)
 
         editTextText = findViewById(R.id.editTextText)
         editTextText.addTextChangedListener(object : TextWatcher {
@@ -249,6 +250,7 @@ class DashboardActivity : AppCompatActivity() {
 
         dialog.show()
     }
+
 
     private fun updateNotificationCount() {
         notificationCount = notifications.size
