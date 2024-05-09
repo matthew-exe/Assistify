@@ -676,8 +676,12 @@ class User{
                         emptyUser.bloodType = security.dec(detailsSnapshot.child("nhsNumber").value.toString())
                     }
                    if(detailsSnapshot.hasChild("medicalConditions")){
-                       val medConditions = detailsSnapshot.child("medicalConditions").children
-                       emptyUser.medConditions = medConditions.map{security.dec(it.value.toString())}
+                       val medConditions = detailsSnapshot.child("medicalConditions")
+                       val returnList = mutableListOf<String>()
+                       for(child in medConditions.children){
+                           returnList.add(security.dec(child.value.toString()))
+                       }
+                       emptyUser.medConditions = returnList
                    }
                 }
                 (context as ProfileActivity).linkUserProfile(emptyUser, displaySnackbar)
