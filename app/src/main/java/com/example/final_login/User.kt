@@ -2,7 +2,6 @@ package com.example.final_login
 import android.content.Context
 import android.widget.ExpandableListView
 import android.widget.Toast
-import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -81,11 +80,30 @@ class User{
 
     }
 
-    fun checkUserExists(email: String, callback: (Boolean) -> Unit) {
+    fun checkUserExistsEmail(email: String, callback: (Boolean) -> Unit) {
         databaseReference.orderByChild("email").equalTo(security.enc(email)).addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val exists = dataSnapshot.exists() && dataSnapshot.hasChildren()
                 callback(exists)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                println("Firebase Error getting data: $databaseError")
+                callback(false)
+            }
+        })
+    }
+
+    fun checkUserExistsUID(callback: (Boolean) -> Unit) {
+        databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.hasChild(security.enc(firebaseAuth.currentUser!!.uid))){
+                    callback(true)
+                    println("USER EXISTS: ${dataSnapshot.exists()}")
+                } else {
+                    callback(false)
+                    println("Child with value 'x' does not exist in the 'users' node.")
+                }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -102,7 +120,7 @@ class User{
 
     fun sendResetPasswordEmail(context: Context, emailAddress:String){
         val firebaseAuth = FirebaseAuth.getInstance()
-        checkUserExists(emailAddress) { userExists ->
+        checkUserExistsEmail(emailAddress) { userExists ->
             if(userExists){
                 firebaseAuth.sendPasswordResetEmail(emailAddress)
                     .addOnCompleteListener { task ->

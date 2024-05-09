@@ -5,12 +5,12 @@ import java.sql.Time
 data class ProfileData (
     var name: String,
     val profilePicture: Int,
-    val dateOfBirth: String,
-    val age: Int,
-    val bloodType: String,
+    var dateOfBirth: String,
+    var age: String,
+    var bloodType: String,
     val nhsNumber: String,
 
-    val medConditions: List<String>,
+    var medConditions: List<String>,
 
     val emergencyContact: String,
     val emergencyRelation: String,
