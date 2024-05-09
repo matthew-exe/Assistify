@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.Button
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -251,7 +252,7 @@ class LoginActivity : AppCompatActivity() {
             themeAccessibleActive = false
             btnThemeSwitch.setChecked(false)
         } else {
-            wholePage.setBackgroundColor(R.drawable.background_gradient)
+            wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
             themeAccessibleActive = true
             btnThemeSwitch.setChecked(true)
@@ -266,6 +267,10 @@ class LoginActivity : AppCompatActivity() {
 
         val dialogBuilder = AlertDialog.Builder(this)
             .setView(dialogView)
+
+        if (themeAccessibleActive) {
+            dialogView.findViewById<RelativeLayout>(R.id.forgotPasswordLayout).setBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
+        }
 
         val alertDialog = dialogBuilder.create()
 

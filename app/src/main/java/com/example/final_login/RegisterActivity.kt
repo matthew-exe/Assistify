@@ -175,9 +175,15 @@ class RegisterActivity : AppCompatActivity() {
         val btnAcceptTerms = dialogView.findViewById<Button>(R.id.btnAcceptTerms)
         val btnDeclineTerms = dialogView.findViewById<Button>(R.id.btnDeclineTerms)
 
-        val dialogBuilder = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setTitle("Terms and Conditions")
+        val dialogBuilder = if (!themeAccessibleActive) {
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setTitle("Terms and Conditions")
+        } else {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+                .setView(dialogView)
+                .setTitle("Terms and Conditions")
+        }
 
         val alertDialog = dialogBuilder.show()
 
@@ -209,7 +215,7 @@ class RegisterActivity : AppCompatActivity() {
             themeAccessibleActive = false
             btnThemeSwitch.setChecked(false)
         } else {
-            wholePage.setBackgroundColor(R.drawable.background_gradient)
+            wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
             themeAccessibleActive = true
             btnThemeSwitch.setChecked(true)

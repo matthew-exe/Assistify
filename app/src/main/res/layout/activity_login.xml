@@ -163,7 +163,7 @@
                 android:background="@drawable/google_button"
                 android:drawableLeft="@drawable/google"
                 android:text="@string/google_signin"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textSize="14sp"
                 android:layout_marginTop="7dp"
                 android:layout_marginBottom="7dp"
