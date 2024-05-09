@@ -17,6 +17,7 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -176,31 +177,35 @@ class LoginActivity : AppCompatActivity() {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)
-                user.checkUserExists(account.email!!) { userExists ->
-                    if(userExists){
-                        println("User Exists")
-                        firebaseAuthWithGoogle(account.idToken!!)
-                    }
-                    else {
-                        val name = user.splitName(account.displayName!!)
-                        user.dbCreateUser(account.email!!, name.first, name.second)
-                        firebaseAuthWithGoogle(account.idToken!!)
-                    }
-                }
+                firebaseAuthWithGoogle(account.idToken!!, account)
             } catch (e: ApiException) {
                 println(e)
             }
         }
     }
-    private fun firebaseAuthWithGoogle(idToken: String) {
+    private fun firebaseAuthWithGoogle(idToken: String,account:GoogleSignInAccount) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val intent = Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
+                    user.checkUserExistsUID {
+                        println("User Exists: $it")
+                        if(!it){
+                            val name = user.splitName(account.displayName!!)
+                            user.dbCreateUser(account.email!!, name.first, name.second)
+                            val intent = Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            val intent = Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
+                        }
+
+                    }
+
                 } else {
                     Toast.makeText(this@LoginActivity, "Authentication Failed.", Toast.LENGTH_SHORT).show()
                 }
