@@ -354,23 +354,6 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showSendNewNotificationDialog() {
-        val editText = EditText(this)
-        AlertDialog.Builder(this)
-            .setTitle("Enter a notification to send!")
-            .setView(editText)
-            .setPositiveButton("Save") { _, _ ->
-                val newValue = editText.text.toString()
-                if (newValue.isNotBlank()) {
-                    // Save the new value to the database
-                    user.addUserNotification(newValue)
-                } else {
-                    Snackbar.make(rootView, "Invalid input", Snackbar.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
 
     // Custom ExpandableListAdapter implementation
     private inner class MyExpandableListAdapter(
@@ -474,7 +457,6 @@ class SettingsActivity : AppCompatActivity() {
                     )
                     "Change Password" -> showResetPasswordDialog()
                     "Generate Monitor Key" -> showGenerateMonitorKeyDialog()
-                    "Send user notification" -> showSendNewNotificationDialog()
                 }
             }
 

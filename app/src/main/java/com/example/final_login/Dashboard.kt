@@ -108,14 +108,13 @@ class Dashboard : AppCompatActivity() {
         btnCallUser = findViewById(R.id.btnCallUser)
 
         btnCallUser.setOnClickListener {
-            user.addUserNotification("You have been called by a user")
-//            phoneNumberToDial = "07450272351" // Should be connected users number in production
-//            if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-//                ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
-//            } else {
-//                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
-//                startActivity(intent)
-//            }
+            phoneNumberToDial = "07450272351" // Should be connected users number in production
+            if (ContextCompat.checkSelfPermission(this@Dashboard, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this@Dashboard, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
+            } else {
+                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
+                startActivity(intent)
+            }
         }
 
         bottomNavigationView = findViewById(R.id.bottom_navigation)
@@ -181,13 +180,15 @@ class Dashboard : AppCompatActivity() {
         dialog.setContentView(R.layout.notification_dialog)
 
         val lvNotifications = dialog.findViewById<ListView>(R.id.lvNotifications)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, notifications.map { it.second })
+        val currentNotifications = notifications.map { it.second }.toMutableList()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, currentNotifications)
         lvNotifications.adapter = adapter
 
         lvNotifications.setOnItemClickListener { _, _, position, _ ->
             val notificationToDeleteId = notifications[position].first
             user.deleteUserNotification(notificationToDeleteId) { success ->
                 if (success) {
+                    currentNotifications.removeAt(position)
                     adapter.notifyDataSetChanged()
                 }
             }
