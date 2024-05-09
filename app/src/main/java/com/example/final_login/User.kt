@@ -494,7 +494,7 @@ class User{
         guardianRef.updateChildren(updateMap)
     }
 
-    fun removeChild(){
+    fun removeChildForGuardian(){
         val guardianRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
         guardianRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -663,20 +663,20 @@ class User{
                 if(dataSnapshot.hasChild("personalDetails")){
                     val detailsSnapshot = dataSnapshot.child("personalDetails")
                     if(detailsSnapshot.hasChild("age")){
-                        emptyUser.age = detailsSnapshot.child("age").value.toString()
+                        emptyUser.age = security.dec(dataSnapshot.child("age").value.toString())
                     }
                     if(detailsSnapshot.hasChild("dateOfBirth")){
-                        emptyUser.dateOfBirth = detailsSnapshot.child("dateOfBirth").value.toString()
+                        emptyUser.dateOfBirth = security.dec(detailsSnapshot.child("dateOfBirth").value.toString())
                     }
                     if(detailsSnapshot.hasChild("bloodType")){
-                        emptyUser.bloodType = detailsSnapshot.child("bloodType").value.toString()
+                        emptyUser.bloodType = security.dec(detailsSnapshot.child("bloodType").value.toString())
                     }
                     if(detailsSnapshot.hasChild("nhsNumber")){
-                        emptyUser.bloodType = detailsSnapshot.child("nhsNumber").value.toString()
+                        emptyUser.bloodType = security.dec(detailsSnapshot.child("nhsNumber").value.toString())
                     }
                    if(detailsSnapshot.hasChild("medicalConditions")){
                        val medConditions = detailsSnapshot.child("medicalConditions").children
-                       emptyUser.medConditions = medConditions.map{it.value.toString()}
+                       emptyUser.medConditions = medConditions.map{security.dec(it.value.toString())}
                    }
                 }
                 (context as ProfileActivity).linkUserProfile(emptyUser, displaySnackbar)

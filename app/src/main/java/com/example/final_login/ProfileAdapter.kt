@@ -110,7 +110,7 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         layout.findViewById<TextView>(R.id.emergency_number_text).text = emergencyNumber
 
         layout.findViewById<Button>(R.id.unlink_button)?.setOnClickListener {
-            user.removeChild()
+            user.removeChildForGuardian()
             removeLayout(userDetails)
         }
 
