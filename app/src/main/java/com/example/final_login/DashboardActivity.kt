@@ -25,8 +25,11 @@ import android.widget.TextView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,7 +57,7 @@ class DashboardActivity : AppCompatActivity() {
 
     private var phoneNumberToDial: String? = null
     private var notificationCount: Int = 0
-    private val notifications = mutableListOf<String>()
+    private var notifications = mutableListOf<Pair<String, String>>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -202,9 +205,11 @@ class DashboardActivity : AppCompatActivity() {
 
         tvNotificationCount = findViewById(R.id.tvNotificationCount)
 
-        // Add some dummy notifications
-        notifications.addAll(listOf("Notification 1", "Notification 2", "Notification 3"))
-        updateNotificationCount()
+        user.getUserNotifications { retrievedNotifications ->
+            notifications = retrievedNotifications.toMutableList()
+            updateNotificationCount()
+            setupNotificationsListener()
+        }
 
         btnNotifications = findViewById(R.id.btnNotifications)
         btnNotifications.setOnClickListener {
@@ -233,18 +238,22 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun showNotificationsDialog() {
-        // TODO Set up real notifications and remove the dummy ones
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.notification_dialog)
 
         val lvNotifications = dialog.findViewById<ListView>(R.id.lvNotifications)
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, notifications)
+        val currentNotifications = notifications.map { it.second }.toMutableList()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, currentNotifications)
         lvNotifications.adapter = adapter
 
-        lvNotifications.setOnItemLongClickListener { _, _, position, _ ->
-            notifications.removeAt(position)
-            adapter.notifyDataSetChanged()
-            updateNotificationCount()
+        lvNotifications.setOnItemClickListener { _, _, position, _ ->
+            val notificationToDeleteId = notifications[position].first
+            user.deleteUserNotification(notificationToDeleteId) { success ->
+                if (success) {
+                    currentNotifications.removeAt(position)
+                    adapter.notifyDataSetChanged()
+                }
+            }
             true
         }
 
@@ -261,6 +270,25 @@ class DashboardActivity : AppCompatActivity() {
         } else {
             tvNotificationCount.visibility = View.VISIBLE
         }
+    }
+
+    private fun setupNotificationsListener() {
+        val userRef = databaseReference.child(security.enc(currentUser.uid!!))
+        val notificationsRef = userRef.child("notifications")
+
+        // Add a listener to listen for changes in notifications
+        notificationsRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                user.getUserNotifications { retrievedNotifications ->
+                    notifications = retrievedNotifications.toMutableList()
+                    updateNotificationCount()
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                println("Error getting notifications: ${databaseError.message}")
+            }
+        })
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
