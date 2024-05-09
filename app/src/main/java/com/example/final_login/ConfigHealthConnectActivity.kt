@@ -12,9 +12,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
-import androidx.health.connect.client.records.BasalMetabolicRateRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.RespiratoryRateRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,7 +32,9 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
             HealthPermission.getReadPermission(HeartRateRecord::class),
             HealthPermission.getReadPermission(StepsRecord::class),
             HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
-            HealthPermission.getReadPermission(BasalMetabolicRateRecord::class)
+            HealthPermission.getReadPermission(RespiratoryRateRecord::class),
+            HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
+            HealthPermission.getReadPermission(SleepSessionRecord::class)
         )
 
     private val requestPermissionActivityContract = PermissionController.createRequestPermissionResultContract()

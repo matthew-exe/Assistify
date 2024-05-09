@@ -3,7 +3,7 @@ object SensorRepository {
     val sensorName = mapOf(
         SensorID.PULSE to "Pulse",
         SensorID.STEPS to "Steps",
-        SensorID.CALORIES to "Calories Burnt"
+        SensorID.CALORIES to "Calories"
     )
 
     val structures = mapOf(

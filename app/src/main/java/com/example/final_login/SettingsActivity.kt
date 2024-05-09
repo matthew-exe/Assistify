@@ -1,5 +1,7 @@
 package com.example.final_login
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -344,13 +346,27 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun showCopySnackBar(secureKey:String){
+        val snackbar = Snackbar.make(rootView, secureKey, Snackbar.LENGTH_INDEFINITE)
+        val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+        snackbar.setAction("Copy") {
+            val clip = ClipData.newPlainText("secureKey", secureKey)
+            clipboardManager.setPrimaryClip(clip)
+            Snackbar.make(rootView, "Keep Your Key Safe!", Snackbar.LENGTH_SHORT).show()
+        }
+
+        snackbar.show()
+    }
+
     private fun showGenerateMonitorKeyDialog() {
         AlertDialog.Builder(this)
             .setTitle("Generate Monitor Key")
             .setMessage("Do you want to generate a new monitor key?")
             .setPositiveButton("Yes") { _, _ ->
                 // TODO Implement monitor key generation
-                Snackbar.make(rootView, "Pretend a key was generated!", Snackbar.LENGTH_SHORT).show()
+                showCopySnackBar(user.generateSecureLinkKey())
+                user.setToAccessPermitted()
             }
             .setNegativeButton("No", null)
             .show()
@@ -536,6 +552,7 @@ class SettingsActivity : AppCompatActivity() {
 
             return itemView
         }
+
 
         override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean = true
     }

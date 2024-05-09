@@ -1,32 +1,42 @@
 package com.example.final_login
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
 
 class ProfileActivity: AppCompatActivity() {
     private val user = User()
     private var phoneNumberToDial: String? = null
 
     private lateinit var bottomNavigationView: BottomNavigationView
+    lateinit var adapter: ProfileAdapter
+    private lateinit var viewPager: ViewPager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_profile)
+
+        viewPager = findViewById(R.id.viewPager)
+        adapter = ProfileAdapter(this)
+
+        viewPager.adapter = adapter
+
+        val dotsIndicator = findViewById<WormDotsIndicator>(R.id.worm_dots_indicator)
+        dotsIndicator.attachTo(viewPager)
 
         if (!user.isUserLoggedIn()) {
             val intent = Intent(this, LoginActivity::class.java)
@@ -57,83 +67,27 @@ class ProfileActivity: AppCompatActivity() {
                 else -> false
             }
         }
+    }
 
-        findViewById<Button>(R.id.linkButton).setOnClickListener {
-            // TODO("This is where data about the client is retrieved")
-            // Check ProfileData to see the format of data
-            val userList = arrayOf(
-                ProfileData("Yvonne", R.drawable.yvonne, "1951-11-30", 73, "A+",
-                    "4857773456", listOf("Hip replacement", "Arthritis"), "Teresa",
-                    "Daughter", "07777123456"),
+    fun linkUserProfile(userData: ProfileData) {
+        adapter.addLinkedProfileLayout(userData)
+        viewPager.adapter?.notifyDataSetChanged()
+        Snackbar.make(viewPager, "Successfully linked with ${userData.name}", Snackbar.LENGTH_SHORT).show()
+    }
+
+    fun unlinkSnackBar(userDetails: ProfileData) {
+        Snackbar.make(viewPager, "Unlinked from ${userDetails.name}", Snackbar.LENGTH_SHORT).show()
+    }
+
+    fun callClient() {
+        phoneNumberToDial = "07450272351" // Should be connected users number in production
+        if (ContextCompat.checkSelfPermission(this@ProfileActivity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this@ProfileActivity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE
             )
-            updateUserProfile(userList[0])
+        } else {
+            val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
+            startActivity(intent)
         }
-
-        findViewById<Button>(R.id.unlink_button).setOnClickListener {
-            unlinkUserProfile()
-        }
-
-        findViewById<Button>(R.id.call_button).setOnClickListener {
-            val phoneNumberToDial = "07450272352"
-
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
-            } else {
-                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
-                startActivity(intent)
-            }
-        }
-    }
-
-    private fun updateUserProfile(userDetails: ProfileData) {
-        findViewById<Button>(R.id.linkButton).visibility = View.GONE
-        findViewById<TextView>(R.id.pre_link_text_1).visibility = View.GONE
-        findViewById<TextView>(R.id.pre_link_text_2).visibility = View.GONE
-
-        findViewById<Button>(R.id.unlink_button).visibility = View.VISIBLE
-        findViewById<Button>(R.id.call_button).visibility = View.VISIBLE
-
-        val linearLayout = findViewById<LinearLayout>(R.id.linearLayout)
-        linearLayout.setBackgroundResource(R.drawable.border)
-
-        Toast.makeText(this, "Successfully linked with ${userDetails.name}", Toast.LENGTH_SHORT).show()
-
-        val dob = "Date of birth: ${userDetails.dateOfBirth}"
-        val age = "Age: ${userDetails.age}"
-        val bloodType = "Blood type: ${userDetails.bloodType}"
-        val nhsNumber = "NHS number: ${userDetails.nhsNumber}"
-        var medicalConditions = "Medical conditions: "
-        if (userDetails.medConditions.isNotEmpty()) {
-            for (medCon in userDetails.medConditions) {
-                medicalConditions += "\n \u2022 $medCon"
-            }
-        }
-        val details = "Details:"
-        val contactInfo = "Contact Information:"
-        val emergencyContact = "Emergency contact: ${userDetails.emergencyContact}"
-        val emergencyRelation = "Relation to client: ${userDetails.emergencyRelation}"
-        val emergencyNumber = "Emergency contact number: ${userDetails.emergencyNumber}"
-
-        // Update the UI with the user's details
-        findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.profile_picture).setImageResource(userDetails.profilePicture)
-        findViewById<TextView>(R.id.name_text).text = userDetails.name
-        findViewById<TextView>(R.id.dob_text).text = dob
-        findViewById<TextView>(R.id.age_text).text = age
-        findViewById<TextView>(R.id.blood_type_text).text = bloodType
-        findViewById<TextView>(R.id.nhs_number_text).text = nhsNumber
-        findViewById<TextView>(R.id.medical_conditions_text).text = medicalConditions
-        findViewById<TextView>(R.id.details_text).text = details
-        findViewById<TextView>(R.id.info_text).text = contactInfo
-        findViewById<TextView>(R.id.emergency_contact_text).text = emergencyContact
-        findViewById<TextView>(R.id.emergency_relation_text).text = emergencyRelation
-        findViewById<TextView>(R.id.emergency_number_text).text = emergencyNumber
-    }
-
-    private fun unlinkUserProfile() {
-        finish()
-        startActivity(intent)
-
-        Toast.makeText(this, "Successfully unlinked from client", Toast.LENGTH_SHORT).show()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -153,6 +107,25 @@ class ProfileActivity: AppCompatActivity() {
                 // Ignore all other requests
             }
         }
+    }
+
+    fun showKeyEnterDialog() {
+        val editText = EditText(this)
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Enter Key:")
+            .setView(editText)
+            .setPositiveButton("OK") { _, _ ->
+                val enteredKey = editText.text.toString()
+                user.checkAccessIsPermittedBeforeLink(viewPager, enteredKey)
+//                linkUserProfile(enteredKey)
+                println("Entered string: $enteredKey")
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.show()
     }
 
     companion object {

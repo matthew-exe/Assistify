@@ -1,7 +1,6 @@
 package com.example.final_login
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
@@ -21,11 +20,11 @@ class BackgroundWorker : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        runShecdule()
+        runSchedule()
         return START_STICKY
     }
 
-    private fun runShecdule() {
+    private fun runSchedule() {
         val context = this
         timer.schedule(object : TimerTask() {
             override fun run() {
@@ -34,7 +33,7 @@ class BackgroundWorker : Service() {
                     scope1.launch {
                         try {
                             val healthConnectManager = HealthConnectManager(context)
-                            healthConnectManager.readHeartRate()
+                            healthConnectManager.readCurrentHeartRateHC()
                             println("Health Connect Ran And Retrieved The Current Heart Rate")
                         } catch (e: Exception) {
                             println("Health Connect Failed To Retrieve The Current Heart Rate")
@@ -45,7 +44,7 @@ class BackgroundWorker : Service() {
                     scope2.launch {
                         try {
                             val healthConnectManager = HealthConnectManager(context)
-                            healthConnectManager.aggregateHeartRate()
+                            healthConnectManager.readAggregateHeartRateHC()
                             println("Health Connect Ran And Retrieved The Aggregate Heart Rate")
                         } catch (e: Exception) {
                             println("Health Connect Failed to Retrieve The Aggregate Heart Rate")
@@ -56,7 +55,7 @@ class BackgroundWorker : Service() {
                     scope3.launch {
                         try {
                             val healthConnectManager = HealthConnectManager(context)
-                            healthConnectManager.readStepsLast24()
+                            healthConnectManager.readStepsLast24HC()
                             println("Health Connect Ran And Retrieved The Step Count")
                         } catch (e: Exception) {
                             println("Health Connect Failed To Retrieve Step Count")
@@ -64,7 +63,7 @@ class BackgroundWorker : Service() {
                         }
                     }
                 }
-                runShecdule()
+                runSchedule()
             }
         }, delay)
     }

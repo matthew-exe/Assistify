@@ -3,10 +3,11 @@ package com.example.final_login
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.HealthConnectClient.Companion.SDK_AVAILABLE
-import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
-import androidx.health.connect.client.records.BasalMetabolicRateRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.RespiratoryRateRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import java.time.Instant
@@ -15,6 +16,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import kotlin.time.toKotlinDuration
 
 class HealthConnectManager(private val context: Context) {
 
@@ -39,7 +41,7 @@ class HealthConnectManager(private val context: Context) {
     }
 
 
-    suspend fun readStepsLast24(){
+    suspend fun readStepsLast24HC(){
         try {
             val timePeriod = returnTimeLast24()
             val response = healthConnectClient.readRecords(
@@ -58,7 +60,7 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
-    suspend fun aggregateHeartRate() {
+    suspend fun readAggregateHeartRateHC() {
         try {
             val timePeriod = returnTimeLast24()
             val response =
@@ -71,9 +73,6 @@ class HealthConnectManager(private val context: Context) {
             val minimumHeartRate = response[HeartRateRecord.BPM_MIN]
             val maximumHeartRate = response[HeartRateRecord.BPM_MAX]
             val avgHeartRate = response[HeartRateRecord.BPM_AVG]
-            println("MIN $minimumHeartRate")
-            println("MAX $maximumHeartRate")
-            println("AVG $avgHeartRate")
             if (minimumHeartRate != null && maximumHeartRate != null && avgHeartRate != null) {
                 user.sendHeartRateAggregateToDatabase(minimumHeartRate, maximumHeartRate, avgHeartRate)
             }
@@ -82,43 +81,7 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
-    suspend fun readCaloriesLast24(){
-        try {
-            val timePeriod = returnTimeLast24()
-            val response = healthConnectClient.readRecords(
-                androidx.health.connect.client.request.ReadRecordsRequest(
-                    ActiveCaloriesBurnedRecord::class,
-                    timeRangeFilter = TimeRangeFilter.between(timePeriod.first, timePeriod.second)
-                )
-            )
-            println(response.records.size)
-            for (calorie in response.records) {
-                println(calorie.energy)
-            }
-        } catch (e: Exception) {
-            println(e)
-        }
-    }
-
-    suspend fun readBSM(){
-        try {
-            val timePeriod = returnTimeLast24()
-            val response = healthConnectClient.readRecords(
-                androidx.health.connect.client.request.ReadRecordsRequest(
-                    BasalMetabolicRateRecord::class,
-                    timeRangeFilter = TimeRangeFilter.between(timePeriod.first, timePeriod.second)
-                )
-            )
-            println(response.records.size)
-            for (calorie in response.records) {
-                println(calorie.basalMetabolicRate)
-            }
-        } catch (e: Exception) {
-            println(e)
-        }
-    }
-
-    suspend fun readHeartRate(){
+    suspend fun readCurrentHeartRateHC(){
         try {
             val timePeriod = returnTimeLast24()
             val response = healthConnectClient.readRecords(
@@ -136,6 +99,7 @@ class HealthConnectManager(private val context: Context) {
             println(e)
         }
     }
+
     private fun returnTimeLast24():Pair<Instant, Instant>{
         val currentDate = LocalDate.now()
         val startDateTime = LocalDateTime.of(currentDate, LocalTime.MIDNIGHT.plusMinutes(1))
@@ -143,6 +107,78 @@ class HealthConnectManager(private val context: Context) {
         val startTime: Instant = startDateTime.atZone(ZoneOffset.UTC).toInstant()
         val endTime: Instant = endDateTime.atZone(ZoneOffset.UTC).toInstant()
         return Pair(startTime, endTime)
+    }
+
+    private fun returnSleepTimes(): Pair<Instant, Instant> {
+        val currentDate = LocalDate.now()
+        val previousDate = currentDate.minusDays(1)
+        val startDateTime = LocalDateTime.of(previousDate, LocalTime.of(19, 0))
+        val startTime: Instant = startDateTime.atZone(ZoneOffset.UTC).toInstant()
+        val endDateTime = LocalDateTime.of(currentDate, LocalTime.NOON)
+        val endTime: Instant = endDateTime.atZone(ZoneOffset.UTC).toInstant()
+        return Pair(startTime, endTime)
+    }
+
+    suspend fun readRespitoryRate(){
+        try {
+            val timePeriod = returnTimeLast24()
+            val response = healthConnectClient.readRecords(
+                androidx.health.connect.client.request.ReadRecordsRequest(
+                    RespiratoryRateRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(timePeriod.first, timePeriod.second)
+                )
+            )
+            println("RES SIZE: ${response.records.size}")
+            for (record in response.records) {
+                println("RES RATE: ${record.rate}")
+            }
+        } catch (e: Exception) {
+            println(e)
+        }
+    }
+
+    suspend fun readCaloriesLast24(){
+        try {
+            val timePeriod = returnTimeLast24()
+            val response =
+                healthConnectClient.aggregate(
+                    AggregateRequest(
+                        setOf(TotalCaloriesBurnedRecord.ENERGY_TOTAL),
+                        timeRangeFilter = TimeRangeFilter.between(timePeriod.first, timePeriod.second)
+                    )
+                )
+            val energyTotal = response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]
+            if (energyTotal != null){
+                user.sendCaloriesToDatabase(energyTotal.inKilocalories.toString())
+            } else {
+                println("NOOOOOOOOOOOOOO")
+            }
+        } catch (e: Exception) {
+            // Run error handling here
+        }
+    }
+
+    suspend fun readSleepLastNight(){
+        try {
+            val timePeriod = returnSleepTimes()
+            val response =
+                healthConnectClient.aggregate(
+                    AggregateRequest(
+                        setOf(SleepSessionRecord.SLEEP_DURATION_TOTAL),
+                        timeRangeFilter = TimeRangeFilter.between(timePeriod.first, timePeriod.second)
+                    )
+                )
+            val sleepRecordTotal = response[SleepSessionRecord.SLEEP_DURATION_TOTAL]
+            if (sleepRecordTotal != null){
+                println("SLEEP OKAY")
+                println(sleepRecordTotal.toKotlinDuration())
+//                println(sleepRecordTotal.toKotlinDuration().toComponents { hours, minutes, seconds, nanoseconds ->  })
+            } else {
+                println("NOOOOOOOOOOOOOO Sleeep")
+            }
+        } catch (e: Exception) {
+            // Run error handling here
+        }
     }
 
 }

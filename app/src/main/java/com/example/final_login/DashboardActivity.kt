@@ -22,7 +22,6 @@ import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.TextView
-import androidx.health.connect.client.HealthConnectClient
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -31,12 +30,6 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneOffset
-import java.time.temporal.ChronoUnit
 
 
 class DashboardActivity : AppCompatActivity() {
@@ -85,7 +78,7 @@ class DashboardActivity : AppCompatActivity() {
         val scope1 = CoroutineScope(Dispatchers.Main)
         scope1.launch {
             try {
-                healthConnectManager.readStepsLast24()
+                healthConnectManager.readStepsLast24HC()
             } catch (e: Exception) {
                 println(e)
             }
@@ -94,7 +87,7 @@ class DashboardActivity : AppCompatActivity() {
         val scope2 = CoroutineScope(Dispatchers.Main)
         scope2.launch {
             try {
-                healthConnectManager.readHeartRate()
+                healthConnectManager.readCurrentHeartRateHC()
             } catch (e: Exception) {
                 println(e)
             }
@@ -103,16 +96,34 @@ class DashboardActivity : AppCompatActivity() {
         val scope3 = CoroutineScope(Dispatchers.Main)
         scope3.launch {
             try {
-                healthConnectManager.aggregateHeartRate()
+                healthConnectManager.readAggregateHeartRateHC()
             } catch (e: Exception) {
                 println(e)
             }
         }
 
+        val scope4 = CoroutineScope(Dispatchers.Main)
+        scope4.launch {
+            try {
+                healthConnectManager.readCaloriesLast24()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
+        val scope5 = CoroutineScope(Dispatchers.Main)
+        scope5.launch {
+            try {
+                healthConnectManager.readSleepLastNight()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
+
         //TODO("Uncomment to run background service")
 //        val serviceIntent = Intent(this, BackgroundWorker::class.java)
 //        startService(serviceIntent)
-
 
         val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
         adapter = MyAdapter(this, ::generateDummySensorData)
@@ -123,6 +134,7 @@ class DashboardActivity : AppCompatActivity() {
 
         user.readStepsFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
         user.readHeartRateFromDatabase(security.enc(firebaseAuth.currentUser!!.uid), adapter)
+        user.readCaloriesFromDatabase(adapter)
 
         editTextText = findViewById(R.id.editTextText)
         editTextText.addTextChangedListener(object : TextWatcher {

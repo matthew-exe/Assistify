@@ -92,5 +92,6 @@
     ]]>
     </string>
     <string name="default_web_client_id">"69959552127-6rugs773fjdua9bdtclle5hhgqknbmbl.apps.googleusercontent.com"</string>
+    <string name="health_connect_intro">Assistify integrates seamlessly with Health Connect, harnessing its wealth of health-related data to empower users in their wellness journey. Through this integration, users can effortlessly access vital information about their health metrics, such as heart rate, steps taken, and sleep patterns, all consolidated within our intuitive interface. Leveraging this data, our app offers personalized insights and recommendations tailored to each individual\'s unique health profile, fostering informed decision-making and facilitating progress towards their wellness goals. Whether it\'s monitoring fitness progress, managing chronic conditions, or simply striving for a healthier lifestyle, our app provides a holistic solution by harnessing the power of Health Connect\'s comprehensive data ecosystem.</string>
 
 </resources>
