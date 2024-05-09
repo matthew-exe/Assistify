@@ -663,7 +663,8 @@ class User{
                 if(dataSnapshot.hasChild("personalDetails")){
                     val detailsSnapshot = dataSnapshot.child("personalDetails")
                     if(detailsSnapshot.hasChild("age")){
-                        emptyUser.age = security.dec(dataSnapshot.child("age").value.toString())
+//                        emptyUser.age = dataSnapshot.child("age").value.toString()
+                        emptyUser.age = security.dec(detailsSnapshot.child("age").value.toString())
                     }
                     if(detailsSnapshot.hasChild("dateOfBirth")){
                         emptyUser.dateOfBirth = security.dec(detailsSnapshot.child("dateOfBirth").value.toString())
