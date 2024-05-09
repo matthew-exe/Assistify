@@ -94,7 +94,7 @@ class MyAdapter(
     }
 
     private fun addItem(sensorData: SensorData) {
-        user.populateDashboard(this)
+        user.populateDashboard(this, user.getUserIdToLoad())
         data.add(sensorData)
         user.sendDashboardToDatabase(data)
         filterData(editTextText.text.toString())

@@ -138,7 +138,7 @@ class DashboardActivity : AppCompatActivity() {
 
         }
 
-        user.populateDashboard(adapter)
+        user.populateDashboard(adapter, user.getUserIdToLoad())
 
         editTextText = findViewById(R.id.editTextText)
         editTextText.addTextChangedListener(object : TextWatcher {
