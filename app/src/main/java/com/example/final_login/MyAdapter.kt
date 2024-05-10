@@ -125,11 +125,11 @@ class MyAdapter(
             context,
             android.R.layout.simple_list_item_1,
             sensorItems.map { it.name },
-            sensorItems.filter{it in filteredData }.map{ it.name } // Passes in a list of currently selected sensors on the dashboard so that no dashboard can have or store two of the same sensors
+            returnSelectedNames()
         )
 
         if(sensorItems.filter{it in filteredData }.map{ it.name } == sensorItems.map{it.name}){
-//            TODO("Show text instead of sensor options, saying something like 'MORE COMING SOON....'")
+
         }
 
         builder.setAdapter(adapter) { _, which ->
@@ -186,5 +186,15 @@ class MyAdapter(
             filteredData.add("Add")
         }
         notifyDataSetChanged()
+    }
+
+    private fun returnSelectedNames(): MutableList<String> {
+        var returnList = mutableListOf<String>()
+        for(data in filteredData){
+            if(data is SensorData){
+                returnList.add(data.name)
+            }
+        }
+        return returnList
     }
 }
