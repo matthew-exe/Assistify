@@ -81,7 +81,7 @@ class MyAdapter(
                 val sensor = filteredData[position] as SensorData
                 holder.name.text = sensor.name
                 holder.image.setImageResource(sensor.image)
-                holder.stat.text = if (sensor.stat != "0") sensor.stat else ""
+                holder.stat.text = if (sensor.stat != "0") sensor.stat else "Syncing..."
 
                 if (sensor.name == "Pulse") {
                     val heartAnimation = AnimationUtils.loadAnimation(context, R.anim.anim_pulse)
@@ -125,12 +125,8 @@ class MyAdapter(
             context,
             android.R.layout.simple_list_item_1,
             sensorItems.map { it.name },
-            returnSelectedNames()
+            filteredData.filterIsInstance<SensorData>().map{it.name}
         )
-
-        if(sensorItems.filter{it in filteredData }.map{ it.name } == sensorItems.map{it.name}){
-
-        }
 
         builder.setAdapter(adapter) { _, which ->
             addItem(sensorItems[which])
@@ -188,13 +184,4 @@ class MyAdapter(
         notifyDataSetChanged()
     }
 
-    private fun returnSelectedNames(): MutableList<String> {
-        var returnList = mutableListOf<String>()
-        for(data in filteredData){
-            if(data is SensorData){
-                returnList.add(data.name)
-            }
-        }
-        return returnList
-    }
 }

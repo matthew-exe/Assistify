@@ -29,6 +29,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class LoginActivity : AppCompatActivity() {
@@ -56,6 +59,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var wholePage:ConstraintLayout
     private lateinit var cardPage: CardView
 
+    private var hasPermissions = false
     private val rCSignIn = 9001
 
 
@@ -152,6 +156,22 @@ class LoginActivity : AppCompatActivity() {
             showForgotPasswordDialog()
         }
 
+        val healthConnectManager = HealthConnectManager(this)
+
+        if(healthConnectManager.availability == HealthConnectAvailability.INSTALLED){
+            val scope = CoroutineScope(Dispatchers.Main)
+            scope.launch {
+                try {
+                    if(healthConnectManager.hasAllPermissions(healthConnectManager.PERMISSIONS)){
+                        hasPermissions = true
+                    } else {
+                        hasPermissions = false
+                    }
+                } catch (e: Exception) {
+                    println(e)
+                }
+            }
+        }
     }
 
     // Email & Password Login
@@ -160,7 +180,7 @@ class LoginActivity : AppCompatActivity() {
             if (task.isSuccessful) {
                 checkIfEmailUpdated()
                 Toast.makeText(this@LoginActivity,"You are Logged In.",Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
+                val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
@@ -193,13 +213,13 @@ class LoginActivity : AppCompatActivity() {
                         println("User Exists: $it")
                         if(!it){
                             val name = user.splitName(account.displayName!!)
-                            user.dbCreateUser(account.email!!, name.first, name.second)
-                            val intent = Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
+                            user.dbCreateUser(account.email!!, name.first, name.second, "")
+                            val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)
                             finish()
                         } else {
-                            val intent = Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
+                            val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)
                             finish()

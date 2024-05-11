@@ -14,6 +14,12 @@ class FormController {
         return email.text.toString().isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email.text.toString()).matches()
     }
 
+    fun isValidPhoneNumber(phone: TextInputEditText): Boolean {
+        val ukMobileNumberRegex = Regex("^\\+44\\d{10}$|^\\(\\d{5}\\)\\d{6}$|^0\\d{10}$|^\\(0\\)\\d{10}$|^\\d{5}\\s\\d{6}$")
+        return ukMobileNumberRegex.matches(phone.text.toString())
+    }
+
+
     fun isValidPassword(password: TextInputEditText): Boolean {
         val passwordRegex = Regex("^(?=.*[A-Z])(?=.*\\d.*\\d)(?=.*[^A-Za-z0-9]).{9,}\$")
         return passwordRegex.matches(password.text.toString())
@@ -21,6 +27,16 @@ class FormController {
 
     fun passwordsMatch(password: TextInputEditText, confirmPassword: TextInputEditText): Boolean {
         return password.text.toString() == confirmPassword.text.toString()
+    }
+
+    fun checkPhoneNumber(phone:TextInputEditText): Boolean {
+        return if(isValidPhoneNumber(phone)){
+            applyGreenTick(phone)
+            true
+        } else {
+            removeTick(phone)
+            false
+        }
     }
 
     fun checkName(element:TextInputEditText): Boolean {

@@ -3,6 +3,8 @@ package com.example.final_login
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.HealthConnectClient.Companion.SDK_AVAILABLE
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
@@ -10,6 +12,9 @@ import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,6 +29,16 @@ class HealthConnectManager(private val context: Context) {
     private val user = User()
     var availability = HealthConnectAvailability.NOT_SUPPORTED
         private set
+
+    val PERMISSIONS =
+        setOf(
+            HealthPermission.getReadPermission(HeartRateRecord::class),
+            HealthPermission.getReadPermission(StepsRecord::class),
+            HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
+            HealthPermission.getReadPermission(RespiratoryRateRecord::class),
+            HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
+            HealthPermission.getReadPermission(SleepSessionRecord::class)
+        )
 
     init {
         checkAvailability()
@@ -137,7 +152,7 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
-    suspend fun readCaloriesLast24(){
+    suspend fun readCaloriesLast24HC(){
         try {
             val timePeriod = returnTimeLast24()
             val response =
@@ -151,7 +166,7 @@ class HealthConnectManager(private val context: Context) {
             if (energyTotal != null){
                 user.sendCaloriesToDatabase(energyTotal.inKilocalories.toString())
             } else {
-                println("NOOOOOOOOOOOOOO")
+                println("Calories Failed To Save")
             }
         } catch (e: Exception) {
             // Run error handling here
@@ -170,7 +185,6 @@ class HealthConnectManager(private val context: Context) {
                 )
             val sleepRecordTotal = response[SleepSessionRecord.SLEEP_DURATION_TOTAL]
             if (sleepRecordTotal != null){
-                println("SLEEP OKAY")
                 user.sendSleepToDatabase(sleepRecordTotal.toKotlinDuration().toString())
             } else {
                 println("NOOOOOOOOOOOOOO Sleeep")
@@ -180,14 +194,54 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
+    fun syncHealthConnect(){
+        val scope1 = CoroutineScope(Dispatchers.Main)
+        scope1.launch {
+            try {
+                readStepsLast24HC()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
+        val scope2 = CoroutineScope(Dispatchers.Main)
+        scope2.launch {
+            try {
+                readCurrentHeartRateHC()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
+        val scope3 = CoroutineScope(Dispatchers.Main)
+        scope3.launch {
+            try {
+                readAggregateHeartRateHC()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
+        val scope4 = CoroutineScope(Dispatchers.Main)
+        scope4.launch {
+            try {
+                readCaloriesLast24HC()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+
+        val scope5 = CoroutineScope(Dispatchers.Main)
+        scope5.launch {
+            try {
+                readSleepLastNight()
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+    }
 }
 
-/**
- * Health Connect requires that the underlying Health Connect APK is installed on the device.
- * [HealthConnectAvailability] represents whether this APK is indeed installed, whether it is not
- * installed but supported on the device, or whether the device is not supported (based on Android
- * version).
- */
 enum class HealthConnectAvailability {
     INSTALLED,
     NOT_INSTALLED,

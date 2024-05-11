@@ -9,7 +9,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.snapshots
+import com.google.firebase.database.values
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -100,12 +104,6 @@ class User{
             }
         }
     }
-
-
-
-
-
-
 
     fun populateDashboard(adapter: MyAdapter, user: String){
         readStepsFromDatabase(adapter, user)
@@ -233,12 +231,12 @@ class User{
         firebaseAuth.signOut()
     }
 
-    fun dbCreateUser(email: String, firstname: String, surname: String):Boolean{
+    fun dbCreateUser(email: String, firstname: String, surname: String, number: String):Boolean{
         var userCreated = false
         val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(""))
         databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!)).setValue(userData)
         try{
-            val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(""))
+            val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(number))
             databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid)).setValue(userData)
             userCreated = true
         } catch (e:Exception){
@@ -412,18 +410,24 @@ class User{
     fun sendHeartRateToDatabase(avgBPM: Int, mostRecent: Long, lastTaken: Instant){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
-            val stepsRef = userRef.child("health").child("heart").child("now")
+            val heartRef = userRef.child("health").child("heart").child("now")
             val hMap = HashMap<String, String>()
             hMap["avg"] = avgBPM.toString()
             hMap["mostRecent"] = mostRecent.toString()
             hMap["lastTaken"] = lastTaken.toString()
-            stepsRef.setValue(hMap)
+            heartRef.setValue(hMap)
                 .addOnSuccessListener {
                     println("Heart Rate Saved")
                 }
                 .addOnFailureListener {
                     println("Heart Rate Failed To Save")
                 }
+            val ageRef = userRef.child("age")
+//            println("AGEREF VALUE: $ageRef")
+//            println("nameRef VALUE: $nameRef")
+//            HazardController.checkForHeartDanger(age, avgBPM, mostRecent, lastTaken){
+//
+//            }
         } else {
             TODO("RETURN TO LOGIN")
         }

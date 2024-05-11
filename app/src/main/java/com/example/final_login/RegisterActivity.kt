@@ -30,6 +30,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var inputSurname: TextInputEditText
     private lateinit var inputEmail: TextInputEditText
     private lateinit var inputPassword: TextInputEditText
+    private lateinit var inputPhone: TextInputEditText
     private lateinit var inputConfirmPassword: TextInputEditText
     private lateinit var checkBoxTermsConditons: CheckBox
 
@@ -55,6 +56,7 @@ class RegisterActivity : AppCompatActivity() {
         inputFirstname = findViewById(R.id.inputFirstname)
         inputSurname = findViewById(R.id.inputSurname)
         inputEmail = findViewById(R.id.inputEmail)
+        inputPhone = findViewById(R.id.inputPhone)
         inputPassword = findViewById(R.id.inputPassword)
         inputConfirmPassword = findViewById(R.id.inputConfirmPassword)
         checkBoxTermsConditons = findViewById(R.id.checkBoxTermsConditons)
@@ -75,41 +77,49 @@ class RegisterActivity : AppCompatActivity() {
         inputFirstname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 formController.checkName(inputFirstname)
-                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
             }
         }
         inputSurname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 formController.checkName(inputSurname)
-                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
             }
         }
         inputEmail.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 formController.checkEmail(inputEmail)
-                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
+            }
+        }
+        inputPhone.onFocusChangeListener = View.OnFocusChangeListener{_, hasFocus ->
+            if(!hasFocus){
+                formController.checkPhoneNumber(inputPhone)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
             }
         }
         inputPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
             }
         }
         inputConfirmPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
             }
         }
+
         checkBoxTermsConditons.setOnCheckedChangeListener { _, _ ->
-            checkAllInputs(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)
+            checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
         }
+
 
         // Button Clicks
         btnRegister.setOnClickListener{
             val signupEmail = inputEmail.text.toString()
             val signupPassword = inputPassword.text.toString()
-            if(isAllInputsValid(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons)){
-                sendRegistration(signupEmail,signupPassword, inputFirstname, inputSurname)
+            if(isAllInputsValid(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)){
+                sendRegistration(signupEmail,signupPassword, inputFirstname, inputSurname, inputPhone)
             } else {
                 // TODO: Implement some kind of messaging system between the form controller and here to show why it failed such as incorrect email format
                 Toast.makeText(this@RegisterActivity,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
@@ -134,10 +144,10 @@ class RegisterActivity : AppCompatActivity() {
         toggleTheme()
     }
     // User Signup Function
-    private fun sendRegistration(email:String, password:String, firstname: TextInputEditText, surname: TextInputEditText){
+    private fun sendRegistration(email:String, password:String, firstname: TextInputEditText, surname: TextInputEditText, phone:TextInputEditText){
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                user.dbCreateUser(email,firstname.text.toString(), surname.text.toString())
+                user.dbCreateUser(email,firstname.text.toString(), surname.text.toString(), phone.text.toString())
                 Toast.makeText(this@RegisterActivity,"You are Registered.",Toast.LENGTH_SHORT).show()
                 val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -149,13 +159,14 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun isAllInputsValid(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox): Boolean {
-        return formController.isValidName(forename) && formController.isValidName(surname) && formController.isValidEmail(username) && formController.isValidPassword(password) && formController.passwordsMatch(password, confirmPassword) && formController.isChecked(checkbox)
+    private fun isAllInputsValid(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox, phone:TextInputEditText): Boolean {
+        return formController.isValidName(forename) && formController.isValidName(surname) && formController.isValidEmail(username) && formController.isValidPassword(password) && formController.passwordsMatch(password, confirmPassword) && formController.isChecked(checkbox) && formController.isValidPhoneNumber(phone)
     }
 
-    private fun checkAllInputs(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox) {
-        btnRegister.isEnabled = isAllInputsValid(forename, surname, username, password, confirmPassword, checkbox)
+    private fun checkAllInputs(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox, phone:TextInputEditText) {
+        btnRegister.isEnabled = isAllInputsValid(forename, surname, username, password, confirmPassword, checkbox, phone)
     }
+
     // String Colours
     private fun setColorsOnString(txtViewId: Int, strToChange: String, colour: Int): SpannableString {
         val txtView: TextView = findViewById(txtViewId)

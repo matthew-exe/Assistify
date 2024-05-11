@@ -27,22 +27,12 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
     private lateinit var tvInstall: TextView
     private lateinit var btnInstall: Button
 
-    private val PERMISSIONS =
-        setOf(
-            HealthPermission.getReadPermission(HeartRateRecord::class),
-            HealthPermission.getReadPermission(StepsRecord::class),
-            HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
-            HealthPermission.getReadPermission(RespiratoryRateRecord::class),
-            HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
-            HealthPermission.getReadPermission(SleepSessionRecord::class)
-        )
-
     private val requestPermissionActivityContract = PermissionController.createRequestPermissionResultContract()
 
     // TODO("Check For Permissions")
 
     private val requestPermissions = registerForActivityResult(requestPermissionActivityContract) { granted ->
-        if (granted.containsAll(PERMISSIONS)) {
+        if (granted.containsAll(healthConnectManager.PERMISSIONS)) {
             val intent = Intent(this@ConfigHealthConnectActivity, DashboardActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
@@ -70,8 +60,8 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
             val scope = CoroutineScope(Dispatchers.Main)
             scope.launch {
                 try {
-                    if(healthConnectManager.hasAllPermissions(PERMISSIONS)){
-                        requestPermissions.launch(PERMISSIONS)
+                    if(healthConnectManager.hasAllPermissions(healthConnectManager.PERMISSIONS)){
+                        requestPermissions.launch(healthConnectManager.PERMISSIONS)
                     } else {
                         addSyncHealthConnect()
                     }
@@ -92,7 +82,7 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
         tvInstall.text = "Please Sync Health Connect"
         btnInstall.text = "Sync"
         btnInstall.setOnClickListener {
-            requestPermissions.launch(PERMISSIONS)
+            requestPermissions.launch(healthConnectManager.PERMISSIONS)
         }
 
     }

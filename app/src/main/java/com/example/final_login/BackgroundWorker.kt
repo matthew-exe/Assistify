@@ -14,7 +14,7 @@ class BackgroundWorker : Service() {
 
     private val timer = Timer()
     private val delay: Long = 20 * 60 * 1000 // 20 minutes in milliseconds
-
+    private val healthConnectManager: HealthConnectManager = HealthConnectManager(this)
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
@@ -25,43 +25,10 @@ class BackgroundWorker : Service() {
     }
 
     private fun runSchedule() {
-        val context = this
         timer.schedule(object : TimerTask() {
             override fun run() {
                 Handler(mainLooper).post {
-                    val scope1 = CoroutineScope(Dispatchers.Main)
-                    scope1.launch {
-                        try {
-                            val healthConnectManager = HealthConnectManager(context)
-                            healthConnectManager.readCurrentHeartRateHC()
-                            println("Health Connect Ran And Retrieved The Current Heart Rate")
-                        } catch (e: Exception) {
-                            println("Health Connect Failed To Retrieve The Current Heart Rate")
-                            println(e)
-                        }
-                    }
-                    val scope2 = CoroutineScope(Dispatchers.Main)
-                    scope2.launch {
-                        try {
-                            val healthConnectManager = HealthConnectManager(context)
-                            healthConnectManager.readAggregateHeartRateHC()
-                            println("Health Connect Ran And Retrieved The Aggregate Heart Rate")
-                        } catch (e: Exception) {
-                            println("Health Connect Failed to Retrieve The Aggregate Heart Rate")
-                            println(e)
-                        }
-                    }
-                    val scope3 = CoroutineScope(Dispatchers.Main)
-                    scope3.launch {
-                        try {
-                            val healthConnectManager = HealthConnectManager(context)
-                            healthConnectManager.readStepsLast24HC()
-                            println("Health Connect Ran And Retrieved The Step Count")
-                        } catch (e: Exception) {
-                            println("Health Connect Failed To Retrieve Step Count")
-                            println(e)
-                        }
-                    }
+                    healthConnectManager.syncHealthConnect()
                 }
                 runSchedule()
             }

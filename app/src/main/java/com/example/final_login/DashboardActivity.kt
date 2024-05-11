@@ -75,54 +75,9 @@ class DashboardActivity : AppCompatActivity() {
         databaseReference = firebaseDatabase.reference.child("users")
         firebaseAuth = FirebaseAuth.getInstance()
         currentUser = firebaseAuth.currentUser!!
+
         healthConnectManager = HealthConnectManager(this)
-
-
-        val scope1 = CoroutineScope(Dispatchers.Main)
-        scope1.launch {
-            try {
-                healthConnectManager.readStepsLast24HC()
-            } catch (e: Exception) {
-                println(e)
-            }
-        }
-
-        val scope2 = CoroutineScope(Dispatchers.Main)
-        scope2.launch {
-            try {
-                healthConnectManager.readCurrentHeartRateHC()
-            } catch (e: Exception) {
-                println(e)
-            }
-        }
-
-        val scope3 = CoroutineScope(Dispatchers.Main)
-        scope3.launch {
-            try {
-                healthConnectManager.readAggregateHeartRateHC()
-            } catch (e: Exception) {
-                println(e)
-            }
-        }
-
-        val scope4 = CoroutineScope(Dispatchers.Main)
-        scope4.launch {
-            try {
-                healthConnectManager.readCaloriesLast24()
-            } catch (e: Exception) {
-                println(e)
-            }
-        }
-
-        val scope5 = CoroutineScope(Dispatchers.Main)
-        scope5.launch {
-            try {
-                healthConnectManager.readSleepLastNight()
-            } catch (e: Exception) {
-                println(e)
-            }
-        }
-
+        healthConnectManager.syncHealthConnect()
 
         //TODO("Uncomment to run background service")
 //        val serviceIntent = Intent(this, BackgroundWorker::class.java)
@@ -136,10 +91,6 @@ class DashboardActivity : AppCompatActivity() {
         user.getDashboard(adapter)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
-
-        if(adapter.data.filter{ it.name == "Steps" }.size > 0){
-
-        }
 
         user.populateDashboard(adapter, user.getUserUidToLoad())
 
