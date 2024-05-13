@@ -66,7 +66,7 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
     private fun addSyncHealthConnect(button: Button){
         button.text = "Sync"
         button.setOnClickListener {
-            (context as ConfigHealthConnect2).requestPermissions.launch(healthConnectManager.PERMISSIONS)
+            (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
         }
     }
 

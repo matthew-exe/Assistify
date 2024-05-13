@@ -60,9 +60,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var wholePage:ConstraintLayout
     private lateinit var cardPage: CardView
 
+
     private var hasPermissions = false
     private val rCSignIn = 9001
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +74,6 @@ class LoginActivity : AppCompatActivity() {
         firebaseAuth = FirebaseAuth.getInstance()
         // Google Signin
         val googleSigninOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            // default_web_client_id - appears as a red error but works fine, it relates to the google.json services file in the app root
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail().build()
         googleSignInClient = GoogleSignIn.getClient(this, googleSigninOptions)
@@ -140,7 +139,6 @@ class LoginActivity : AppCompatActivity() {
         }
         // Google Login Btn
         btnGoogleLogin.setOnClickListener {
-            // TODO: Deprecated!! Don't Know What To Replace With
             val signInIntent = googleSignInClient.signInIntent
             startActivityForResult(signInIntent, rCSignIn)
         }
@@ -184,7 +182,7 @@ class LoginActivity : AppCompatActivity() {
             if (task.isSuccessful) {
                 checkIfEmailUpdated()
                 Toast.makeText(this@LoginActivity,"You are Logged In.",Toast.LENGTH_SHORT).show()
-                val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnect2::class.java)
+                val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
@@ -208,7 +206,9 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-    private fun firebaseAuthWithGoogle(idToken: String,account:GoogleSignInAccount) {
+
+
+    private fun firebaseAuthWithGoogle(idToken: String,account: GoogleSignInAccount) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->

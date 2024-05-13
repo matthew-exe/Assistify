@@ -2,78 +2,38 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/configHealthConnectView"
+    android:id="@+id/configHealthConnectView2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ConfigHealthConnectActivity"
-    android:background="@color/white">
+    tools:context=".ConfigHealthConnectActivity">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardPage"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/off_white"
-        app:cardCornerRadius="10dp"
-        app:cardElevation="12dp"
-        android:layout_margin="20dp"
-        app:contentPadding="20dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:contentDescription="View Pager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/imgHealthConnect"
-                android:layout_width="170dp"
-                android:layout_height="135dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@+id/tvInstall"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:background="@drawable/health_connect_logo"/>
-
-            <TextView
-                android:id="@+id/tvInstall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/lexend"
-                android:text="Health Connect"
-                android:textSize="18sp"
-                app:layout_constraintTop_toBottomOf="@+id/imgHealthConnect"
-                app:layout_constraintBottom_toTopOf="@+id/tvGoogleHealthInstallDetails"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-            <TextView
-                android:id="@+id/tvGoogleHealthInstallDetails"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/lexend"
-                android:text="@string/health_connect_intro"
-                android:layout_marginTop="10dp"
-                android:textSize="12sp"
-                app:layout_constraintTop_toBottomOf="@+id/tvInstall"
-                app:layout_constraintBottom_toTopOf="@+id/btnInstall"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-            <Button
-                android:id="@+id/btnInstall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Install"
-                android:layout_marginTop="10dp"
-                app:layout_constraintTop_toBottomOf="@+id/tvGoogleHealthInstallDetails"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.cardview.widget.CardView>
+    <com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+        android:id="@+id/worm_dots_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:dotsColor="#371f61"
+        app:dotsCornerRadius="8dp"
+        app:dotsSize="16dp"
+        app:dotsSpacing="4dp"
+        app:dotsStrokeColor="#673AB7"
+        app:dotsStrokeWidth="2dp"
+        android:layout_marginBottom="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
