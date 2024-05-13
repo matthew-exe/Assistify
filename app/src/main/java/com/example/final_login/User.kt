@@ -208,7 +208,7 @@ class User{
         }
     }
 
-    private fun deleteAccount(){
+    fun deleteAccount(){
         val currentUser = firebaseAuth.currentUser
         currentUser?.delete()?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
