@@ -17,18 +17,10 @@ class HazardController {
         val maxRate = calcMaxHeartRate(age)
         if(mostRecent >= maxRate){
             return Pair(true, "$name: Critically High Level Heart Rate Recorded - ${mostRecent.toInt()}bpm (${returnTimeInHours(lastTaken)} ago)")
-        } else if(mostRecent > 40){
+        } else if(mostRecent < 40){
             return Pair(true, "$name: Critically Low Level Heart Rate Recorded - ${mostRecent.toInt()}bpm (${returnTimeInHours(lastTaken)} ago)")
         }
         return Pair(false, "")
-    }
-
-    fun isHeartLow(){
-
-    }
-
-    fun isHeartHigh(){
-
     }
 
     fun hasntMoved(totalSteps:Int){

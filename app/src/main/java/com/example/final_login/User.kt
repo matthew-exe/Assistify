@@ -350,8 +350,8 @@ class User{
             totalSteps.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val totalStepsData = dataSnapshot.value
-                    if(myAdapter.data.filter{it.name == "Steps"}.isNotEmpty()){
-                        myAdapter.data.filter{it.name == "Steps"}[0].stat = totalStepsData.toString()
+                    if(myAdapter.data.any { it.name == "Steps" }){
+                        myAdapter.data.first{it.name == "Steps"}.stat = totalStepsData.toString()
                         myAdapter.filterData("")
                     }
                 }
@@ -461,8 +461,8 @@ class User{
             mostRecentRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
-                    if(myAdapter.data.filter{it.name == "Sleep"}.isNotEmpty()){
-                        myAdapter.data.filter{it.name == "Sleep"}[0].stat = sleepTotal
+                    if(myAdapter.data.any { it.name == "Sleep" }){
+                        myAdapter.data.first{it.name == "Sleep"}.stat = sleepTotal
                         myAdapter.filterData("")
                     }
                 }
@@ -480,8 +480,8 @@ class User{
             avgBPM.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val calories = dataSnapshot.value.toString()
-                    if(myAdapter.data.filter{it.name == "Calories"}.isNotEmpty()){
-                        myAdapter.data.filter{it.name == "Calories"}[0].stat = formatCaloriesString(calories)
+                    if(myAdapter.data.any { it.name == "Calories" }){
+                        myAdapter.data.first{it.name == "Calories"}.stat = formatCaloriesString(calories)
                         myAdapter.filterData("")
                     }
                 }
@@ -511,8 +511,8 @@ class User{
             mostRecent.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val mostRecentBpm = dataSnapshot.value
-                    if(myAdapter.data.filter{it.name == "Pulse"}.size > 0) {
-                        myAdapter.data.filter { it.name == "Pulse" }[0].stat = "${mostRecentBpm}bpm"
+                    if(myAdapter.data.any { it.name == "Pulse" }) {
+                        myAdapter.data.first { it.name == "Pulse" }.stat = "${mostRecentBpm}bpm"
                     }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -545,6 +545,42 @@ class User{
         updateMap["children"] = secureKey
         guardianRef.updateChildren(updateMap)
     }
+
+//    fun childRemoveGuardian(){
+//        val childRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+//        childRef.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                if (dataSnapshot.exists()){
+//                    if(dataSnapshot.hasChild("accessPermitted")){
+//                        if(dataSnapshot.child("accessPermitted").value.toString() != "false" && dataSnapshot.child("accessPermitted").value.toString() != "true"){
+//                            removeGuardian(dataSnapshot.child("accessPermitted").value.toString())
+//                            setChildAccessPermittedToFalse(security.enc(firebaseAuth.currentUser!!.uid))
+//                        }
+//                    }
+//                }
+//            }
+//            override fun onCancelled(error: DatabaseError) {
+//                TODO("Not yet implemented")
+//            }
+//        })
+//    }
+//
+//    fun removeGuardian(guardian:String){
+//        val guardianRef = databaseReference.child(guardian)
+//        guardianRef.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                if (dataSnapshot.exists()){
+//                    if(dataSnapshot.hasChild("children")){
+//                        val childrenRef = dataSnapshot.child("children")
+//                        childrenRef.ref.removeValue()
+//                    }
+//                }
+//            }
+//            override fun onCancelled(error: DatabaseError) {
+//                TODO("Not yet implemented")
+//            }
+//        })
+//    }
 
     fun removeChildForGuardian(){
         val guardianRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
@@ -642,6 +678,23 @@ class User{
             override fun onCancelled(databaseError: DatabaseError) {
                 println("Error: ${databaseError.message}")
             }
+        })
+    }
+
+    private fun getGuardiansName(guardian:String){
+        val guardianRef = databaseReference.child(guardian)
+        guardianRef.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.exists()){
+                    if(snapshot.hasChild("firstname")){
+                        println(security.dec(snapshot.child("firstname").value.toString()))
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
         })
     }
 
