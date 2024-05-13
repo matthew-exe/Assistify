@@ -1,6 +1,5 @@
 package com.example.final_login
 import android.content.Context
-import android.widget.ExpandableListView
 import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.snackbar.Snackbar
@@ -9,11 +8,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.snapshots
-import com.google.firebase.database.values
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -28,10 +23,11 @@ class User{
     private val databaseReference = firebaseDatabase.reference.child("users")
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val security = Security()
+    private val hazardController = HazardController()
 
     fun getDashboard(adapter: MyAdapter) {
         if (isUserLoggedIn()) {
-            val currentUserRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
+            val currentUserRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             currentUserRef.child("children").addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if (dataSnapshot.exists()) {
@@ -41,13 +37,12 @@ class User{
                             val linkedUserRef = databaseReference.child(linkedUserKey)
                             val dashboardRef = linkedUserRef.child(security.enc("dashboard"))
                             dashboardRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                override fun onDataChange(dataSnapshot: DataSnapshot){
                                     val dashboardData = dataSnapshot.value
                                     adapter.data = createDashboard(dashboardData)
                                     adapter.filterData("")
                                     populateDashboard(adapter, linkedUserKey) // Call populateDashboard with the linked user's key
                                 }
-
                                 override fun onCancelled(databaseError: DatabaseError) {
                                     println("Error: ${databaseError.message}")
                                 }
@@ -61,7 +56,7 @@ class User{
                                 val dashboardData = dataSnapshot.value
                                 adapter.data = createDashboard(dashboardData)
                                 adapter.filterData("")
-                                populateDashboard(adapter, security.enc(firebaseAuth.currentUser!!.uid!!)) // Call populateDashboard with the current user's key
+                                populateDashboard(adapter, security.enc(firebaseAuth.currentUser!!.uid)) // Call populateDashboard with the current user's key
                             }
 
                             override fun onCancelled(databaseError: DatabaseError) {
@@ -80,14 +75,11 @@ class User{
         }
     }
 
-
-
-
     fun getUserUidToLoad(): String {
         return runBlocking {
             if (isUserLoggedIn()) {
-                val currentUserRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
-                var userIdForDashboard = security.enc(firebaseAuth.currentUser!!.uid!!)
+                val currentUserRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+                var userIdForDashboard = security.enc(firebaseAuth.currentUser!!.uid)
 
                 withContext(Dispatchers.IO) {
                     val dataSnapshot = currentUserRef.child("children").get().await()
@@ -163,10 +155,8 @@ class User{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.hasChild(security.enc(firebaseAuth.currentUser!!.uid))){
                     callback(true)
-                    println("USER EXISTS: ${dataSnapshot.exists()}")
                 } else {
                     callback(false)
-                    println("Child with value 'x' does not exist in the 'users' node.")
                 }
             }
 
@@ -234,10 +224,10 @@ class User{
     fun dbCreateUser(email: String, firstname: String, surname: String, number: String):Boolean{
         var userCreated = false
         val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(""))
-        databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!)).setValue(userData)
+        databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid)).setValue(userData)
         try{
-            val userData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(number))
-            databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid)).setValue(userData)
+            val usersData = UserData(security.enc(email), security.enc(firstname), security.enc(surname), security.enc(number))
+            databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid)).setValue(usersData)
             userCreated = true
         } catch (e:Exception){
             println(e)
@@ -273,8 +263,9 @@ class User{
         return Pair(firstName, surname)
     }
 
-    fun addUserNotification(notification: String) {
-        val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
+    fun addUserNotification(user:String, notification: String, encrypt:Boolean) {
+        // Encrypt to true if firebaseAuth.currentUser, encrypt to false if reading from accessPermitted/Children from database
+        val userRef = databaseReference.child(if(encrypt) security.enc(user) else user)
         val notificationsRef = userRef.child("notifications")
         val newNotificationRef = notificationsRef.push()
         val notificationId = newNotificationRef.key // Get the unique ID generated by Firebase
@@ -293,7 +284,7 @@ class User{
     }
 
     fun deleteUserNotification(notificationId: String, callback: (Boolean) -> Unit) {
-        val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
+        val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
         val notificationsRef = userRef.child("notifications")
         notificationsRef.child(notificationId).removeValue()
             .addOnSuccessListener {
@@ -307,7 +298,7 @@ class User{
     }
 
     fun getUserNotifications(callback: (List<Pair<String, String>>) -> Unit) {
-        val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
+        val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
         val notificationsRef = userRef.child("notifications")
         notificationsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -330,10 +321,6 @@ class User{
         })
     }
 
-    fun populateUserSettingsList(list:ExpandableListView){
-
-    }
-
     fun sendStepsToDatabase(timeWoke: Instant, total:Int, lastMovement:Instant){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
@@ -344,7 +331,7 @@ class User{
             hMap["lastMovement"] = lastMovement.toString()
             stepsRef.setValue(hMap)
                 .addOnSuccessListener {
-                    println("Steps Saved")
+//                    println("Steps Saved")
                 }
                 .addOnFailureListener {
                     println("Steps Failed To Save")
@@ -354,7 +341,7 @@ class User{
         }
     }
 
-    fun readStepsFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
+    private fun readStepsFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         // Take what object in as param and then assign totalStepsData to the text value
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(user)
@@ -397,7 +384,7 @@ class User{
             hMap["avg"] = avg.toString()
             stepsRef.setValue(hMap)
                 .addOnSuccessListener {
-                    println("Heart Rate Saved")
+//                    println("Heart Rate Saved")
                 }
                 .addOnFailureListener {
                     println("Heart Rate Failed To Save")
@@ -417,17 +404,12 @@ class User{
             hMap["lastTaken"] = lastTaken.toString()
             heartRef.setValue(hMap)
                 .addOnSuccessListener {
-                    println("Heart Rate Saved")
+//                    println("Heart Rate Saved")
                 }
                 .addOnFailureListener {
                     println("Heart Rate Failed To Save")
                 }
-            val ageRef = userRef.child("age")
-//            println("AGEREF VALUE: $ageRef")
-//            println("nameRef VALUE: $nameRef")
-//            HazardController.checkForHeartDanger(age, avgBPM, mostRecent, lastTaken){
-//
-//            }
+            checkHeart(avgBPM, mostRecent, lastTaken)
         } else {
             TODO("RETURN TO LOGIN")
         }
@@ -472,7 +454,7 @@ class User{
         }
     }
 
-    fun readSleepFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
+    private fun readSleepFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()) {
             val userRef = databaseReference.child(user)
             val mostRecentRef = userRef.child("health").child("sleep").child("mostRecent")
@@ -491,7 +473,7 @@ class User{
         }
     }
 
-    fun readCaloriesFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
+    private fun readCaloriesFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()) {
             val userRef = databaseReference.child(user)
             val avgBPM = userRef.child("health").child("calories").child("last24")
@@ -511,7 +493,7 @@ class User{
         }
     }
 
-    fun readHeartRateFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
+    private fun readHeartRateFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(user)
             val avgBPM = userRef.child("health").child("heart").child("avg")
@@ -557,7 +539,7 @@ class User{
         }
     }
 
-    fun setGuardianAccount(secureKey: String, view: ViewPager){
+    fun setGuardianAccount(secureKey: String){
         val guardianRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
         val updateMap = HashMap<String, Any>()
         updateMap["children"] = secureKey
@@ -608,7 +590,8 @@ class User{
                         val accessPermitted = dataSnapshot.child("accessPermitted").getValue(String::class.java)
                         if (accessPermitted == "true") {
                             monitoredRef.child("accessPermitted").setValue(security.enc(firebaseAuth.currentUser!!.uid))
-                            setGuardianAccount(secureKey, view)
+                            setGuardianAccount(secureKey)
+                            addUserNotification(secureKey, "Linking Successful", false) // ADD BETTER NOTIFICATION
                             checkAndGetChildFromDatabase(view.context, view.adapter as ProfileAdapter, displaySnackbar)
                         } else {
                             Snackbar.make(view, "Invalid Key! Please Try Again.", Snackbar.LENGTH_SHORT).show()
@@ -644,21 +627,6 @@ class User{
             }
         })
     }
-
-    private fun linkAccount(secureKey:String) {
-        if (isUserLoggedIn()) {
-            val guardianRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
-            val canReadRef = guardianRef.child("canRead")
-            canReadRef.setValue(secureKey)
-
-            val monitoredRef = databaseReference.child(secureKey)
-            val accessPermitted = monitoredRef.child("permittedToo")
-            accessPermitted.setValue(security.enc(firebaseAuth.currentUser!!.uid))
-        } else {
-            TODO("RETURN TO LOGIN")
-        }
-    }
-
 
     private fun readProfileOfMonitored(secureKey:String, context: Context, displaySnackbar: Boolean){
         val monitoredRef = databaseReference.child(secureKey).child("accessPermitted")
@@ -767,6 +735,36 @@ class User{
         val dateTime = LocalDateTime.parse(timeString, DateTimeFormatter.ISO_DATE_TIME)
         val formattedDateTime = dateTime.format(formatter)
         return formattedDateTime
+    }
+
+    private fun checkHeart(avgBpm:Int, mostRecent:Long, lastTaken: Instant){
+        databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid)).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val nameAndAge = mutableListOf("",65)
+                if(dataSnapshot.hasChild("firstname")){
+                    nameAndAge[0] = security.dec(dataSnapshot.child("firstname").value.toString())
+                }
+                if (dataSnapshot.hasChild("personalDetails")) {
+                    val detailsSnapshot = dataSnapshot.child("personalDetails")
+                    if(detailsSnapshot.hasChild("age")){
+                        nameAndAge[1] = security.dec(detailsSnapshot.child("age").value.toString()).toInt()
+                    }
+                }
+                val isHazard = hazardController.heartHazardCheck(nameAndAge[1] as Int, nameAndAge[0].toString(),avgBpm, mostRecent, lastTaken)
+                if(isHazard.first){
+                    if(dataSnapshot.hasChild("accessPermitted")){
+                        if(dataSnapshot.child("accessPermitted").value.toString() != "false" && dataSnapshot.child("accessPermitted").value.toString() != "true"){
+                            addUserNotification(dataSnapshot.child("accessPermitted").value.toString(), isHazard.second, false)
+                        }
+
+                    }
+
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                println("Cancelled")
+            }
+        })
     }
 
 

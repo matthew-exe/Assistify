@@ -1,9 +1,13 @@
 package com.example.final_login
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import java.time.Duration
 import java.time.Instant
 
 class HazardController {
+
+    private val firebaseDatabase = FirebaseDatabase.getInstance()
 
     /** This is a controller that checks for potentially hazardous situations, and starts
      * the notification process of informing a guardian.
@@ -13,13 +17,14 @@ class HazardController {
 //
 //        lastTaken: Instant
 
-    fun heartHazardCheck(age:Int, name:String ,avgBpm:Int, mostRecent:Long, lastTaken: Instant): Pair<Boolean, String>{
+    fun heartHazardCheck(age:Int, name:String, avgBpm:Int, mostRecent:Long, lastTaken: Instant): Pair<Boolean, String>{
         val maxRate = calcMaxRate(age)
-        if(avgBpm >= maxRate){
-            return Pair(true, "$name: Critical Level BPM Reached ${returnTimeInHours(lastTaken)}")
+        if(mostRecent >= maxRate){
+            return Pair(true, "$name: Critically High Level Heart Rate Recorded - ${avgBpm}bpm (${returnTimeInHours(lastTaken)} ago)")
         }
         return Pair(false, "")
     }
+
     fun isHeartLow(){
 
     }
@@ -38,12 +43,12 @@ class HazardController {
 
     fun hasntWoke(){}
 
-    private fun returnTimeInHours(lastTaken: Instant): Pair<Long, Long> {
+    private fun returnTimeInHours(lastTaken: Instant): String {
         val currentTime = Instant.now()
         val duration = Duration.between(lastTaken, currentTime)
         val hours = duration.toHours()
         val minutes = duration.toMinutes() % 60
-        return Pair(hours, minutes)
+        return "${hours}h ${minutes}m"
     }
 
     private fun returnMaxRate(age:Int):Int{

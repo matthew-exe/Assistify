@@ -39,6 +39,7 @@ class LoginActivity : AppCompatActivity() {
     private val formController = FormController()
     private val user = User()
     private val security = Security()
+    private lateinit var healthConnectManager:HealthConnectManager
 
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var databaseReference: DatabaseReference
@@ -156,8 +157,11 @@ class LoginActivity : AppCompatActivity() {
             showForgotPasswordDialog()
         }
 
-        val healthConnectManager = HealthConnectManager(this)
+        healthConnectManager = HealthConnectManager(this)
+        setHasPermissions()
+    }
 
+    private fun setHasPermissions(){
         if(healthConnectManager.availability == HealthConnectAvailability.INSTALLED){
             val scope = CoroutineScope(Dispatchers.Main)
             scope.launch {
@@ -180,7 +184,7 @@ class LoginActivity : AppCompatActivity() {
             if (task.isSuccessful) {
                 checkIfEmailUpdated()
                 Toast.makeText(this@LoginActivity,"You are Logged In.",Toast.LENGTH_SHORT).show()
-                val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
+                val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnect2::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
                 finish()
