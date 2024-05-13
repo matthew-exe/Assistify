@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
     <uses-permission android:name="android.permission.health.READ_RESPIRATORY_RATE" />
     <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
-    <uses-permission android:name="android.permission.health.READ_SLEEP"/>
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
@@ -34,6 +34,10 @@
             android:name=".ConfigHealthConnectActivity"
             android:exported="false" />
         <activity
+            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+            android:exported="false"/>
+
+        <activity
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
@@ -57,16 +61,19 @@
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
         </activity>
+
         <activity-alias
-            android:name="ViewPermissionUsageActivity"
+            android:name=".ViewPermissionUsageActivity"
             android:exported="true"
-            android:targetActivity=".PermissionsRationaleActivity"
-            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE"
+            android:targetActivity=".PermissionsRationaleActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity-alias>
+
         <service android:name=".BackgroundWorker" />
     </application>
 

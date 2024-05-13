@@ -39,6 +39,7 @@ class LoginActivity : AppCompatActivity() {
     private val formController = FormController()
     private val user = User()
     private val security = Security()
+    private lateinit var healthConnectManager:HealthConnectManager
 
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var databaseReference: DatabaseReference
@@ -59,9 +60,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var wholePage:ConstraintLayout
     private lateinit var cardPage: CardView
 
+
     private var hasPermissions = false
     private val rCSignIn = 9001
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +74,6 @@ class LoginActivity : AppCompatActivity() {
         firebaseAuth = FirebaseAuth.getInstance()
         // Google Signin
         val googleSigninOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            // default_web_client_id - appears as a red error but works fine, it relates to the google.json services file in the app root
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail().build()
         googleSignInClient = GoogleSignIn.getClient(this, googleSigninOptions)
@@ -139,7 +139,6 @@ class LoginActivity : AppCompatActivity() {
         }
         // Google Login Btn
         btnGoogleLogin.setOnClickListener {
-            // TODO: Deprecated!! Don't Know What To Replace With
             val signInIntent = googleSignInClient.signInIntent
             startActivityForResult(signInIntent, rCSignIn)
         }
@@ -156,8 +155,11 @@ class LoginActivity : AppCompatActivity() {
             showForgotPasswordDialog()
         }
 
-        val healthConnectManager = HealthConnectManager(this)
+        healthConnectManager = HealthConnectManager(this)
+        setHasPermissions()
+    }
 
+    private fun setHasPermissions(){
         if(healthConnectManager.availability == HealthConnectAvailability.INSTALLED){
             val scope = CoroutineScope(Dispatchers.Main)
             scope.launch {
@@ -190,7 +192,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    // Google Auth Login
     // Google Auth Function
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -204,7 +205,8 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-    private fun firebaseAuthWithGoogle(idToken: String,account:GoogleSignInAccount) {
+
+    private fun firebaseAuthWithGoogle(idToken: String,account: GoogleSignInAccount) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
@@ -212,12 +214,7 @@ class LoginActivity : AppCompatActivity() {
                     user.checkUserExistsUID {
                         println("User Exists: $it")
                         if(!it){
-                            val name = user.splitName(account.displayName!!)
-                            user.dbCreateUser(account.email!!, name.first, name.second, "")
-                            val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
+                            showTermsAndConditionsDialog(account)
                         } else {
                             val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -318,6 +315,46 @@ class LoginActivity : AppCompatActivity() {
         })
 
         alertDialog.show()
+    }
+
+    private fun showTermsAndConditionsDialog(account: GoogleSignInAccount) {
+        val dialogView = layoutInflater.inflate(R.layout.terms_and_conditions_dialog, null)
+        val btnAcceptTerms = dialogView.findViewById<Button>(R.id.btnAcceptTerms)
+        val btnDeclineTerms = dialogView.findViewById<Button>(R.id.btnDeclineTerms)
+
+        val dialogBuilder = if (!themeAccessibleActive) {
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+        } else {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+                .setView(dialogView)
+        }
+
+        val alertDialog = dialogBuilder.show()
+
+        btnAcceptTerms.setOnClickListener {
+            acceptedTermsConditions(account)
+            alertDialog.dismiss()
+        }
+
+        btnDeclineTerms.setOnClickListener {
+            declinedTermsConditions()
+            alertDialog.dismiss()
+        }
+    }
+
+    private fun acceptedTermsConditions(account:GoogleSignInAccount) {
+        val name = user.splitName(account.displayName!!)
+        user.dbCreateUser(account.email!!, name.first, name.second, "")
+        val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    private fun declinedTermsConditions() {
+        user.deleteAccount()
+        println("Remove Account From System")
     }
 
 }

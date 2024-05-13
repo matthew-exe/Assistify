@@ -1,8 +1,8 @@
 package com.example.final_login
 
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.HealthConnectClient.Companion.SDK_AVAILABLE
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.HeartRateRecord
@@ -25,7 +25,7 @@ import kotlin.time.toKotlinDuration
 
 class HealthConnectManager(private val context: Context) {
 
-    private var healthConnectClient: HealthConnectClient = HealthConnectClient.getOrCreate(context)
+    private lateinit var healthConnectClient: HealthConnectClient
     private val user = User()
     var availability = HealthConnectAvailability.NOT_SUPPORTED
         private set
@@ -47,16 +47,22 @@ class HealthConnectManager(private val context: Context) {
         return healthConnectClient.permissionController.getGrantedPermissions().containsAll(permissions)
     }
 
-
     private fun checkAvailability() {
-        availability = when {
-            HealthConnectClient.getSdkStatus(context) == SDK_AVAILABLE -> HealthConnectAvailability.INSTALLED
-            else -> HealthConnectAvailability.NOT_INSTALLED
+        val packageManager = context.packageManager
+        val packageName = "com.google.android.apps.healthdata"
+        availability = try {
+            packageManager.getPackageInfo(packageName, 0)
+            HealthConnectAvailability.INSTALLED
+        } catch (e: PackageManager.NameNotFoundException) {
+            HealthConnectAvailability.NOT_INSTALLED
+        }
+        if(availability == HealthConnectAvailability.INSTALLED){
+            healthConnectClient = HealthConnectClient.getOrCreate(context)
         }
     }
 
 
-    suspend fun readStepsLast24HC(){
+    private suspend fun readStepsLast24HC(){
         try {
             val timePeriod = returnTimeLast24()
             val response = healthConnectClient.readRecords(
@@ -75,7 +81,7 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
-    suspend fun readAggregateHeartRateHC() {
+    private suspend fun readAggregateHeartRateHC() {
         try {
             val timePeriod = returnTimeLast24()
             val response =
@@ -96,7 +102,7 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
-    suspend fun readCurrentHeartRateHC(){
+    private suspend fun readCurrentHeartRateHC(){
         try {
             val timePeriod = returnTimeLast24()
             val response = healthConnectClient.readRecords(
@@ -110,6 +116,7 @@ class HealthConnectManager(private val context: Context) {
                 totalBPM += heartRate.samples[0].beatsPerMinute.toInt()
             }
             user.sendHeartRateToDatabase((totalBPM/response.records.size),response.records[response.records.lastIndex].samples[0].beatsPerMinute, response.records[response.records.lastIndex].samples[0].time)
+//            val hazard = hazardController.heartHazardCheck((totalBPM/response.records.size),response.records[response.records.lastIndex].samples[0].beatsPerMinute, response.records[response.records.lastIndex].samples[0].time)
         } catch (e: Exception) {
             println(e)
         }
@@ -152,7 +159,7 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
-    suspend fun readCaloriesLast24HC(){
+    private suspend fun readCaloriesLast24HC(){
         try {
             val timePeriod = returnTimeLast24()
             val response =
@@ -173,7 +180,7 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
-    suspend fun readSleepLastNight(){
+    private suspend fun readSleepLastNight(){
         try {
             val timePeriod = returnSleepTimes()
             val response =
@@ -187,11 +194,11 @@ class HealthConnectManager(private val context: Context) {
             if (sleepRecordTotal != null){
                 user.sendSleepToDatabase(sleepRecordTotal.toKotlinDuration().toString())
             } else {
-                println("NOOOOOOOOOOOOOO Sleeep")
+                println("No Sleep Recorded")
             }
         } catch (e: Exception) {
-            // Run error handling here
         }
+            // Run error handling here
     }
 
     fun syncHealthConnect(){
