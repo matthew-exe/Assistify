@@ -25,7 +25,7 @@
             <ImageView
                 android:id="@+id/imgHealthConnect"
                 android:layout_width="170dp"
-                android:layout_height="150dp"
+                android:layout_height="135dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toTopOf="@+id/tvInstall"
                 app:layout_constraintStart_toStartOf="parent"
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lexend"
                 android:text="@string/health_connect_intro"
-                android:textAlignment="center"
+                android:justificationMode="inter_word"
                 android:layout_marginTop="6dp"
                 android:textSize="16sp"
                 app:layout_constraintTop_toBottomOf="@+id/tvInstall"

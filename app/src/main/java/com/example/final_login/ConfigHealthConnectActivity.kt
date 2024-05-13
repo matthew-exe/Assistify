@@ -24,7 +24,7 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
             finish()
         } else {
             val rootView = findViewById<View>(android.R.id.content)
-            Snackbar.make(rootView, "Assistify requires the permissions in order to function", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(rootView, "Assistify requires the permissions to be granted in order to function", Snackbar.LENGTH_LONG).show()
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {

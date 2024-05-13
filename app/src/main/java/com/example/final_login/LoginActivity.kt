@@ -325,11 +325,9 @@ class LoginActivity : AppCompatActivity() {
         val dialogBuilder = if (!themeAccessibleActive) {
             AlertDialog.Builder(this)
                 .setView(dialogView)
-                .setTitle("Terms and Conditions")
         } else {
             AlertDialog.Builder(this, R.style.MyDialogTheme)
                 .setView(dialogView)
-                .setTitle("Terms and Conditions")
         }
 
         val alertDialog = dialogBuilder.show()
