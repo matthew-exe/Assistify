@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "final_login"
+rootProject.name = "Assistify"
 include(":app")
  
