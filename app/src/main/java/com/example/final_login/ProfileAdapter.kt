@@ -1,5 +1,6 @@
 package com.example.final_login
 
+import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -9,8 +10,13 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.viewpager.widget.PagerAdapter
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
-class ProfileAdapter(private val context: Context) : PagerAdapter() {
+class ProfileAdapter(private val context: Context, private var isAccessPermitted: String, private val guardFullName: String) : PagerAdapter() {
     var layouts = mutableListOf<Pair<Int, ProfileData>>()
     private val user = User()
 
@@ -51,18 +57,35 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
                 (context as ProfileActivity).showKeyEnterDialog()
             }
 
+            layout.findViewById<Button>(R.id.unlinkButton)?.setOnClickListener {
+                showUnlinkDialogClient()
+            }
+
             val preLinkText1 = layout.findViewById<TextView>(R.id.pre_link_text_1)
             val preLinkText2 = layout.findViewById<TextView>(R.id.pre_link_text_2)
-            val linkButton = layout.findViewById<TextView>(R.id.linkButton)
-            if (layouts.size > 1) {
+            val linkButton = layout.findViewById<Button>(R.id.linkButton)
+            val unlinkButton = layout.findViewById<Button>(R.id.unlinkButton)
+
+            if (isAccessPermitted != "false" && isAccessPermitted != "true") {
+                preLinkText1.text = "It appears you are linked to $guardFullName."
+                preLinkText2.text = "Please tap the button below to unlink."
+                unlinkButton.visibility = View.GONE
+                unlinkButton.visibility = View.VISIBLE
+                linkButton.visibility = View.GONE
+            } else if (layouts.size > 1) {
                 preLinkText1.text = ""
                 preLinkText2.text = "Multi-account Monitoring Coming Soon."
+                unlinkButton.visibility = View.GONE
+                linkButton.visibility = View.VISIBLE
                 linkButton.isEnabled = false
             } else {
                 preLinkText1.text = "It appears you are not yet linked to a client."
                 preLinkText2.text = "Please tap the button below to link."
+                unlinkButton.visibility = View.GONE
+                linkButton.visibility = View.VISIBLE
                 linkButton.isEnabled = true
             }
+
         } else if (layoutResId == R.layout.activity_linked_profile) {
             // This is the activity_linked_profile layout
             updateUserProfile(layout, userDetails)
@@ -110,8 +133,7 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         layout.findViewById<TextView>(R.id.emergency_number_text).text = emergencyNumber
 
         layout.findViewById<Button>(R.id.unlink_button)?.setOnClickListener {
-            user.removeChildForGuardian()
-            removeLayout(userDetails)
+            showUnlinkDialogMonitor(userDetails)
         }
 
         layout.findViewById<Button>(R.id.call_button)?.setOnClickListener {
@@ -163,6 +185,38 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
         notifyDataSetChanged()
     }
 
+    private fun showUnlinkDialogClient() {
+        val dialog = AlertDialog.Builder(context as ProfileActivity)
+            .setTitle("Are you sure you want to unlink?")
+            .setPositiveButton("Yes") { _, _ ->
+                user.childRemoveGuardian()
+                isAccessPermitted = "false"
+                context.clientUnlinkSnackBar()
+                notifyDataSetChanged()
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.show()
+    }
+
+    private fun showUnlinkDialogMonitor(userDetails: ProfileData) {
+        val dialog = AlertDialog.Builder(context as ProfileActivity)
+            .setTitle("Are you sure you want to unlink?")
+            .setPositiveButton("Yes") { _, _ ->
+                user.removeChildForGuardian()
+                removeLayout(userDetails)
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.show()
+    }
+
     private fun removeLayout(userDetails: ProfileData) {
         val layoutToRemove = layouts.find { it.second == userDetails }
         val statIndex = layouts.indexOf(layoutToRemove)
@@ -172,7 +226,7 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
 //            layouts.remove(layoutToRemove)
 //            layouts.remove(statToRemove)
             layouts.clear()
-            (context as ProfileActivity).unlinkSnackBar(userDetails)
+            (context as ProfileActivity).monitorUnlinkSnackBar(userDetails)
             loadNoProfile()
             notifyDataSetChanged()
         }

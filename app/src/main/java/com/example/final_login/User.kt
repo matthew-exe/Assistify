@@ -80,9 +80,6 @@ class User{
         }
     }
 
-
-
-
     fun getUserUidToLoad(): String {
         return runBlocking {
             if (isUserLoggedIn()) {
@@ -590,6 +587,44 @@ class User{
                     if(dataSnapshot.hasChild("accessPermitted")){
                         val accessRef = dataSnapshot.child("accessPermitted")
                         accessRef.ref.setValue("false")
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    fun childRemoveGuardian(){
+        val childRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+        childRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()){
+                    if(dataSnapshot.hasChild("accessPermitted")){
+                        if(dataSnapshot.child("accessPermitted").value.toString() != "false" && dataSnapshot.child("accessPermitted").value.toString() != "true"){
+                            removeGuardian(dataSnapshot.child("accessPermitted").value.toString())
+                            setChildAccessPermittedToFalse(security.enc(firebaseAuth.currentUser!!.uid))
+                        }
+
+
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    fun removeGuardian(guardian:String){
+        val guardianRef = databaseReference.child(guardian)
+        guardianRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()){
+                    if(dataSnapshot.hasChild("children")){
+                        val childrenRef = dataSnapshot.child("children")
+                        childrenRef.ref.removeValue()
                     }
                 }
             }

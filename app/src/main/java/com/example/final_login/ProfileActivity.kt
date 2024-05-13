@@ -6,8 +6,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.text.Layout
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -15,28 +18,48 @@ import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.values
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
 
 class ProfileActivity: AppCompatActivity() {
     private val user = User()
     private var phoneNumberToDial: String? = null
+    private var isAccessPermitted: String = "false"
+    private var guardFullName: String = ""
 
     private lateinit var bottomNavigationView: BottomNavigationView
-    lateinit var adapter: ProfileAdapter
+    private lateinit var adapter: ProfileAdapter
     private lateinit var viewPager: ViewPager
+
+    private lateinit var firebaseDatabase: FirebaseDatabase
+    private lateinit var databaseReference: DatabaseReference
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var currentUser: FirebaseUser
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_profile)
 
-        viewPager = findViewById(R.id.viewPager)
-        adapter = ProfileAdapter(this)
+        firebaseDatabase = FirebaseDatabase.getInstance()
+        databaseReference = firebaseDatabase.reference.child("users")
+        firebaseAuth = FirebaseAuth.getInstance()
+        currentUser = firebaseAuth.currentUser!!
 
-        viewPager.adapter = adapter
-
-        val dotsIndicator = findViewById<WormDotsIndicator>(R.id.worm_dots_indicator)
-        dotsIndicator.attachTo(viewPager)
+        checkAccessPermitted { isPermitted ->
+            isAccessPermitted = isPermitted
+            loadGuardianFullName { name ->
+                guardFullName = name
+                initializeAdapter()
+            }
+        }
 
         if (!user.isUserLoggedIn()) {
             val intent = Intent(this, LoginActivity::class.java)
@@ -80,8 +103,12 @@ class ProfileActivity: AppCompatActivity() {
         }
     }
 
-    fun unlinkSnackBar(userDetails: ProfileData) {
+    fun monitorUnlinkSnackBar(userDetails: ProfileData) {
         Snackbar.make(viewPager, "Unlinked from ${userDetails.name}", Snackbar.LENGTH_SHORT).show()
+    }
+
+    fun clientUnlinkSnackBar() {
+        Snackbar.make(viewPager, "Unlinked from $guardFullName", Snackbar.LENGTH_SHORT).show()
     }
 
     fun callClient() {
@@ -131,6 +158,54 @@ class ProfileActivity: AppCompatActivity() {
             .create()
 
         dialog.show()
+    }
+
+    private fun checkAccessPermitted(callback: (String) -> Unit) {
+        val firebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseReference = firebaseDatabase.reference.child("users")
+        val firebaseAuth = FirebaseAuth.getInstance()
+        val security = Security()
+
+        databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid)).addListenerForSingleValueEvent(object :
+            ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val checkAP = snapshot.child("accessPermitted").value.toString()
+                callback(checkAP)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    private fun loadGuardianFullName(callback: (String) -> Unit) {
+        val security = Security()
+        var fullName = ""
+
+        databaseReference.child(isAccessPermitted).get()
+            .addOnSuccessListener { dataSnapshot ->
+                if (dataSnapshot.exists() && dataSnapshot.hasChildren()) {
+                    fullName = security.dec(dataSnapshot.child("firstname").value.toString())
+                    fullName += " "
+                    fullName += security.dec(dataSnapshot.child("surname").value.toString())
+                    callback(fullName)
+                } else {
+                    println("firebase Error: Data not found or empty")
+                    callback(fullName)
+                }
+            }.addOnFailureListener { exception ->
+                println("firebase Error getting data: $exception")
+            }
+    }
+
+    private fun initializeAdapter() {
+        viewPager = findViewById(R.id.viewPager)
+        adapter = ProfileAdapter(this, isAccessPermitted, guardFullName)
+        viewPager.adapter = adapter
+
+        val dotsIndicator = findViewById<WormDotsIndicator>(R.id.worm_dots_indicator)
+        dotsIndicator.attachTo(viewPager)
     }
 
     companion object {
