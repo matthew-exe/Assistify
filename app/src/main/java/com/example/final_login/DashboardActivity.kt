@@ -109,7 +109,7 @@ class DashboardActivity : AppCompatActivity() {
 
         emergencyCallSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
             override fun onSlideComplete(view: SlideToActView) {
-                phoneNumberToDial = "07450272350" // Should be 999 in production
+                phoneNumberToDial = "999" // UK Emergency Number
                 if (ContextCompat.checkSelfPermission(this@DashboardActivity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this@DashboardActivity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
                     emergencyCallSlider.resetSlider()
@@ -124,12 +124,15 @@ class DashboardActivity : AppCompatActivity() {
         btnCallUser = findViewById(R.id.btnCallUser)
 
         btnCallUser.setOnClickListener {
-            phoneNumberToDial = "07450272351" // Should be connected users number in production
-            if (ContextCompat.checkSelfPermission(this@DashboardActivity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this@DashboardActivity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
-            } else {
-                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
-                startActivity(intent)
+            CoroutineScope(Dispatchers.Main).launch {
+                phoneNumberToDial = user.getPhoneNumberToDial()
+                if (ContextCompat.checkSelfPermission(this@DashboardActivity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this@DashboardActivity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
+                } else {
+                    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
+                    startActivity(intent)
+
+                }
             }
         }
 

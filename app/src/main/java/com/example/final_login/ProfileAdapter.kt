@@ -88,11 +88,18 @@ class ProfileAdapter(private val context: Context) : PagerAdapter() {
                 medicalConditions += "\n \u2022 $medCon"
             }
         }
+
+        var contactInfo = "Contact Information:"
+        var emergencyContact = "Emergency contact: Not set"
+        var emergencyRelation = "Relation to client: Not set"
+        var emergencyNumber = "Emergency contact no. Not set"
         val details = "Details:"
-        val contactInfo = "Contact Information:"
-        val emergencyContact = "Emergency contact: ${userDetails.emergencyContact}"
-        val emergencyRelation = "Relation to client: ${userDetails.emergencyRelation}"
-        val emergencyNumber = "Emergency contact no. ${userDetails.emergencyNumber}"
+
+        if (userDetails.emergencyContact != "") {
+            emergencyContact = "Emergency contact: ${userDetails.emergencyContact}"
+            emergencyRelation = "Relation to client: ${userDetails.emergencyRelation}"
+            emergencyNumber = "Emergency contact no. ${userDetails.emergencyNumber}"
+        }
 
         // Update the UI with the user's details
         layout.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.profile_picture)

@@ -8,13 +8,13 @@ data class ProfileData (
     var dateOfBirth: String,
     var age: String,
     var bloodType: String,
-    val nhsNumber: String,
+    var nhsNumber: String,
 
     var medConditions: List<String>,
 
-    val emergencyContact: String,
-    val emergencyRelation: String,
-    val emergencyNumber: String,
+    var emergencyContact: String,
+    var emergencyRelation: String,
+    var emergencyNumber: String,
 
     var currentBPM: String,
     var minBPM: String,

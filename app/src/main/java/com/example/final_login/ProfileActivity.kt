@@ -16,6 +16,9 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ProfileActivity: AppCompatActivity() {
     private val user = User()
@@ -85,13 +88,14 @@ class ProfileActivity: AppCompatActivity() {
     }
 
     fun callClient() {
-        phoneNumberToDial = "07450272351" // Should be connected users number in production
-        if (ContextCompat.checkSelfPermission(this@ProfileActivity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this@ProfileActivity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE
-            )
-        } else {
-            val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
-            startActivity(intent)
+        CoroutineScope(Dispatchers.Main).launch {
+            phoneNumberToDial = user.getPhoneNumberToDial()
+            if (ContextCompat.checkSelfPermission(this@ProfileActivity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this@ProfileActivity, arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL_PHONE)
+            } else {
+                val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phoneNumberToDial"))
+                startActivity(intent)
+            }
         }
     }
 
