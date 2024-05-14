@@ -1,6 +1,8 @@
 package com.example.final_login
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Resources.Theme
 import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
@@ -56,7 +58,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
 
     private var themeAccessibleActive = false
-    private lateinit var wholePage:ConstraintLayout
+    private lateinit var wholePage: ConstraintLayout
     private lateinit var cardPage: CardView
 
     private var hasPermissions = false
@@ -90,7 +92,7 @@ class LoginActivity : AppCompatActivity() {
         btnThemeSwitch = findViewById(R.id.btnAccessibleTheme)
         wholePage = findViewById(R.id.wholePage)
         cardPage = findViewById(R.id.cardPage)
-        themeAccessibleActive = !intent.getBooleanExtra("themeAccessibleActive", false)
+        themeAccessibleActive = ThemeSharedPref.getThemeState(this)
         toggleTheme()
         // Forgot Password Link and Styling
         textForgotPassword = findViewById(R.id.textForgotPassword)
@@ -265,17 +267,18 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun toggleTheme() {
-        // TODO: Switch from accessible to normal theme just implement functionality, styling can be done once designed by UI
         if(themeAccessibleActive){
             wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.off_white, null))
-            themeAccessibleActive = false
+            ThemeSharedPref.setThemeState(this, true)
             btnThemeSwitch.setChecked(false)
+            themeAccessibleActive = false
         } else {
             wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
-            themeAccessibleActive = true
+            ThemeSharedPref.setThemeState(this, false)
             btnThemeSwitch.setChecked(true)
+            themeAccessibleActive = true
         }
     }
 
@@ -319,5 +322,4 @@ class LoginActivity : AppCompatActivity() {
 
         alertDialog.show()
     }
-
 }

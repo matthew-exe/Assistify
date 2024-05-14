@@ -2,6 +2,9 @@ package com.example.final_login
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +13,7 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatEditText
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 
 class MyAdapter(
@@ -70,6 +74,12 @@ class MyAdapter(
         when (holder) {
             is ButtonViewHolder -> {
                 if (isUserDashboard) {
+                    val sensorCard = holder.button.findViewById<CardView>(R.id.button)
+                    val sensorText = holder.button.findViewById<TextView>(R.id.buttonText)
+                    if (!ThemeSharedPref.getThemeState(holder.button.context)) {
+                        sensorText.setTextColor(holder.button.context.resources.getColor(R.color.black, null))
+                        sensorCard.setCardBackgroundColor(holder.button.context.resources.getColor(R.color.accessibleYellow, null))
+                    }
                     holder.button.setOnClickListener {
                         showSensorSelectionPopup()
                     }
@@ -79,8 +89,22 @@ class MyAdapter(
             }
             is ItemViewHolder -> {
                 val sensor = filteredData[position] as SensorData
+                val sensorCard = holder.itemView.findViewById<CardView>(R.id.sensorCard)
+                val sensorName = holder.itemView.findViewById<TextView>(R.id.tvSensorName)
+                val sensorStat = holder.itemView.findViewById<TextView>(R.id.tvSensorStat)
+                val sensorImage = holder.itemView.findViewById<ImageView>(R.id.ivSensorImage)
                 holder.name.text = sensor.name
                 holder.image.setImageResource(sensor.image)
+                if (!ThemeSharedPref.getThemeState(holder.itemView.context)) {
+                    val blackColorFilter = PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.SRC_IN)
+
+                    sensorImage.setImageResource(sensor.image)
+                    sensorImage.colorFilter = blackColorFilter
+
+                    sensorCard.setCardBackgroundColor(holder.itemView.context.resources.getColor(R.color.accessibleYellow, null))
+                    sensorName.setTextColor(holder.itemView.context.resources.getColor(R.color.black, null))
+                    sensorStat.setTextColor(holder.itemView.context.resources.getColor(R.color.black, null))
+                }
                 holder.stat.text = if (sensor.stat != "0") sensor.stat else "Syncing..."
 
                 if (sensor.name == "Pulse") {
