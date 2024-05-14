@@ -19,3 +19,9 @@ Assistify aims to seamlessly integrate IoT devices and adaptive controls under o
 ![Static Badge](https://img.shields.io/badge/Fitbit_Watch-%236750A4?style=flat-square&logo=fitbit)
 ![Static Badge](https://img.shields.io/badge/Google_Fit-%23DBE1F1?style=flat-square&logo=googlefit)
 ![Static Badge](https://img.shields.io/badge/Oura_Health-red?style=flat-square&logo=osano&logoColor=black)
+
+### Developement Team:
+| Lead | Developer | Developer
+| ------------------------------------------ | ------------------------------------------- | -------------------------------------- |
+| [Matt Gee](https://github.com/matthew-exe) | [Josh Bousfield](https://github.com/Bouza1) | [Emre Kose](https://github.com/DunPog) |
+
