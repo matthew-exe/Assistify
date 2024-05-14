@@ -77,6 +77,33 @@ class User{
     }
 
 
+    suspend fun getPhoneNumberToDial(): String? {
+        val currentUserRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid!!))
+        var userIdForPhoneNumber: String? = null
+
+        val dataSnapshot = currentUserRef.child("children").get().await()
+        if (dataSnapshot.exists()) {
+            // User is linked as a guardian to another user
+            val linkedUserKey = dataSnapshot.value.toString()
+            val linkedUserRef = databaseReference.child(linkedUserKey)
+            val snapshot = linkedUserRef.child("phoneNumber").get().await()
+            if (snapshot.exists() && security.dec(snapshot.value.toString()) != null) {
+                userIdForPhoneNumber = security.dec(snapshot.value.toString())
+            }
+        } else {
+            // User is not linked as a guardian, check if they are a child
+            val snapshot = currentUserRef.child("accessPermitted").get().await()
+            if (snapshot.exists()) {
+                val parentKey = snapshot.value.toString()
+                val parentUserRef = databaseReference.child(parentKey)
+                val snapshot = parentUserRef.child("phoneNumber").get().await()
+                if (snapshot.exists() && security.dec(snapshot.value.toString()) != null) {
+                    userIdForPhoneNumber = security.dec(snapshot.value.toString())
+                }
+            }
+        }
+        return userIdForPhoneNumber
+    }
 
 
     fun getUserUidToLoad(): String {
@@ -741,6 +768,15 @@ class User{
                     if(detailsSnapshot.hasChild("nhsNumber")){
                         emptyUser.bloodType = security.dec(detailsSnapshot.child("nhsNumber").value.toString())
                     }
+                    if(detailsSnapshot.hasChild("emergencyContactName")){
+                        emptyUser.emergencyContact = security.dec(detailsSnapshot.child("emergencyContactName").value.toString())
+                    }
+                    if(detailsSnapshot.hasChild("emergencyContactRelation")){
+                        emptyUser.emergencyRelation = security.dec(detailsSnapshot.child("emergencyContactRelation").value.toString())
+                    }
+                    if(detailsSnapshot.hasChild("emergencyContactNumber")){
+                        emptyUser.emergencyNumber = security.dec(detailsSnapshot.child("emergencyContactNumber").value.toString())
+                    }
                    if(detailsSnapshot.hasChild("medicalConditions")){
                        val medConditions = detailsSnapshot.child("medicalConditions")
                        val returnList = mutableListOf<String>()
@@ -768,15 +804,15 @@ class User{
 
     val emptyUserDetails = ProfileData(
         "Yvonne",
-        R.drawable.yvonne,
+        R.drawable.profile,
         "1951-11-30",
         "73",
         "A+",
         "4857773456",
         listOf("Hip replacement", "Arthritis"),
-        "Teresa",
-        "Daughter",
-        "07777123456",
+        "",
+        "",
+        "",
         "75",
         "55",
         "105",

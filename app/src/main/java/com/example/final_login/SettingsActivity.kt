@@ -126,7 +126,8 @@ class SettingsActivity : AppCompatActivity() {
                     "Date of Birth",
                     "Blood Type",
                     "NHS Number",
-                    "View Medical Conditions"
+                    "View Medical Conditions",
+                    "View Emergency Contact Details"
                 ),
                 null,
                 PersonalDetails()
@@ -173,6 +174,8 @@ class SettingsActivity : AppCompatActivity() {
                     val maskedEmail = email.replace(Regex("""^(\w{1})(\w+)(@\w+\.\w+)$"""), "$1******$3")
                     val maskedPhoneNumber = phoneNumber.replace(Regex("""^(\d{2})(\d+)(\d{2})$"""), "$1******$3")
 
+
+
                     sections[0].displayValue = firstname
                     sections[1].displayValue = surname
                     sections[2].displayValue = maskedEmail
@@ -182,6 +185,9 @@ class SettingsActivity : AppCompatActivity() {
                     var dateOfBirth: String
                     var bloodType: String
                     var nhsNumber: String
+                    var emergencyContactName: String
+                    var emergencyContactRelation: String
+                    var emergencyContactNumber: String
                     var medicalConditions: List<String>
 
                     val personalDetailsSnapshot = dataSnapshot.child("personalDetails")
@@ -190,26 +196,43 @@ class SettingsActivity : AppCompatActivity() {
                         dateOfBirth = personalDetailsSnapshot.child("dateOfBirth").getValue(String::class.java)?.let { security.dec(it) } ?: ""
                         bloodType = personalDetailsSnapshot.child("bloodType").getValue(String::class.java)?.let { security.dec(it) } ?: ""
                         nhsNumber = personalDetailsSnapshot.child("nhsNumber").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                        emergencyContactName = personalDetailsSnapshot.child("emergencyContactName").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                        emergencyContactRelation = personalDetailsSnapshot.child("emergencyContactRelation").getValue(String::class.java)?.let { security.dec(it) } ?: ""
+                        emergencyContactNumber = personalDetailsSnapshot.child("emergencyContactNumber").getValue(String::class.java)?.let { security.dec(it) } ?: ""
                         val genericTypeIndicator : GenericTypeIndicator<List<String>> = object : GenericTypeIndicator<List<String>>() {}
                         val medicalConditionsSnapshot = personalDetailsSnapshot.child("medicalConditions").getValue(genericTypeIndicator)
                         medicalConditions = medicalConditionsSnapshot?.map { security.dec(it) } ?: emptyList()
+
                     } else {
                         age = ""
                         dateOfBirth = ""
                         bloodType = ""
                         nhsNumber = ""
+                        emergencyContactName = ""
+                        emergencyContactRelation = ""
+                        emergencyContactNumber = ""
                         medicalConditions = emptyList()
                     }
 
 
-                    val personalDetails = PersonalDetails(age, dateOfBirth, bloodType, nhsNumber, medicalConditions)
+                    val personalDetails = PersonalDetails(
+                        age,
+                        dateOfBirth,
+                        bloodType,
+                        nhsNumber,
+                        emergencyContactName,
+                        emergencyContactRelation,
+                        emergencyContactNumber,
+                        medicalConditions,
+                    )
 
                     sections[4].children = listOf(
                         "Age: $age",
                         "Date of Birth: $dateOfBirth",
                         "Blood Type: $bloodType",
                         "NHS Number: $nhsNumber",
-                        "View Medical Conditions"
+                        "View Medical Conditions",
+                        "View Emergency Contact Details"
                     )
 
                     sections[4].personalDetails = personalDetails
@@ -328,6 +351,85 @@ class SettingsActivity : AppCompatActivity() {
                 false
             }
         }
+    }
+
+    private fun showEmergencyContactDialog(
+        sections: MutableList<SettingsItem>,
+        groupPosition: Int
+    ) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_emergency_contact, null)
+        val etContactName = dialogView.findViewById<EditText>(R.id.et_contact_name)
+        val etContactRelation = dialogView.findViewById<EditText>(R.id.et_contact_relation)
+        val etContactNumber = dialogView.findViewById<EditText>(R.id.et_contact_number)
+
+        val personalDetails = sections[groupPosition].personalDetails ?: PersonalDetails()
+        etContactName.setText(personalDetails.emergencyContactName ?: "")
+        etContactRelation.setText(personalDetails.emergencyContactRelation ?: "")
+        etContactNumber.setText(personalDetails.emergencyContactNumber ?: "")
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Emergency Contact")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                val name = etContactName.text.toString().trim()
+                val relation = etContactRelation.text.toString().trim()
+                val number = etContactNumber.text.toString().trim()
+
+                // Validate inputs
+                if (name.isBlank() || relation.isBlank() || number.isBlank()) {
+                    Snackbar.make(rootView, "Please fill in all the fields", Snackbar.LENGTH_SHORT)
+                        .show()
+                    return@setPositiveButton
+                }
+
+                val phoneNumberPattern = Regex("^\\+?\\d{10,13}$")
+                if (!phoneNumberPattern.matches(number)) {
+                    Snackbar.make(
+                        rootView,
+                        "Please enter a valid phone number",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                val encryptedName = security.enc(name)
+                val encryptedRelation = security.enc(relation)
+                val encryptedNumber = security.enc(number)
+
+                val updateMap = mapOf(
+                    "emergencyContactName" to encryptedName,
+                    "emergencyContactRelation" to encryptedRelation,
+                    "emergencyContactNumber" to encryptedNumber
+                )
+
+                databaseReference.child(security.enc(currentUser.uid!!)).child("personalDetails")
+                    .updateChildren(updateMap)
+                    .addOnSuccessListener {
+                        sections[groupPosition].personalDetails = personalDetails.copy(
+                            emergencyContactName = name,
+                            emergencyContactRelation = relation,
+                            emergencyContactNumber = number
+                        )
+                        adapter.notifyDataSetChanged()
+                        Snackbar.make(
+                            rootView,
+                            "Emergency contact saved successfully",
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+                    .addOnFailureListener { exception ->
+                        println("firebase Error saving emergency contact: $exception")
+                        Snackbar.make(
+                            rootView,
+                            "Error saving emergency contact",
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
     }
 
     private fun showResetPasswordDialog() {
@@ -539,6 +641,7 @@ class SettingsActivity : AppCompatActivity() {
                                 }
                             )
                             "View Medical Conditions" -> showMedicalConditionsDialog(sections.toMutableList(), groupPosition)
+                            "View Emergency Contact Details" -> showEmergencyContactDialog(sections.toMutableList(), groupPosition)
                         }
                     }
                 }
