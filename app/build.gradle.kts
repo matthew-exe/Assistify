@@ -38,13 +38,14 @@ android {
 }
 
 dependencies {
+
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.firebase:firebase-database-ktx:21.0.0")
     implementation("androidx.activity:activity:1.9.0")
-    implementation ("androidx.health.connect:connect-client:1.0.0-alpha10")
+    implementation ("androidx.health.connect:connect-client:1.1.0-alpha02")
     implementation ("androidx.compose.runtime:runtime:1.6.6")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

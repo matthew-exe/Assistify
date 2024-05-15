@@ -32,10 +32,10 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_config_health_connect)
 
+        healthConnectManager = HealthConnectManager(this)
         viewPager = findViewById(R.id.viewPager)
         val adapter = InstructionsAdapter(this)
         viewPager.adapter = adapter
-        healthConnectManager = HealthConnectManager(this)
 
         val dotsIndicator = findViewById<WormDotsIndicator>(R.id.worm_dots_indicator)
         dotsIndicator.attachTo(viewPager)

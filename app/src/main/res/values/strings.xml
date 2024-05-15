@@ -32,5 +32,5 @@
     <string name="intructions">Intructions</string>
     <string name="installation_instructions">Assistify uses data collected from your smart watch. If you have not done so already, please pair your smart watch to your phone, by following the installation instructions provided by the manufacturer. Assistify can read the data of any device compatible with Health Connect, please refer to your owners manual for compatibility.</string>
     <string name="intro_text">"Our mission is to seamlessly integrate smart devices and adaptive controls into a user-friendly mobile application. With real-time monitoring capabilities, we empower caregivers to watch over vulnerable care-recipients, alerting them to any potential hazards. This app is designed to offer peace of mind to both caregivers and care-recipients, enhancing independence while ensuring safety."</string>
-    <string name="default_web_client_id">"69959552127-6rugs773fjdua9bdtclle5hhgqknbmbl.apps.googleusercontent.com"</string>
+    <string name="default_web_client_id">"69959552127-f2fno6854bel2drv9v9j1koi0rdqusku.apps.googleusercontent.com"</string>
 </resources>

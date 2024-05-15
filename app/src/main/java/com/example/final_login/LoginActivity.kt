@@ -57,6 +57,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
 
     private var themeAccessibleActive = false
+
     private lateinit var wholePage:ConstraintLayout
     private lateinit var cardPage: CardView
 
@@ -165,6 +166,7 @@ class LoginActivity : AppCompatActivity() {
             scope.launch {
                 try {
                     if(healthConnectManager.hasAllPermissions(healthConnectManager.PERMISSIONS)){
+                        println("Has all Permissions ${healthConnectManager.PERMISSIONS}")
                         hasPermissions = true
                     } else {
                         hasPermissions = false

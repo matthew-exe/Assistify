@@ -2,6 +2,7 @@ package com.example.final_login
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
@@ -25,10 +26,10 @@ import kotlin.time.toKotlinDuration
 
 class HealthConnectManager(private val context: Context) {
 
-    private lateinit var healthConnectClient: HealthConnectClient
+    lateinit var healthConnectClient: HealthConnectClient
     private val user = User()
     var availability = HealthConnectAvailability.NOT_SUPPORTED
-        private set
+
 
     val PERMISSIONS =
         setOf(
@@ -42,12 +43,15 @@ class HealthConnectManager(private val context: Context) {
 
     init {
         checkAvailability()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
+            println("Past UPSIDE DOWN CAKE ")
+        }
     }
     suspend fun hasAllPermissions(permissions: Set<String>): Boolean {
         return healthConnectClient.permissionController.getGrantedPermissions().containsAll(permissions)
     }
 
-    private fun checkAvailability() {
+    fun checkAvailability() {
         val packageManager = context.packageManager
         val packageName = "com.google.android.apps.healthdata"
         availability = try {

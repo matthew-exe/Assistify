@@ -1,14 +1,22 @@
 package com.example.final_login
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
 import androidx.viewpager.widget.PagerAdapter
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 class InstructionsAdapter(private val context: Context) : PagerAdapter() {
 
@@ -55,18 +63,29 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
         if(healthConnectManager.availability == HealthConnectAvailability.NOT_SUPPORTED){
             addNotSupportedMessage(view, btnInstall)
         } else if(healthConnectManager.availability == HealthConnectAvailability.NOT_INSTALLED){
-            addPleaseInstallButton(btnInstall)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                addSyncHealthConnect(btnInstall, true)
+            } else {
+                addPleaseInstallButton(btnInstall)
+            }
         }
 
         if(healthConnectManager.availability == HealthConnectAvailability.INSTALLED) {
-            addSyncHealthConnect(btnInstall)
+            println("IS INSTALLED ")
+            addSyncHealthConnect(btnInstall, false)
         }
     }
 
-    private fun addSyncHealthConnect(button: Button){
+    private fun addSyncHealthConnect(button: Button, api34:Boolean){
         button.text = "Sync"
         button.setOnClickListener {
-            (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
+            println("Syncing!")
+            if(!api34){
+                (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
+            } else {
+                val requestPermissionActivityContract = PermissionController.createRequestPermissionResultContract()
+
+            }
         }
     }
 
