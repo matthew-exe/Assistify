@@ -122,6 +122,13 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         btnCallUser = findViewById(R.id.btnCallUser)
+        btnCallUser.visibility = View.GONE
+
+        CoroutineScope(Dispatchers.Main).launch {
+            if (user.getPhoneNumberToDial() != null) {
+                btnCallUser.visibility = View.VISIBLE
+            }
+        }
 
         btnCallUser.setOnClickListener {
             CoroutineScope(Dispatchers.Main).launch {
