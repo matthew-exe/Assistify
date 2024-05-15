@@ -43,9 +43,6 @@ class HealthConnectManager(private val context: Context) {
 
     init {
         checkAvailability()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
-            println("Past UPSIDE DOWN CAKE ")
-        }
     }
     suspend fun hasAllPermissions(permissions: Set<String>): Boolean {
         return healthConnectClient.permissionController.getGrantedPermissions().containsAll(permissions)

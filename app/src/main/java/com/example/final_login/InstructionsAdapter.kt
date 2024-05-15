@@ -63,7 +63,7 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
         if(healthConnectManager.availability == HealthConnectAvailability.NOT_SUPPORTED){
             addNotSupportedMessage(view, btnInstall)
         } else if(healthConnectManager.availability == HealthConnectAvailability.NOT_INSTALLED){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 addSyncHealthConnect(btnInstall, true)
             } else {
                 addPleaseInstallButton(btnInstall)
@@ -84,13 +84,13 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
                 (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
             } else {
                 val requestPermissionActivityContract = PermissionController.createRequestPermissionResultContract()
-
+                (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
             }
         }
     }
 
     private fun addNotSupportedMessage(view:View, button:Button){
-        Snackbar.make(view, "The Current Minimum Version is Android 33, Please Upgrade Your Device", Snackbar.LENGTH_LONG).show()
+        Snackbar.make(view, "The Current Minimum Version is Android 28, Please Upgrade Your Device", Snackbar.LENGTH_LONG).show()
         button.isEnabled = false
     }
 
