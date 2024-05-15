@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.text.Layout
@@ -13,6 +14,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.viewpager.widget.ViewPager
@@ -42,6 +44,8 @@ class ProfileActivity: AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var currentUser: FirebaseUser
+
+    private lateinit var wholePage: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +94,9 @@ class ProfileActivity: AppCompatActivity() {
                 else -> false
             }
         }
+
+        wholePage = findViewById(R.id.wholePage)
+        setTheme()
     }
 
     fun linkUserProfile(userData: ProfileData, displaySnackbar: Boolean) {
@@ -205,10 +212,28 @@ class ProfileActivity: AppCompatActivity() {
         viewPager.adapter = adapter
 
         val dotsIndicator = findViewById<WormDotsIndicator>(R.id.worm_dots_indicator)
+
+         if (!ThemeSharedPref.getThemeState(this)) {
+             dotsIndicator.setStrokeDotsIndicatorColor(resources.getColor(R.color.accessibleYellow, null))
+             dotsIndicator.setDotIndicatorColor(resources.getColor(R.color.accessibleYellowDarker, null))
+         }
+
         dotsIndicator.attachTo(viewPager)
     }
 
     companion object {
         private const val REQUEST_CALL_PHONE = 1
+    }
+
+    private fun setTheme() {
+        if (!ThemeSharedPref.getThemeState(this)) {
+            wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
+
+            bottomNavigationView.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
+            bottomNavigationView.itemRippleColor = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            bottomNavigationView.itemActiveIndicatorColor = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            bottomNavigationView.itemTextColor = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+            bottomNavigationView.itemIconTintList = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+        }
     }
 }

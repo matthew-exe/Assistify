@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.content.res.Resources.Theme
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,7 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -30,6 +33,8 @@ import com.google.firebase.database.GenericTypeIndicator
 class SettingsActivity : AppCompatActivity() {
     private val user = User()
     private val security = Security()
+    private val themeChangeMessageKey = "themeChangeMessage"
+    private var themeChangeMessage: String? = null
     private lateinit var adapter: MyExpandableListAdapter
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var signOutButton: Button
@@ -39,6 +44,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var currentUser: FirebaseUser
     private lateinit var rootView: View
+    private lateinit var wholePage: ConstraintLayout
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -133,6 +139,7 @@ class SettingsActivity : AppCompatActivity() {
             ),
             SettingsItem("Change Password", null),
             SettingsItem("Generate Monitor Key", null),
+            SettingsItem("Switch Theme", null),
             SettingsItem(
                 "Privacy Policy",
                 listOf(
@@ -158,6 +165,13 @@ class SettingsActivity : AppCompatActivity() {
             ),
         )
         populateUserDetails(sections)
+
+        wholePage = findViewById(R.id.wholePage)
+        setTheme()
+
+        savedInstanceState?.getString(themeChangeMessageKey)?.let {
+            Snackbar.make(rootView, it, Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     private fun populateUserDetails(sections: List<SettingsItem>) {
@@ -469,6 +483,7 @@ class SettingsActivity : AppCompatActivity() {
                     )
                     "Change Password" -> showResetPasswordDialog()
                     "Generate Monitor Key" -> showGenerateMonitorKeyDialog()
+                    "Switch Theme" -> switchTheme()
                 }
             }
 
@@ -550,5 +565,38 @@ class SettingsActivity : AppCompatActivity() {
 
 
         override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean = true
+    }
+
+    private fun switchTheme() {
+        themeChangeMessage = if (ThemeSharedPref.getThemeState(this)) {
+            ThemeSharedPref.setThemeState(this, false)
+            "Switched to accessible theme"
+        } else {
+            ThemeSharedPref.setThemeState(this, true)
+            "Switched to default theme"
+        }
+        recreate()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(themeChangeMessageKey, themeChangeMessage)
+    }
+
+    private fun setTheme() {
+        if (!ThemeSharedPref.getThemeState(this)) {
+            wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
+
+            bottomNavigationView.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
+            bottomNavigationView.itemRippleColor = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            bottomNavigationView.itemActiveIndicatorColor = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            bottomNavigationView.itemTextColor = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+            bottomNavigationView.itemIconTintList = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+
+            signOutButton.setBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
+            signOutButton.setTextColor(resources.getColor(R.color.black, null))
+
+            expandableListView.setBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
+        }
     }
 }

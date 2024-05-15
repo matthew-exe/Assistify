@@ -2,6 +2,7 @@ package com.example.final_login
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.res.Resources.Theme
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,6 +67,17 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
             val linkButton = layout.findViewById<Button>(R.id.linkButton)
             val unlinkButton = layout.findViewById<Button>(R.id.unlinkButton)
 
+            if (!ThemeSharedPref.getThemeState(context as ProfileActivity)) {
+                preLinkText1.setTextColor(layout.context.resources.getColor(R.color.black, null))
+                preLinkText2.setTextColor(layout.context.resources.getColor(R.color.black, null))
+                if (layouts.size <= 1) {
+                    linkButton.setBackgroundColor(layout.context.resources.getColor(R.color.accessibleYellow, null))
+                }
+                linkButton.setTextColor(layout.context.resources.getColor(R.color.black, null))
+                unlinkButton.setBackgroundColor(layout.context.resources.getColor(R.color.accessibleYellow, null))
+                unlinkButton.setTextColor(layout.context.resources.getColor(R.color.black, null))
+            }
+
             if (isAccessPermitted != "false" && isAccessPermitted != "true") {
                 preLinkText1.text = "It appears you are linked to $guardFullName."
                 preLinkText2.text = "Please tap the button below to unlink."
@@ -99,7 +111,6 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
 
     private fun updateUserProfile(layout: View, userDetails: ProfileData) {
         val linearLayout = layout.findViewById<LinearLayout>(R.id.linearLayout)
-        linearLayout.setBackgroundResource(R.drawable.border)
 
         val dob = "Date of birth: ${userDetails.dateOfBirth}"
         val age = "Age: ${userDetails.age}"
@@ -116,6 +127,24 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
         val emergencyContact = "Emergency contact: ${userDetails.emergencyContact}"
         val emergencyRelation = "Relation to client: ${userDetails.emergencyRelation}"
         val emergencyNumber = "Emergency contact no. ${userDetails.emergencyNumber}"
+
+        if (!ThemeSharedPref.getThemeState(context as ProfileActivity)) {
+            linearLayout.setBackgroundResource(R.drawable.border_accessible)
+
+            layout.findViewById<TextView>(R.id.name_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.dob_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.age_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.blood_type_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.nhs_number_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.medical_conditions_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.details_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.info_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.emergency_contact_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.emergency_relation_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.emergency_number_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+        } else {
+            linearLayout.setBackgroundResource(R.drawable.border)
+        }
 
         // Update the UI with the user's details
         layout.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.profile_picture)
@@ -137,13 +166,12 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
         }
 
         layout.findViewById<Button>(R.id.call_button)?.setOnClickListener {
-            (context as ProfileActivity).callClient()
+            (context).callClient()
         }
     }
 
     private fun updateStatProfile(layout: View, userDetails: ProfileData) {
         val linearLayout = layout.findViewById<LinearLayout>(R.id.linearLayoutStat)
-        linearLayout.setBackgroundResource(R.drawable.border)
 
         val statPicture = R.drawable.statistics
         val statText = "Statistics:"
@@ -160,6 +188,27 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
         val caloriesSpent = "Total Today: ${userDetails.caloriesTotalSpent}"
         val sleepText = "Sleep:"
         val totalSleep = "Total ${userDetails.sleepTotal}"
+
+        if (!ThemeSharedPref.getThemeState(context as ProfileActivity)) {
+            linearLayout.setBackgroundResource(R.drawable.border_accessible)
+
+            layout.findViewById<TextView>(R.id.statistics_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.heartRate_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.currBPM_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.minBPM_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.maxBPM_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.averageBPM_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.steps_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.steps24hTotal_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.stepsLastDetected_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.stepsFirstDetected_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.sleep_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.sleep_total_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.calories_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+            layout.findViewById<TextView>(R.id.caloriesTotalSpent_text).setTextColor(layout.context.resources.getColor(R.color.black, null))
+        } else {
+            linearLayout.setBackgroundResource(R.drawable.border)
+        }
 
         layout.findViewById<ImageView>(R.id.statistics_picture)
             .setImageResource(statPicture)
