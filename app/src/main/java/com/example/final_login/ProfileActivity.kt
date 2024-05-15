@@ -150,7 +150,11 @@ class ProfileActivity: AppCompatActivity() {
 
     fun showKeyEnterDialog() {
         val editText = EditText(this)
-        val dialog = AlertDialog.Builder(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(this)
+        }
             .setTitle("Enter Key:")
             .setView(editText)
             .setPositiveButton("OK") { _, _ ->

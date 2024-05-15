@@ -137,7 +137,11 @@ class MyAdapter(
     }
 
     private fun showSensorSelectionPopup() {
-        val builder = AlertDialog.Builder(context)
+        val builder = if (!ThemeSharedPref.getThemeState(context)) {
+            AlertDialog.Builder(context, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(context)
+        }
         builder.setTitle("Select Sensor")
 
         val sensorItems = SensorRepository.sensorName.map { (id, name) ->
@@ -173,7 +177,11 @@ class MyAdapter(
     }
 
     private fun showDeleteConfirmationDialog(position: Int) {
-        val builder = AlertDialog.Builder(context)
+        val builder = if (!ThemeSharedPref.getThemeState(context)) {
+            AlertDialog.Builder(context, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(context)
+        }
         builder.setTitle("Delete Sensor")
         builder.setMessage("Are you sure you want to delete this sensor?")
         builder.setPositiveButton("Yes") { _, _ ->

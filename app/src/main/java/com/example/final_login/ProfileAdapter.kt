@@ -235,7 +235,11 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
     }
 
     private fun showUnlinkDialogClient() {
-        val dialog = AlertDialog.Builder(context as ProfileActivity)
+        val dialog = if (!ThemeSharedPref.getThemeState(context as ProfileActivity)) {
+            AlertDialog.Builder(context, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(context)
+        }
             .setTitle("Are you sure you want to unlink?")
             .setPositiveButton("Yes") { _, _ ->
                 user.childRemoveGuardian()

@@ -202,7 +202,11 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun showNotificationsDialog() {
-        val dialog = Dialog(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            Dialog(this, R.style.MyDialogTheme)
+        } else {
+            Dialog(this)
+        }
         dialog.setContentView(R.layout.notification_dialog)
 
         val lvNotifications = dialog.findViewById<ListView>(R.id.lvNotifications)

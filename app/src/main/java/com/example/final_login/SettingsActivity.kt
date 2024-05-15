@@ -279,7 +279,11 @@ class SettingsActivity : AppCompatActivity() {
         val editText = EditText(this)
         editText.setText(initialValue)
 
-        val dialog = AlertDialog.Builder(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(this)
+        }
             .setTitle(title)
             .setView(editText)
             .setPositiveButton("Save") { _, _ ->
@@ -295,6 +299,10 @@ class SettingsActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+        if (!ThemeSharedPref.getThemeState(this)) {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.black, null))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.black, null))
+        }
     }
 
 
@@ -308,7 +316,11 @@ class SettingsActivity : AppCompatActivity() {
         rvMedicalConditions.adapter = medicalConditionsAdapter
         rvMedicalConditions.layoutManager = LinearLayoutManager(this)
 
-        val dialog = AlertDialog.Builder(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(this)
+        }
             .setTitle("Medical Conditions")
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
@@ -329,6 +341,10 @@ class SettingsActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+        if (!ThemeSharedPref.getThemeState(this)) {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.black, null))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.black, null))
+        }
 
         etMedicalCondition.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -345,14 +361,24 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showResetPasswordDialog() {
-        AlertDialog.Builder(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(this)
+        }
             .setTitle("Change Password")
             .setMessage("Do you want us to send you an email to reset your password?")
             .setPositiveButton("Yes") { _, _ ->
                 user.sendResetPasswordEmail(this, currentUser.email!!)
             }
             .setNegativeButton("No", null)
-            .show()
+            .create()
+
+        dialog.show()
+        if (!ThemeSharedPref.getThemeState(this)) {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.black, null))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.black, null))
+        }
     }
 
     private fun showCopySnackBar(secureKey:String){
