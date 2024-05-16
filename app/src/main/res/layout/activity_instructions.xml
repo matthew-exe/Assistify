@@ -47,7 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_marginTop="10dp"
                 android:textSize="16sp"
-                android:justificationMode="inter_word"
+                android:textAlignment="center"
                 android:fontFamily="@font/lexend"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"

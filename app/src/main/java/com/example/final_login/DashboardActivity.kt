@@ -59,7 +59,6 @@ class DashboardActivity : AppCompatActivity() {
     private var notificationCount: Int = 0
     private var notifications = mutableListOf<Pair<String, String>>()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

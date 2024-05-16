@@ -15,6 +15,7 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager
     private val requestPermissionActivityContract = PermissionController.createRequestPermissionResultContract()
     private lateinit var healthConnectManager: HealthConnectManager
+    private lateinit var adapter : InstructionsAdapter
 
     val requestPermissions = registerForActivityResult(requestPermissionActivityContract) { granted ->
         if (granted.containsAll(healthConnectManager.PERMISSIONS)) {
@@ -34,13 +35,14 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
 
         healthConnectManager = HealthConnectManager(this)
         viewPager = findViewById(R.id.viewPager)
-        val adapter = InstructionsAdapter(this)
+        adapter = InstructionsAdapter(this)
         viewPager.adapter = adapter
-
         val dotsIndicator = findViewById<WormDotsIndicator>(R.id.worm_dots_indicator)
         dotsIndicator.attachTo(viewPager)
+    }
 
-        // TODO("Check For Permissions")
-
+    override fun onResume() {
+        super.onResume()
+        adapter.setButtons()
     }
 }

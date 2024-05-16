@@ -22,6 +22,9 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(context)
     private val healthConnectManager = HealthConnectManager(context)
+    private var currentLayout = 0
+    private lateinit var vgContainer: ViewGroup
+    private val user = User()
 
     private val layoutResIds = arrayOf(
         R.layout.activity_introduction,
@@ -39,6 +42,8 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val layoutResId = layoutResIds[position]
+        vgContainer = container
+        currentLayout = layoutResId
         val view = layoutInflater.inflate(layoutResId, container, false)
         container.addView(view)
         checkForView(layoutResId, view)
@@ -64,28 +69,21 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
             addNotSupportedMessage(view, btnInstall)
         } else if(healthConnectManager.availability == HealthConnectAvailability.NOT_INSTALLED){
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                addSyncHealthConnect(btnInstall, true)
+                addSyncHealthConnect(btnInstall)
             } else {
                 addPleaseInstallButton(btnInstall)
             }
         }
 
         if(healthConnectManager.availability == HealthConnectAvailability.INSTALLED) {
-            println("IS INSTALLED ")
-            addSyncHealthConnect(btnInstall, false)
+            addSyncHealthConnect(btnInstall)
         }
     }
 
-    private fun addSyncHealthConnect(button: Button, api34:Boolean){
+    private fun addSyncHealthConnect(button: Button){
         button.text = "Sync"
         button.setOnClickListener {
-            println("Syncing!")
-            if(!api34){
-                (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
-            } else {
-                val requestPermissionActivityContract = PermissionController.createRequestPermissionResultContract()
-                (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
-            }
+            (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
         }
     }
 
@@ -96,14 +94,20 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
 
     private fun addPleaseInstallButton(button: Button){
         button.setOnClickListener {
-            val uriString = ("market://details?id=com.google.android.apps.healthdata")
-            context.startActivity(
-                Intent(Intent.ACTION_VIEW).apply {
-                    setPackage("com.android.vending")
-                    data = Uri.parse(uriString)
-                    putExtra("overlay", true)
-                    putExtra("callerId", "com.example.final_login")
-                })
+            healthConnectManager.checkAvailability()
+            if(healthConnectManager.availability == HealthConnectAvailability.INSTALLED){
+                (context as ConfigHealthConnectActivity).requestPermissions.launch(healthConnectManager.PERMISSIONS)
+            } else {
+                val uriString = ("market://details?id=com.google.android.apps.healthdata")
+                context.startActivity(
+                    Intent(Intent.ACTION_VIEW).apply {
+                        setPackage("com.android.vending")
+                        data = Uri.parse(uriString)
+                        putExtra("overlay", true)
+                        putExtra("callerId", "com.example.final_login")
+                    })
+            }
+
             //TODO("Return and Refresh So It can Request Permissions Instead of Having To Force Close App and Restart")
         }
     }
@@ -132,4 +136,16 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
                 putExtra("callerId", "com.example.final_login")
             })
     }
+
+    fun setButtons(){
+        if(currentLayout == R.layout.activity_install ){
+            healthConnectManager.checkAvailability()
+            if(healthConnectManager.availability == HealthConnectAvailability.INSTALLED){
+                val view = layoutInflater.inflate(currentLayout, vgContainer)
+                addSyncHealthConnect(view.findViewById<Button>(R.id.btnInstall))
+            }
+            println(user.isUserLoggedIn())
+        }
+    }
+
 }

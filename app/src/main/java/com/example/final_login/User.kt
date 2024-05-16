@@ -232,23 +232,6 @@ class User{
         } catch (e:Exception){
             println(e)
         }
-
-
-//        databaseReference.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                if (!dataSnapshot.exists()){
-//                    val id = security.enc(FirebaseAuth.getInstance().currentUser!!.uid!!)
-//
-//                    databaseReference.child(id).setValue(userData)
-//                    userCreated = true
-//                } else {
-//                    userCreated = true
-//                }
-//            }
-//            override fun onCancelled(databaseError: DatabaseError){
-//                userCreated = false
-//            }
-//        })
         return userCreated
     }
 
@@ -418,7 +401,7 @@ class User{
     private fun formatCaloriesString(calString:String): String {
         val floatValue = calString.toFloat() // Convert string to float
         val roundedValue = Math.round(floatValue) // Round the float to the nearest whole number
-        return roundedValue.toString()
+        return roundedValue.toString() + "kcal"
     }
 
     fun sendCaloriesToDatabase(totalEnergy: String){
@@ -442,13 +425,15 @@ class User{
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val lastSleepRef = userRef.child("health").child("sleep").child("mostRecent")
-            lastSleepRef.setValue(totalTime)
-                .addOnSuccessListener {
-                    println("Sleep Saved To Database")
-                }
-                .addOnFailureListener {
-                    println("Sleep Failed To Saved To Database")
-                }
+            if(totalTime != "0s"){
+                lastSleepRef.setValue(totalTime)
+                    .addOnSuccessListener {
+                        println("Sleep Saved To Database")
+                    }
+                    .addOnFailureListener {
+                        println("Sleep Failed To Saved To Database")
+                    }
+            }
         } else {
             TODO("RETURN TO LOGIN")
         }
@@ -462,7 +447,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
                     if(myAdapter.data.any { it.name == "Sleep" }){
-                        myAdapter.data.first{it.name == "Sleep"}.stat = sleepTotal
+                        myAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == "0s") "N/A" else sleepTotal
                         myAdapter.filterData("")
                     }
                 }
@@ -481,7 +466,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val calories = dataSnapshot.value.toString()
                     if(myAdapter.data.any { it.name == "Calories" }){
-                        myAdapter.data.first{it.name == "Calories"}.stat = formatCaloriesString(calories)
+                        myAdapter.data.first{it.name == "Calories"}.stat = calories
                         myAdapter.filterData("")
                     }
                 }
@@ -546,42 +531,6 @@ class User{
         guardianRef.updateChildren(updateMap)
     }
 
-//    fun childRemoveGuardian(){
-//        val childRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
-//        childRef.addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                if (dataSnapshot.exists()){
-//                    if(dataSnapshot.hasChild("accessPermitted")){
-//                        if(dataSnapshot.child("accessPermitted").value.toString() != "false" && dataSnapshot.child("accessPermitted").value.toString() != "true"){
-//                            removeGuardian(dataSnapshot.child("accessPermitted").value.toString())
-//                            setChildAccessPermittedToFalse(security.enc(firebaseAuth.currentUser!!.uid))
-//                        }
-//                    }
-//                }
-//            }
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//        })
-//    }
-//
-//    fun removeGuardian(guardian:String){
-//        val guardianRef = databaseReference.child(guardian)
-//        guardianRef.addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                if (dataSnapshot.exists()){
-//                    if(dataSnapshot.hasChild("children")){
-//                        val childrenRef = dataSnapshot.child("children")
-//                        childrenRef.ref.removeValue()
-//                    }
-//                }
-//            }
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//        })
-//    }
-
     fun removeChildForGuardian(){
         val guardianRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
         guardianRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -636,9 +585,7 @@ class User{
                         Snackbar.make(view, "Invalid Key!", Snackbar.LENGTH_SHORT).show()
                     }
                 }
-
                 override fun onCancelled(databaseError: DatabaseError) {
-                    // Handle database error
                 }
             })
         } else {
@@ -659,7 +606,7 @@ class User{
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                // Handle database error
+
             }
         })
     }
@@ -678,23 +625,6 @@ class User{
             override fun onCancelled(databaseError: DatabaseError) {
                 println("Error: ${databaseError.message}")
             }
-        })
-    }
-
-    private fun getGuardiansName(guardian:String){
-        val guardianRef = databaseReference.child(guardian)
-        guardianRef.addListenerForSingleValueEvent(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.exists()){
-                    if(snapshot.hasChild("firstname")){
-                        println(security.dec(snapshot.child("firstname").value.toString()))
-                    }
-                }
-            }
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-
         })
     }
 
