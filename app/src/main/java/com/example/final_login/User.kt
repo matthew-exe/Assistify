@@ -600,6 +600,44 @@ class User{
         })
     }
 
+    fun childRemoveGuardian(){
+        val childRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
+        childRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()){
+                    if(dataSnapshot.hasChild("accessPermitted")){
+                        if(dataSnapshot.child("accessPermitted").value.toString() != "false" && dataSnapshot.child("accessPermitted").value.toString() != "true"){
+                            removeGuardian(dataSnapshot.child("accessPermitted").value.toString())
+                            setChildAccessPermittedToFalse(security.enc(firebaseAuth.currentUser!!.uid))
+                        }
+
+
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    fun removeGuardian(guardian:String){
+        val guardianRef = databaseReference.child(guardian)
+        guardianRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()){
+                    if(dataSnapshot.hasChild("children")){
+                        val childrenRef = dataSnapshot.child("children")
+                        childrenRef.ref.removeValue()
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
     fun setChildAccessPermittedToFalse(secureKey: String){
         val monitoredRef = databaseReference.child(secureKey)
         monitoredRef.addListenerForSingleValueEvent(object : ValueEventListener {

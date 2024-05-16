@@ -57,7 +57,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnLogin: Button
 
     private var themeAccessibleActive = false
-    private lateinit var wholePage:ConstraintLayout
+    private lateinit var wholePage: ConstraintLayout
     private lateinit var cardPage: CardView
 
 
@@ -90,7 +90,7 @@ class LoginActivity : AppCompatActivity() {
         btnThemeSwitch = findViewById(R.id.btnAccessibleTheme)
         wholePage = findViewById(R.id.wholePage)
         cardPage = findViewById(R.id.cardPage)
-        themeAccessibleActive = !intent.getBooleanExtra("themeAccessibleActive", false)
+        themeAccessibleActive = ThemeSharedPref.getThemeState(this)
         toggleTheme()
         // Forgot Password Link and Styling
         textForgotPassword = findViewById(R.id.textForgotPassword)
@@ -266,11 +266,13 @@ class LoginActivity : AppCompatActivity() {
         if(themeAccessibleActive){
             wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.off_white, null))
+            ThemeSharedPref.setThemeState(this, true)
             themeAccessibleActive = false
             btnThemeSwitch.setChecked(false)
         } else {
             wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
+            ThemeSharedPref.setThemeState(this, false)
             themeAccessibleActive = true
             btnThemeSwitch.setChecked(true)
         }
@@ -356,5 +358,4 @@ class LoginActivity : AppCompatActivity() {
         user.deleteAccount()
         println("Remove Account From System")
     }
-
 }

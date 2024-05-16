@@ -221,11 +221,13 @@ class RegisterActivity : AppCompatActivity() {
         if(themeAccessibleActive){
             wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.off_white, null))
+            ThemeSharedPref.setThemeState(this, true)
             themeAccessibleActive = false
             btnThemeSwitch.setChecked(false)
         } else {
             wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
+            ThemeSharedPref.setThemeState(this, false)
             themeAccessibleActive = true
             btnThemeSwitch.setChecked(true)
         }

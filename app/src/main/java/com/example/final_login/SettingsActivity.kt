@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -30,6 +32,8 @@ import com.google.firebase.database.GenericTypeIndicator
 class SettingsActivity : AppCompatActivity() {
     private val user = User()
     private val security = Security()
+    private val themeChangeMessageKey = "themeChangeMessage"
+    private var themeChangeMessage: String? = null
     private lateinit var adapter: MyExpandableListAdapter
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var signOutButton: Button
@@ -39,6 +43,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var currentUser: FirebaseUser
     private lateinit var rootView: View
+    private lateinit var wholePage: ConstraintLayout
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,6 +139,7 @@ class SettingsActivity : AppCompatActivity() {
             ),
             SettingsItem("Change Password", null),
             SettingsItem("Generate Monitor Key", null),
+            SettingsItem("Switch Theme", null),
             SettingsItem(
                 "Privacy Policy",
                 listOf(
@@ -159,6 +165,13 @@ class SettingsActivity : AppCompatActivity() {
             ),
         )
         populateUserDetails(sections)
+
+        wholePage = findViewById(R.id.wholePage)
+        setTheme()
+
+        savedInstanceState?.getString(themeChangeMessageKey)?.let {
+            Snackbar.make(rootView, it, Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     private fun populateUserDetails(sections: List<SettingsItem>) {
@@ -283,7 +296,11 @@ class SettingsActivity : AppCompatActivity() {
         val editText = EditText(this)
         editText.setText(initialValue)
 
-        val dialog = AlertDialog.Builder(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(this)
+        }
             .setTitle(title)
             .setView(editText)
             .setPositiveButton("Save") { _, _ ->
@@ -299,6 +316,10 @@ class SettingsActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+        if (!ThemeSharedPref.getThemeState(this)) {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.black, null))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.black, null))
+        }
     }
 
 
@@ -312,7 +333,11 @@ class SettingsActivity : AppCompatActivity() {
         rvMedicalConditions.adapter = medicalConditionsAdapter
         rvMedicalConditions.layoutManager = LinearLayoutManager(this)
 
-        val dialog = AlertDialog.Builder(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(this)
+        }
             .setTitle("Medical Conditions")
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
@@ -333,6 +358,10 @@ class SettingsActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+        if (!ThemeSharedPref.getThemeState(this)) {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.black, null))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.black, null))
+        }
 
         etMedicalCondition.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -362,7 +391,11 @@ class SettingsActivity : AppCompatActivity() {
         etContactRelation.setText(personalDetails.emergencyContactRelation ?: "")
         etContactNumber.setText(personalDetails.emergencyContactNumber ?: "")
 
-        val dialog = AlertDialog.Builder(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(this)
+        }
             .setTitle("Emergency Contact")
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
@@ -425,17 +458,31 @@ class SettingsActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+        if (!ThemeSharedPref.getThemeState(this)) {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.black, null))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.black, null))
+        }
     }
 
     private fun showResetPasswordDialog() {
-        AlertDialog.Builder(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+        } else {
+            AlertDialog.Builder(this)
+        }
             .setTitle("Change Password")
             .setMessage("Do you want us to send you an email to reset your password?")
             .setPositiveButton("Yes") { _, _ ->
                 user.sendResetPasswordEmail(this, currentUser.email!!)
             }
             .setNegativeButton("No", null)
-            .show()
+            .create()
+
+        dialog.show()
+        if (!ThemeSharedPref.getThemeState(this)) {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.black, null))
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.black, null))
+        }
     }
 
     private fun showCopySnackBar(secureKey:String){
@@ -566,6 +613,7 @@ class SettingsActivity : AppCompatActivity() {
                     )
                     "Change Password" -> showResetPasswordDialog()
                     "Generate Monitor Key" -> showGenerateMonitorKeyDialog()
+                    "Switch Theme" -> switchTheme()
                 }
             }
 
@@ -648,5 +696,38 @@ class SettingsActivity : AppCompatActivity() {
 
 
         override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean = true
+    }
+
+    private fun switchTheme() {
+        themeChangeMessage = if (ThemeSharedPref.getThemeState(this)) {
+            ThemeSharedPref.setThemeState(this, false)
+            "Switched to accessible theme"
+        } else {
+            ThemeSharedPref.setThemeState(this, true)
+            "Switched to default theme"
+        }
+        recreate()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(themeChangeMessageKey, themeChangeMessage)
+    }
+
+    private fun setTheme() {
+        if (!ThemeSharedPref.getThemeState(this)) {
+            wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
+
+            bottomNavigationView.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
+            bottomNavigationView.itemRippleColor = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            bottomNavigationView.itemActiveIndicatorColor = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            bottomNavigationView.itemTextColor = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+            bottomNavigationView.itemIconTintList = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+
+            signOutButton.setBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
+            signOutButton.setTextColor(resources.getColor(R.color.black, null))
+
+            expandableListView.setBackgroundColor(resources.getColor(R.color.accessibleYellow, null))
+        }
     }
 }

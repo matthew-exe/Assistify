@@ -18,10 +18,12 @@ import com.google.android.material.snackbar.Snackbar
 import com.ncorti.slidetoact.SlideToActView
 import android.Manifest
 import android.app.Dialog
+import android.content.res.ColorStateList
 import android.widget.ArrayAdapter
 import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -54,6 +56,7 @@ class DashboardActivity : AppCompatActivity() {
     private val user = User()
     private val security = Security()
 
+    private lateinit var wholePage: ConstraintLayout
 
     private var phoneNumberToDial: String? = null
     private var notificationCount: Int = 0
@@ -184,6 +187,8 @@ class DashboardActivity : AppCompatActivity() {
         tvFirstName = findViewById(R.id.tvFirstName)
         loadUsersName()
 
+        wholePage = findViewById(R.id.wholePage)
+        setTheme()
     }
 
     private fun generateDummySensorData(count: Int): List<SensorData> {
@@ -202,7 +207,11 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun showNotificationsDialog() {
-        val dialog = Dialog(this)
+        val dialog = if (!ThemeSharedPref.getThemeState(this)) {
+            Dialog(this, R.style.MyDialogTheme)
+        } else {
+            Dialog(this)
+        }
         dialog.setContentView(R.layout.notification_dialog)
 
         val lvNotifications = dialog.findViewById<ListView>(R.id.lvNotifications)
@@ -289,5 +298,27 @@ class DashboardActivity : AppCompatActivity() {
             }.addOnFailureListener { exception ->
                 println("firebase Error getting data: $exception")
             }
+    }
+
+    private fun setTheme() {
+        if (!ThemeSharedPref.getThemeState(this)) {
+            wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
+
+            editTextText.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            editTextText.setTextColor(resources.getColor(R.color.black, null))
+            editTextText.setHintTextColor(resources.getColor(R.color.black, null))
+            val blackMagGlass = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+            editTextText.setCompoundDrawableTintList(blackMagGlass)
+
+            bottomNavigationView.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
+            bottomNavigationView.itemRippleColor = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            bottomNavigationView.itemActiveIndicatorColor = ColorStateList.valueOf(resources.getColor(R.color.accessibleYellow, null))
+            bottomNavigationView.itemTextColor = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+            bottomNavigationView.itemIconTintList = ColorStateList.valueOf(resources.getColor(R.color.black, null))
+
+            emergencyCallSlider.outerColor = resources.getColor(R.color.accessibleYellow, null)
+            emergencyCallSlider.textColor = resources.getColor(R.color.black, null)
+            emergencyCallSlider.iconColor = resources.getColor(R.color.black, null)
+        }
     }
 }
