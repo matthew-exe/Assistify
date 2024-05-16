@@ -449,7 +449,8 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Sleep" }){
-                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == "0s") "N/A" else sleepTotal
+                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == null) "Syncing" else if(sleepTotal == "0s") "N/A" else sleepTotal
+
                         dashboardAdapter.filterData("")
                     }
                 }
@@ -468,7 +469,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val calories = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Calories" }){
-                        dashboardAdapter.data.first{it.name == "Calories"}.stat = calories
+                        dashboardAdapter.data.first{it.name == "Calories"}.stat = if(calories == null) "Syncing" else calories
                         dashboardAdapter.filterData("")
                     }
                 }
@@ -498,7 +499,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val mostRecentBpm = dataSnapshot.value
                     if(dashboardAdapter.data.any { it.name == "Pulse" }) {
-                        dashboardAdapter.data.first { it.name == "Pulse" }.stat = "${mostRecentBpm}bpm"
+                        dashboardAdapter.data.first { it.name == "Pulse" }.stat = if(mostRecentBpm == null) "Syncing" else "${mostRecentBpm}bpm"
                     }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
