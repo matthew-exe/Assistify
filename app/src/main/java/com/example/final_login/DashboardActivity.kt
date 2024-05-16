@@ -90,7 +90,7 @@ class DashboardActivity : AppCompatActivity() {
 
         val isUserDashboard = if (security.dec(user.getUserUidToLoad()) == currentUser.uid) true else false
 
-        adapter = DashboardAdapter(this, ::generateDummySensorData, isUserDashboard)
+        adapter = DashboardAdapter(this, isUserDashboard)
         user.getDashboard(adapter)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -191,20 +191,6 @@ class DashboardActivity : AppCompatActivity() {
         setTheme()
     }
 
-    private fun generateDummySensorData(count: Int): List<SensorData> {
-        require(count >= 0) { "Count must be non-negative" }
-        val dummyDataList = mutableListOf<SensorData>()
-        repeat(count) {
-            SensorRepository.sensorName.forEach { (sensorId, sensorName) ->
-                val imageRes = SensorRepository.structures[sensorId]
-                    ?: throw IllegalArgumentException("Image resource not found for sensor ID: $sensorId")
-                dummyDataList.add(SensorData(sensorName, imageRes, "0"))
-            }
-        }
-        // user.readStepsFromDatabase() // TODO("")Pass In whatever object here
-        return dummyDataList
-        // TODO Need to implement the logic to get the sensor data from the database / from the API
-    }
 
     private fun showNotificationsDialog() {
         val dialog = if (!ThemeSharedPref.getThemeState(this)) {

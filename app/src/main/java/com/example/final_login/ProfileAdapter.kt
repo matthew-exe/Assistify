@@ -285,12 +285,8 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
 
     private fun removeLayout(userDetails: ProfileData) {
         val layoutToRemove = layouts.find { it.second == userDetails }
-        val statIndex = layouts.indexOf(layoutToRemove)
-        val statToRemove = layouts[statIndex + 1]
 
         if (layoutToRemove != null) {
-//            layouts.remove(layoutToRemove)
-//            layouts.remove(statToRemove)
             layouts.clear()
             (context as ProfileActivity).monitorUnlinkSnackBar(userDetails)
             loadNoProfile()

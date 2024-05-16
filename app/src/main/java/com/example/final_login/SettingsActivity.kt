@@ -513,7 +513,6 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle("Generate Monitor Key")
             .setMessage("Do you want to generate a new monitor key?")
             .setPositiveButton("Yes") { _, _ ->
-                // TODO Implement monitor key generation
                 showCopySnackBar(user.generateSecureLinkKey())
                 user.setToAccessPermitted()
             }
@@ -608,7 +607,7 @@ class SettingsActivity : AppCompatActivity() {
                                     startActivity(intent)
                                     finish()
                                 } else {
-                                    // Handle the failure case
+                                    Snackbar.make(rootView, "Error updating email", Snackbar.LENGTH_SHORT).show()
                                 }
                             }
                         }

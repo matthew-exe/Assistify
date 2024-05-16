@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 
 class DashboardAdapter(
     private val context: Context,
-    private val generateDummySensorData: (Int) -> List<SensorData>,
     private val isUserDashboard: Boolean
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
@@ -105,7 +104,7 @@ class DashboardAdapter(
                     sensorName.setTextColor(holder.itemView.context.resources.getColor(R.color.black, null))
                     sensorStat.setTextColor(holder.itemView.context.resources.getColor(R.color.black, null))
                 }
-                holder.stat.text = if (sensor.stat != "0") sensor.stat else "Syncing..."
+                holder.stat.text = if(sensor.stat == null) "Syncing" else if(sensor.stat != "0") sensor.stat else "Syncing"
 
                 if (sensor.name == "Pulse") {
                     val heartAnimation = AnimationUtils.loadAnimation(context, R.anim.anim_pulse)

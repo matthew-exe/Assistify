@@ -199,7 +199,6 @@ class LoginActivity : AppCompatActivity() {
 
     // Split Colors On String
     private fun setColorsOnString(txtViewId: Int, strToChange: String, colour: Int): SpannableString {
-        // TODO: Move to a class called Utils, makes code more readable
         val txtView: TextView = findViewById(txtViewId)
         val spannableString = SpannableString(txtView.text)
         val newColour = ContextCompat.getColor(this, colour)
@@ -213,7 +212,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun toggleTheme() {
-        // TODO: Switch from accessible to normal theme just implement functionality, styling can be done once designed by UI
         if(themeAccessibleActive){
             wholePage.setBackgroundColor(resources.getColor(R.color.accessiblePurple, null))
             cardPage.setCardBackgroundColor(resources.getColor(R.color.off_white, null))

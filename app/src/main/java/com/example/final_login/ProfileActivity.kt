@@ -142,7 +142,7 @@ class ProfileActivity: AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                println("Error: $error")
             }
         })
     }
@@ -211,7 +211,6 @@ class ProfileActivity: AppCompatActivity() {
             .setPositiveButton("OK") { _, _ ->
                 val enteredKey = editText.text.toString()
                 user.checkAccessIsPermittedBeforeLink(viewPager, enteredKey, true)
-//                linkUserProfile(enteredKey)
                 println("Entered string: $enteredKey")
             }
             .setNegativeButton("Cancel") { dialog, _ ->

@@ -114,7 +114,6 @@ class HealthConnectManager(private val context: Context) {
                 totalBPM += heartRate.samples[0].beatsPerMinute.toInt()
             }
             user.sendHeartRateToDatabase((totalBPM/response.records.size),response.records[response.records.lastIndex].samples[0].beatsPerMinute, response.records[response.records.lastIndex].samples[0].time)
-//            val hazard = hazardController.heartHazardCheck((totalBPM/response.records.size),response.records[response.records.lastIndex].samples[0].beatsPerMinute, response.records[response.records.lastIndex].samples[0].time)
         } catch (e: Exception) {
             println(e)
         }
@@ -137,24 +136,6 @@ class HealthConnectManager(private val context: Context) {
         val endDateTime = LocalDateTime.of(currentDate, LocalTime.NOON)
         val endTime: Instant = endDateTime.atZone(ZoneOffset.UTC).toInstant()
         return Pair(startTime, endTime)
-    }
-
-    suspend fun readRespitoryRate(){
-        try {
-            val timePeriod = returnTimeLast24()
-            val response = healthConnectClient.readRecords(
-                androidx.health.connect.client.request.ReadRecordsRequest(
-                    RespiratoryRateRecord::class,
-                    timeRangeFilter = TimeRangeFilter.between(timePeriod.first, timePeriod.second)
-                )
-            )
-            println("RES SIZE: ${response.records.size}")
-            for (record in response.records) {
-                println("RES RATE: ${record.rate}")
-            }
-        } catch (e: Exception) {
-            println(e)
-        }
     }
 
     private suspend fun readCaloriesLast24HC(){

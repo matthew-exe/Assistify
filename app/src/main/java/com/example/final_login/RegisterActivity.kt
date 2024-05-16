@@ -121,7 +121,6 @@ class RegisterActivity : AppCompatActivity() {
             if(isAllInputsValid(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)){
                 sendRegistration(signupEmail,signupPassword, inputFirstname, inputSurname, inputPhone)
             } else {
-                // TODO: Implement some kind of messaging system between the form controller and here to show why it failed such as incorrect email format
                 Toast.makeText(this@RegisterActivity,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
             }
         }

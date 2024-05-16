@@ -100,7 +100,6 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
                         putExtra("callerId", "com.example.final_login")
                     })
             }
-            //TODO("Return and Refresh So It can Request Permissions Instead of Having To Force Close App and Restart")
         }
     }
     private fun setWatchButtons(view:View){

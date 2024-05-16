@@ -233,22 +233,6 @@ class User{
             println(e)
         }
 
-
-//        databaseReference.orderByChild("email").equalTo(email).addListenerForSingleValueEvent(object: ValueEventListener{
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                if (!dataSnapshot.exists()){
-//                    val id = security.enc(FirebaseAuth.getInstance().currentUser!!.uid!!)
-//
-//                    databaseReference.child(id).setValue(userData)
-//                    userCreated = true
-//                } else {
-//                    userCreated = true
-//                }
-//            }
-//            override fun onCancelled(databaseError: DatabaseError){
-//                userCreated = false
-//            }
-//        })
         return userCreated
     }
 
@@ -331,7 +315,7 @@ class User{
             hMap["lastMovement"] = lastMovement.toString()
             stepsRef.setValue(hMap)
                 .addOnSuccessListener {
-//                    println("Steps Saved")
+                    println("Steps Saved")
                 }
                 .addOnFailureListener {
                     println("Steps Failed To Save")
@@ -404,7 +388,7 @@ class User{
             hMap["lastTaken"] = lastTaken.toString()
             heartRef.setValue(hMap)
                 .addOnSuccessListener {
-//                    println("Heart Rate Saved")
+                    println("Heart Rate Saved")
                 }
                 .addOnFailureListener {
                     println("Heart Rate Failed To Save")
@@ -503,7 +487,6 @@ class User{
             avgBPM.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val avg = dataSnapshot.value
-//                    println("Average BPM From Database ${avg}bpm")
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
                     println("Error: ${databaseError.message}")
@@ -600,7 +583,7 @@ class User{
                 }
             }
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                println("Error: ${error.message}")
             }
         })
     }
@@ -617,7 +600,7 @@ class User{
                 }
             }
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                println("Error: ${error.message}")
             }
         })
     }
@@ -643,11 +626,11 @@ class User{
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
-                    // Handle database error
+                    println("Error: ${databaseError.message}")
                 }
             })
         } else {
-            // TODO: Handle the case when the user is not logged in
+            println("User not logged in")
         }
     }
 
@@ -664,7 +647,7 @@ class User{
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
-                // Handle database error
+                println("Error: ${databaseError.message}")
             }
         })
     }
@@ -742,7 +725,6 @@ class User{
                 if(dataSnapshot.hasChild("personalDetails")){
                     val detailsSnapshot = dataSnapshot.child("personalDetails")
                     if(detailsSnapshot.hasChild("age")){
-//                        emptyUser.age = dataSnapshot.child("age").value.toString()
                         emptyUser.age = security.dec(detailsSnapshot.child("age").value.toString())
                     }
                     if(detailsSnapshot.hasChild("dateOfBirth")){
@@ -848,7 +830,7 @@ class User{
 
     val emptyUserDetails = ProfileData(
         "",
-        R.drawable.yvonne,
+        R.drawable.person,
         "",
         "",
         "",
