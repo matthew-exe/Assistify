@@ -442,6 +442,7 @@ class User{
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val lastSleepRef = userRef.child("health").child("sleep").child("mostRecent")
+            println(totalTime == "0s")
             if(totalTime != "0s"){
                 lastSleepRef.setValue(totalTime)
                     .addOnSuccessListener {
@@ -761,6 +762,7 @@ class User{
                         }
                         if(healthSnapShot.hasChild("now")){
                             emptyUser.currentBPM = heartSnapshot.child("aggregate").child("mostRecent").value.toString()
+                            println(" Current BPM: ${emptyUser.currentBPM}")
                         }
                     }
                     if(healthSnapShot.hasChild("steps")){

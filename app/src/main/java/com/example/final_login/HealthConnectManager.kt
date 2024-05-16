@@ -60,7 +60,6 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
-
     private suspend fun readStepsLast24HC(){
         try {
             val timePeriod = returnTimeLast24()
