@@ -662,13 +662,17 @@ class SettingsActivity : AppCompatActivity() {
                             )
                             "Date of Birth" -> showEditDialog("Edit Date of Birth (DD/MM/YYYY)", personalDetails?.dateOfBirth ?: "",
                                 validateInput = { input ->
-                                    val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.UK)
-                                    dateFormat.isLenient = false
-                                    try {
-                                        dateFormat.parse(input)
-                                        true
-                                    } catch (e: java.text.ParseException) {
+                                    if (input.length != 10) {
                                         false
+                                    } else {
+                                        val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.UK)
+                                        dateFormat.isLenient = false
+                                        try {
+                                            dateFormat.parse(input)
+                                            true
+                                        } catch (e: java.text.ParseException) {
+                                            false
+                                        }
                                     }
                                 },
                                 onSave = { validValue ->
