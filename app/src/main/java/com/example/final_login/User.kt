@@ -779,7 +779,7 @@ class User{
                     if(healthSnapShot.hasChild("calories")){
                         val calSnapshot = healthSnapShot.child("calories")
                         if(calSnapshot.hasChild("last24")){
-                            emptyUser.caloriesTotalSpent = calSnapshot.child("last24").value.toString() + "Kcal"
+                            emptyUser.caloriesTotalSpent = calSnapshot.child("last24").value.toString()
                         }
 
                     }
