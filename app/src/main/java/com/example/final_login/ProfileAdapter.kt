@@ -72,17 +72,17 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
                 unlinkButton.setTextColor(layout.context.resources.getColor(R.color.black, null))
             }
 
-            if (isAccessPermitted != "false" && isAccessPermitted != "true") {
-                preLinkText1.text = "It appears you are linked to $guardFullName."
-                preLinkText2.text = "Please tap the button below to unlink."
-                unlinkButton.visibility = View.VISIBLE
-                linkButton.visibility = View.GONE
-            } else if (layouts.size > 1) {
+            if (layouts.size > 1) {
                 preLinkText1.text = ""
                 preLinkText2.text = "Multi-account Monitoring Coming Soon."
                 unlinkButton.visibility = View.GONE
                 linkButton.visibility = View.VISIBLE
                 linkButton.isEnabled = false
+            } else if (isAccessPermitted != "false" && isAccessPermitted != "true") {
+                preLinkText1.text = "It appears you are linked to $guardFullName."
+                preLinkText2.text = "Please tap the button below to unlink."
+                unlinkButton.visibility = View.VISIBLE
+                linkButton.visibility = View.GONE
             } else {
                 preLinkText1.text = "It appears you are not yet linked to a client."
                 preLinkText2.text = "Please tap the button below to link."
