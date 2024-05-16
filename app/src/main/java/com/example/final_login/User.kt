@@ -25,7 +25,7 @@ class User{
     private val security = Security()
     private val hazardController = HazardController()
 
-    fun getDashboard(adapter: MyAdapter) {
+    fun getDashboard(adapter: DashboardAdapter) {
         if (isUserLoggedIn()) {
             val currentUserRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             currentUserRef.child("children").addListenerForSingleValueEvent(object : ValueEventListener {
@@ -97,7 +97,7 @@ class User{
         }
     }
 
-    fun populateDashboard(adapter: MyAdapter, user: String){
+    fun populateDashboard(adapter: DashboardAdapter, user: String){
         readStepsFromDatabase(adapter, user)
         readHeartRateFromDatabase(adapter, user)
         readCaloriesFromDatabase(adapter, user)
@@ -341,7 +341,7 @@ class User{
         }
     }
 
-    private fun readStepsFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
+    private fun readStepsFromDatabase(dashboardAdapter: DashboardAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         // Take what object in as param and then assign totalStepsData to the text value
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(user)
@@ -350,9 +350,9 @@ class User{
             totalSteps.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val totalStepsData = dataSnapshot.value
-                    if(myAdapter.data.any { it.name == "Steps" }){
-                        myAdapter.data.first{it.name == "Steps"}.stat = totalStepsData.toString()
-                        myAdapter.filterData("")
+                    if(dashboardAdapter.data.any { it.name == "Steps" }){
+                        dashboardAdapter.data.first{it.name == "Steps"}.stat = totalStepsData.toString()
+                        dashboardAdapter.filterData("")
                     }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -457,16 +457,16 @@ class User{
         }
     }
 
-    private fun readSleepFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
+    private fun readSleepFromDatabase(dashboardAdapter: DashboardAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()) {
             val userRef = databaseReference.child(user)
             val mostRecentRef = userRef.child("health").child("sleep").child("mostRecent")
             mostRecentRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
-                    if(myAdapter.data.any { it.name == "Sleep" }){
-                        myAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == "0s") "N/A" else sleepTotal
-                        myAdapter.filterData("")
+                    if(dashboardAdapter.data.any { it.name == "Sleep" }){
+                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == "0s") "N/A" else sleepTotal
+                        dashboardAdapter.filterData("")
                     }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -476,16 +476,16 @@ class User{
         }
     }
 
-    private fun readCaloriesFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
+    private fun readCaloriesFromDatabase(dashboardAdapter: DashboardAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()) {
             val userRef = databaseReference.child(user)
             val avgBPM = userRef.child("health").child("calories").child("last24")
             avgBPM.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val calories = dataSnapshot.value.toString()
-                    if(myAdapter.data.any { it.name == "Calories" }){
-                        myAdapter.data.first{it.name == "Calories"}.stat = calories
-                        myAdapter.filterData("")
+                    if(dashboardAdapter.data.any { it.name == "Calories" }){
+                        dashboardAdapter.data.first{it.name == "Calories"}.stat = calories
+                        dashboardAdapter.filterData("")
                     }
                 }
 
@@ -496,7 +496,7 @@ class User{
         }
     }
 
-    private fun readHeartRateFromDatabase(myAdapter: MyAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
+    private fun readHeartRateFromDatabase(dashboardAdapter: DashboardAdapter, user: String = security.enc(firebaseAuth.currentUser!!.uid)){
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(user)
             val avgBPM = userRef.child("health").child("heart").child("avg")
@@ -514,8 +514,8 @@ class User{
             mostRecent.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val mostRecentBpm = dataSnapshot.value
-                    if(myAdapter.data.any { it.name == "Pulse" }) {
-                        myAdapter.data.first { it.name == "Pulse" }.stat = "${mostRecentBpm}bpm"
+                    if(dashboardAdapter.data.any { it.name == "Pulse" }) {
+                        dashboardAdapter.data.first { it.name == "Pulse" }.stat = "${mostRecentBpm}bpm"
                     }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {

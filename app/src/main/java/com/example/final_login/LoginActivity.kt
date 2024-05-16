@@ -43,7 +43,6 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var databaseReference: DatabaseReference
-    private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var firebaseAuth: FirebaseAuth
 
     private lateinit var inputEmail: TextInputEditText
@@ -52,7 +51,6 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var textRegister: TextView
     private lateinit var textForgotPassword: TextView
 
-    private lateinit var btnGoogleLogin: Button
     private lateinit var btnThemeSwitch: SwitchMaterial
     private lateinit var btnLogin: Button
 
@@ -72,17 +70,12 @@ class LoginActivity : AppCompatActivity() {
         firebaseDatabase = FirebaseDatabase.getInstance()
         databaseReference = firebaseDatabase.reference.child("users")
         firebaseAuth = FirebaseAuth.getInstance()
-        // Google Signin
-        val googleSigninOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail().build()
-        googleSignInClient = GoogleSignIn.getClient(this, googleSigninOptions)
+
         // Inputs
         inputEmail = findViewById(R.id.inputEmail)
         inputPassword = findViewById(R.id.inputPassword)
         // Login Button
         btnLogin = findViewById(R.id.btnLogin)
-        btnGoogleLogin = findViewById(R.id.btnGoogleLogin)
         // Register Link and Styling
         textRegister = findViewById(R.id.textRegister)
         textRegister.text = setColorsOnString(R.id.textRegister, "Register Here!", R.color.blue)
@@ -137,11 +130,7 @@ class LoginActivity : AppCompatActivity() {
         btnThemeSwitch.setOnClickListener{
             toggleTheme()
         }
-        // Google Login Btn
-        btnGoogleLogin.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, rCSignIn)
-        }
+
         // Register Text Link
         textRegister.setOnClickListener{
             val intent = Intent(this@LoginActivity, RegisterActivity::class.java)
@@ -190,44 +179,6 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this@LoginActivity, "Login Failed! Please try again shortly.", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    // Google Auth Function
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == rCSignIn) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                firebaseAuthWithGoogle(account.idToken!!, account)
-            } catch (e: ApiException) {
-                println(e)
-            }
-        }
-    }
-
-    private fun firebaseAuthWithGoogle(idToken: String,account: GoogleSignInAccount) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        FirebaseAuth.getInstance().signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    user.checkUserExistsUID {
-                        println("User Exists: $it")
-                        if(!it){
-                            showTermsAndConditionsDialog(account)
-                        } else {
-                            val intent = if(hasPermissions) Intent(this@LoginActivity, DashboardActivity::class.java) else Intent(this@LoginActivity, ConfigHealthConnectActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
-                        }
-
-                    }
-
-                } else {
-                    Toast.makeText(this@LoginActivity, "Authentication Failed.", Toast.LENGTH_SHORT).show()
-                }
-            }
     }
 
     private fun checkIfEmailUpdated() {

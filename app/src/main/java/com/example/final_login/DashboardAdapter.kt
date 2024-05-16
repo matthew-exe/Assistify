@@ -16,7 +16,7 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 
-class MyAdapter(
+class DashboardAdapter(
     private val context: Context,
     private val generateDummySensorData: (Int) -> List<SensorData>,
     private val isUserDashboard: Boolean

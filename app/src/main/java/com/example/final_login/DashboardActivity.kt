@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 
 
 class DashboardActivity : AppCompatActivity() {
-    private lateinit var adapter: MyAdapter
+    private lateinit var adapter: DashboardAdapter
     private lateinit var editTextText: AppCompatEditText
     private lateinit var emergencyCallSlider: SlideToActView
     private lateinit var btnCallUser: ImageButton
@@ -90,7 +90,7 @@ class DashboardActivity : AppCompatActivity() {
 
         val isUserDashboard = if (security.dec(user.getUserUidToLoad()) == currentUser.uid) true else false
 
-        adapter = MyAdapter(this, ::generateDummySensorData, isUserDashboard)
+        adapter = DashboardAdapter(this, ::generateDummySensorData, isUserDashboard)
         user.getDashboard(adapter)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
