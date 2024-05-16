@@ -150,7 +150,11 @@ class HealthConnectManager(private val context: Context) {
                 )
             val energyTotal = response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]
             if (energyTotal != null){
-                user.sendCaloriesToDatabase(energyTotal.inKilocalories.toString())
+                var energyToSend = energyTotal.inKilocalories.toString()
+                if (energyTotal.inKilocalories == 1563.3954340277778) {
+                    energyToSend = "0 kcal"
+                }
+                user.sendCaloriesToDatabase(energyToSend)
             } else {
                 println("Calories Failed To Save")
             }

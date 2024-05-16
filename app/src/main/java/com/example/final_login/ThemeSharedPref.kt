@@ -12,7 +12,7 @@ object ThemeSharedPref {
     }
 
     fun getThemeState(context: Context): Boolean {
-        return getSharedPreferences(context).getBoolean(PREF_THEME_KEY, false)
+        return getSharedPreferences(context).getBoolean(PREF_THEME_KEY, true)
     }
 
     fun setThemeState(context: Context, state: Boolean) {
