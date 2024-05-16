@@ -28,7 +28,6 @@ class HealthConnectManager(private val context: Context) {
     private lateinit var healthConnectClient: HealthConnectClient
     private val user = User()
     var availability = HealthConnectAvailability.NOT_SUPPORTED
-        private set
 
     val PERMISSIONS =
         setOf(
@@ -47,7 +46,7 @@ class HealthConnectManager(private val context: Context) {
         return healthConnectClient.permissionController.getGrantedPermissions().containsAll(permissions)
     }
 
-    private fun checkAvailability() {
+    fun checkAvailability() {
         val packageManager = context.packageManager
         val packageName = "com.google.android.apps.healthdata"
         availability = try {

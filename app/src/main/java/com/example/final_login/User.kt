@@ -416,9 +416,9 @@ class User{
     }
 
     private fun formatCaloriesString(calString:String): String {
-        val floatValue = calString.toFloat() // Convert string to float
-        val roundedValue = Math.round(floatValue) // Round the float to the nearest whole number
-        return roundedValue.toString()
+        val floatValue = calString.toFloat()
+        val roundedValue = Math.round(floatValue)
+        return roundedValue.toString() + "kcal"
     }
 
     fun sendCaloriesToDatabase(totalEnergy: String){
@@ -442,13 +442,15 @@ class User{
         if(isUserLoggedIn()){
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val lastSleepRef = userRef.child("health").child("sleep").child("mostRecent")
-            lastSleepRef.setValue(totalTime)
-                .addOnSuccessListener {
-                    println("Sleep Saved To Database")
-                }
-                .addOnFailureListener {
-                    println("Sleep Failed To Saved To Database")
-                }
+            if(totalTime != "0s"){
+                lastSleepRef.setValue(totalTime)
+                    .addOnSuccessListener {
+                        println("Sleep Saved To Database")
+                    }
+                    .addOnFailureListener {
+                        println("Sleep Failed To Saved To Database")
+                    }
+            }
         } else {
             TODO("RETURN TO LOGIN")
         }
@@ -462,7 +464,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
                     if(myAdapter.data.any { it.name == "Sleep" }){
-                        myAdapter.data.first{it.name == "Sleep"}.stat = sleepTotal
+                        myAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == "0s") "N/A" else sleepTotal
                         myAdapter.filterData("")
                     }
                 }
@@ -481,7 +483,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val calories = dataSnapshot.value.toString()
                     if(myAdapter.data.any { it.name == "Calories" }){
-                        myAdapter.data.first{it.name == "Calories"}.stat = formatCaloriesString(calories)
+                        myAdapter.data.first{it.name == "Calories"}.stat = calories
                         myAdapter.filterData("")
                     }
                 }
