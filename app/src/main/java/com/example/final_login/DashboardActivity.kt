@@ -219,7 +219,6 @@ class DashboardActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
     private fun updateNotificationCount() {
         notificationCount = notifications.size
         tvNotificationCount.text = notificationCount.toString()

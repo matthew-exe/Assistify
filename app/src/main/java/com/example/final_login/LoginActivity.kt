@@ -54,7 +54,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnThemeSwitch: SwitchMaterial
     private lateinit var btnLogin: Button
 
-    private var themeAccessibleActive = false
+    private var themeAccessibleActive = true
     private lateinit var wholePage: ConstraintLayout
     private lateinit var cardPage: CardView
 

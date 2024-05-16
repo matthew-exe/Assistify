@@ -26,10 +26,18 @@
                 android:textSize="20sp"/>
 
             <TextView
-                android:id="@+id/termsAndConditionsTextView"
+                android:id="@+id/termsAndConditions1TextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/terms_and_conditions"
+                android:text="@string/terms_and_conditions1"
+                android:fontFamily="@font/lexend"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/termsAndConditions2TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/terms_and_conditions2"
                 android:fontFamily="@font/lexend"
                 android:textSize="16sp" />
 
