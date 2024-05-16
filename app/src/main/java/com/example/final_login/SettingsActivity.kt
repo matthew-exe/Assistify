@@ -141,26 +141,17 @@ class SettingsActivity : AppCompatActivity() {
             SettingsItem("Generate Monitor Key", null),
             SettingsItem("Switch Theme", null),
             SettingsItem(
-                "Privacy Policy",
-                listOf(
-                    "This is a sample privacy policy for our app. We respect your privacy and are committed to protecting it through our compliance with this policy. This policy describes the types of information we may collect from you or that you may provide when you use our app and our practices for collecting, using, maintaining, protecting, and disclosing that information.\n\nPlease read this policy carefully to understand our policies and practices regarding your information and how we will treat it. If you do not agree with our policies and practices, your choice is not to use our app."
-                )
-            ),
+                "Privacy Policy", null),
             SettingsItem(
                 "About App",
                 listOf(
-                    "This app is simply amazing!"
-                )
-            ),
-            SettingsItem(
-                "How to use", listOf(
-                    "You can follow this tutorial on Youtube to learn how to use the app:\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    "Our mission is to seamlessly integrate smart devices and adaptive controls into a user-friendly mobile application. With real-time monitoring capabilities, we empower caregivers to watch over vulnerable care-recipients, alerting them to any potential hazards. This app is designed to offer peace of mind to both caregivers and care-recipients, enhancing independence while ensuring safety."
                 )
             ),
             SettingsItem(
                 "Contact us",
                 listOf(
-                    "Our customer service team is available Monday - Friday, 9am - 5pm to help you with any questions or concerns you may have.\n\nYou can reach us by phone (0735027350) or email (example@gmail.com).\n\nWe look forward to hearing from you!"
+                    "Our customer service team is available Monday - Friday, 9am - 5pm to help you with any questions or concerns you may have.\n\nYou can reach us by phone (07570586472) or email (s5519054@bournemouth.ac.uk).\n\nWe look forward to hearing from you!"
                 )
             ),
         )
@@ -464,6 +455,25 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun showPrivacyPolicyDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.privacy_policy_dialog, null)
+        val btnAcceptTerms = dialogView.findViewById<Button>(R.id.btnClose)
+
+        val dialogBuilder = if (!ThemeSharedPref.getThemeState(this@SettingsActivity)) {
+            AlertDialog.Builder(this, R.style.MyDialogTheme)
+                .setView(dialogView)
+        } else {
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+        }
+
+        val alertDialog = dialogBuilder.show()
+
+        btnAcceptTerms.setOnClickListener {
+            alertDialog.dismiss()
+        }
+    }
+
     private fun showResetPasswordDialog() {
         val dialog = if (!ThemeSharedPref.getThemeState(this)) {
             AlertDialog.Builder(this, R.style.MyDialogTheme)
@@ -614,6 +624,7 @@ class SettingsActivity : AppCompatActivity() {
                     "Change Password" -> showResetPasswordDialog()
                     "Generate Monitor Key" -> showGenerateMonitorKeyDialog()
                     "Switch Theme" -> switchTheme()
+                    "Privacy Policy" -> showPrivacyPolicyDialog()
                 }
             }
 

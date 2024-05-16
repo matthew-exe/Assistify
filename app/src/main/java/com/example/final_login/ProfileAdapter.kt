@@ -78,7 +78,17 @@ class ProfileAdapter(private val context: Context, private var isAccessPermitted
                 unlinkButton.visibility = View.GONE
                 linkButton.visibility = View.VISIBLE
                 linkButton.isEnabled = false
-            } else if (isAccessPermitted != "false" && isAccessPermitted != "true") {
+            } else if (isAccessPermitted != "false" && isAccessPermitted != "true" && isAccessPermitted != "null") {
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
+                println("isAccessPermitted: $isAccessPermitted")
                 preLinkText1.text = "It appears you are linked to $guardFullName."
                 preLinkText2.text = "Please tap the button below to unlink."
                 unlinkButton.visibility = View.VISIBLE
