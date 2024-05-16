@@ -549,42 +549,6 @@ class User{
         guardianRef.updateChildren(updateMap)
     }
 
-//    fun childRemoveGuardian(){
-//        val childRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
-//        childRef.addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                if (dataSnapshot.exists()){
-//                    if(dataSnapshot.hasChild("accessPermitted")){
-//                        if(dataSnapshot.child("accessPermitted").value.toString() != "false" && dataSnapshot.child("accessPermitted").value.toString() != "true"){
-//                            removeGuardian(dataSnapshot.child("accessPermitted").value.toString())
-//                            setChildAccessPermittedToFalse(security.enc(firebaseAuth.currentUser!!.uid))
-//                        }
-//                    }
-//                }
-//            }
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//        })
-//    }
-//
-//    fun removeGuardian(guardian:String){
-//        val guardianRef = databaseReference.child(guardian)
-//        guardianRef.addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                if (dataSnapshot.exists()){
-//                    if(dataSnapshot.hasChild("children")){
-//                        val childrenRef = dataSnapshot.child("children")
-//                        childrenRef.ref.removeValue()
-//                    }
-//                }
-//            }
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//        })
-//    }
-
     fun removeChildForGuardian(){
         val guardianRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
         guardianRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -722,23 +686,6 @@ class User{
         })
     }
 
-    private fun getGuardiansName(guardian:String){
-        val guardianRef = databaseReference.child(guardian)
-        guardianRef.addListenerForSingleValueEvent(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.exists()){
-                    if(snapshot.hasChild("firstname")){
-                        println(security.dec(snapshot.child("firstname").value.toString()))
-                    }
-                }
-            }
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-
-        })
-    }
-
     private fun loadProfileOfMonitored(secureKey:String, context: Context, displaySnackbar: Boolean){
         val monitoredRef = databaseReference.child(secureKey)
         monitoredRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -760,9 +707,8 @@ class User{
                             emptyUser.maxBPM = heartSnapshot.child("aggregate").child("max").value.toString()
                             emptyUser.minBPM = heartSnapshot.child("aggregate").child("min").value.toString()
                         }
-                        if(healthSnapShot.hasChild("now")){
-                            emptyUser.currentBPM = heartSnapshot.child("aggregate").child("mostRecent").value.toString()
-                            println(" Current BPM: ${emptyUser.currentBPM}")
+                        if(heartSnapshot.hasChild("now")){
+                            emptyUser.currentBPM = heartSnapshot.child("now").child("mostRecent").value.toString()
                         }
                     }
                     if(healthSnapShot.hasChild("steps")){
