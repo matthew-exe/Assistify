@@ -158,12 +158,12 @@
                 android:id="@+id/checkBoxTermsConditons"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:enabled="false"
                 android:layout_marginTop="5dp"
-                app:layout_constraintBottom_toTopOf="@+id/btnRegister"
-                app:layout_constraintTop_toBottomOf="@+id/inputConfirmPasswordHolder"
+                android:enabled="false"
+                app:layout_constraintBottom_toTopOf="@+id/checkBoxCommunications"
                 app:layout_constraintEnd_toStartOf="@+id/textTermsConditions"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/inputConfirmPasswordHolder" />
 
             <TextView
                 android:id="@+id/textTermsConditions"
@@ -171,11 +171,30 @@
                 android:layout_height="wrap_content"
                 android:text="@string/terms_conditions"
                 android:textSize="12sp"
-                android:layout_marginTop="5dp"
-                app:layout_constraintBottom_toTopOf="@+id/btnRegister"
-                app:layout_constraintTop_toBottomOf="@+id/inputConfirmPasswordHolder"
+                app:layout_constraintBottom_toBottomOf="@+id/checkBoxTermsConditons"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/checkBoxTermsConditons"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintTop_toTopOf="@+id/checkBoxTermsConditons" />
+
+            <CheckBox
+                android:id="@+id/checkBoxCommunications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                app:layout_constraintBottom_toTopOf="@+id/btnRegister"
+                app:layout_constraintEnd_toEndOf="@+id/checkBoxTermsConditons"
+                app:layout_constraintStart_toStartOf="@+id/checkBoxTermsConditons" />
+
+            <TextView
+                android:id="@+id/textCommunications"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="I consent to receiving SMS messages and emails."
+                android:textSize="12sp"
+                app:layout_constraintBottom_toTopOf="@+id/checkBoxCommunications"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/checkBoxCommunications"
+                app:layout_constraintTop_toBottomOf="@+id/checkBoxCommunications" />
 
             <Button
                 android:id="@+id/btnRegister"
@@ -188,7 +207,7 @@
                 android:layout_marginBottom="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textTermsConditions"
+                app:layout_constraintTop_toBottomOf="@+id/textCommunications"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
 

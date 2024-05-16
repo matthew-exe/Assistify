@@ -148,6 +148,7 @@ class HealthConnectManager(private val context: Context) {
                         timeRangeFilter = TimeRangeFilter.between(timePeriod.first, timePeriod.second)
                     )
                 )
+
             val energyTotal = response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]
             if (energyTotal != null){
                 user.sendCaloriesToDatabase(energyTotal.inKilocalories.toString())

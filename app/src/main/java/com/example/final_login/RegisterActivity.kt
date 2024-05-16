@@ -33,6 +33,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var inputPhone: TextInputEditText
     private lateinit var inputConfirmPassword: TextInputEditText
     private lateinit var checkBoxTermsConditons: CheckBox
+    private lateinit var checkBoxCommunications: CheckBox
 
     private lateinit var btnRegister: Button
     private lateinit var textLogin: TextView
@@ -60,6 +61,7 @@ class RegisterActivity : AppCompatActivity() {
         inputPassword = findViewById(R.id.inputPassword)
         inputConfirmPassword = findViewById(R.id.inputConfirmPassword)
         checkBoxTermsConditons = findViewById(R.id.checkBoxTermsConditons)
+        checkBoxCommunications = findViewById(R.id.checkBoxCommunications)
         // Buttons
         btnRegister = findViewById(R.id.btnRegister)
         // Theme Switcheroo
@@ -77,40 +79,40 @@ class RegisterActivity : AppCompatActivity() {
         inputFirstname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 formController.checkName(inputFirstname)
-                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, checkBoxCommunications, inputPhone)
             }
         }
         inputSurname.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 formController.checkName(inputSurname)
-                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, checkBoxCommunications, inputPhone)
             }
         }
         inputEmail.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 formController.checkEmail(inputEmail)
-                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, checkBoxCommunications, inputPhone)
             }
         }
         inputPhone.onFocusChangeListener = View.OnFocusChangeListener{_, hasFocus ->
             if(!hasFocus){
                 formController.checkPhoneNumber(inputPhone)
-                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, checkBoxCommunications, inputPhone)
             }
         }
         inputPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, checkBoxCommunications, inputPhone)
             }
         }
         inputConfirmPassword.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
+                checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, checkBoxCommunications, inputPhone)
             }
         }
 
         checkBoxTermsConditons.setOnCheckedChangeListener { _, _ ->
-            checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)
+            checkAllInputs(inputFirstname, inputSurname, inputEmail,inputPassword, inputConfirmPassword, checkBoxTermsConditons, checkBoxCommunications, inputPhone)
         }
 
 
@@ -118,7 +120,7 @@ class RegisterActivity : AppCompatActivity() {
         btnRegister.setOnClickListener{
             val signupEmail = inputEmail.text.toString()
             val signupPassword = inputPassword.text.toString()
-            if(isAllInputsValid(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons, inputPhone)){
+            if(isAllInputsValid(inputFirstname, inputSurname, inputEmail, inputPassword, inputConfirmPassword, checkBoxTermsConditons, checkBoxCommunications, inputPhone)){
                 sendRegistration(signupEmail,signupPassword, inputFirstname, inputSurname, inputPhone)
             } else {
                 Toast.makeText(this@RegisterActivity,"All fields are mandatory.",Toast.LENGTH_SHORT).show()
@@ -158,12 +160,12 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
-    private fun isAllInputsValid(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox, phone:TextInputEditText): Boolean {
-        return formController.isValidName(forename) && formController.isValidName(surname) && formController.isValidEmail(username) && formController.isValidPassword(password) && formController.passwordsMatch(password, confirmPassword) && formController.isChecked(checkbox) && formController.isValidPhoneNumber(phone)
+    private fun isAllInputsValid(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, tosCheckbox:CheckBox, communicationsCheckbox: CheckBox, phone:TextInputEditText): Boolean {
+        return formController.isValidName(forename) && formController.isValidName(surname) && formController.isValidEmail(username) && formController.isValidPassword(password) && formController.passwordsMatch(password, confirmPassword) && formController.isChecked(tosCheckbox) && formController.isChecked(communicationsCheckbox) && formController.isValidPhoneNumber(phone)
     }
 
-    private fun checkAllInputs(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, checkbox:CheckBox, phone:TextInputEditText) {
-        btnRegister.isEnabled = isAllInputsValid(forename, surname, username, password, confirmPassword, checkbox, phone)
+    private fun checkAllInputs(forename: TextInputEditText, surname: TextInputEditText, username: TextInputEditText, password: TextInputEditText, confirmPassword: TextInputEditText, tosCheckbox:CheckBox, communicationsCheckbox:CheckBox, phone:TextInputEditText) {
+        btnRegister.isEnabled = isAllInputsValid(forename, surname, username, password, confirmPassword, tosCheckbox, communicationsCheckbox, phone)
     }
 
     // String Colours
@@ -209,11 +211,14 @@ class RegisterActivity : AppCompatActivity() {
     private fun acceptedTermsConditions() {
         checkBoxTermsConditons.isEnabled = true
         checkBoxTermsConditons.isChecked = true
+        checkBoxCommunications.isEnabled = true
     }
 
     private fun declinedTermsConditions() {
         checkBoxTermsConditons.isEnabled = false
         checkBoxTermsConditons.isChecked = false
+        checkBoxCommunications.isEnabled = false
+        checkBoxCommunications.isChecked = false
     }
 
     private fun toggleTheme() {
