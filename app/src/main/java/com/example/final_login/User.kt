@@ -733,10 +733,10 @@ class User{
                         emptyUser.dateOfBirth = security.dec(detailsSnapshot.child("dateOfBirth").value.toString())
                     }
                     if(detailsSnapshot.hasChild("bloodType")){
-                        emptyUser.bloodType = security.dec(detailsSnapshot.child("nhsNumber").value.toString())
+                        emptyUser.bloodType = security.dec(detailsSnapshot.child("bloodType").value.toString())
                     }
                     if(detailsSnapshot.hasChild("nhsNumber")){
-                        emptyUser.bloodType = security.dec(detailsSnapshot.child("bloodType").value.toString())
+                        emptyUser.nhsNumber = security.dec(detailsSnapshot.child("nhsNumber").value.toString())
                     }
                     if(detailsSnapshot.hasChild("emergencyContactName")){
                         emptyUser.emergencyContact = security.dec(detailsSnapshot.child("emergencyContactName").value.toString())
