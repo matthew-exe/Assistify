@@ -10,8 +10,8 @@ Assistify aims to seamlessly integrate IoT devices and adaptive controls under o
 
 
 ### Test Accounts:
-- test@email.com
-- link@email.com
+- test@email.com (Client account being monitored by the testGuardian@email.com account)
+- testGuardian@email.com (Guardian account monitoring the test@email.com account)
 - Password for both test accounts: Test1234!
 
 ### Compatible With:
