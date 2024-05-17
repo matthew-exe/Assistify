@@ -336,7 +336,13 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val totalStepsData = dataSnapshot.value
                     if(dashboardAdapter.data.any { it.name == "Steps" }){
-                        dashboardAdapter.data.first{it.name == "Steps"}.stat = try {security.dec(totalStepsData.toString())} catch (e: InvocationTargetException) { "Syncing"}
+                        var total:Any
+                        total = try{
+                            security.dec(totalStepsData.toString())
+                        } catch (e: InvocationTargetException) {
+                            0
+                        }
+                        dashboardAdapter.data.first{it.name == "Steps"}.stat = if(total != 0) total.toString() else "Syncing"
                         dashboardAdapter.filterData("")
                     }
                 }
