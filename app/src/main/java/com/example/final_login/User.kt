@@ -310,9 +310,9 @@ class User{
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val stepsRef = userRef.child("health").child("steps")
             val hMap = HashMap<String, String>()
-            hMap["total"] = total.toString()
-            hMap["timeWoke"] = timeWoke.toString()
-            hMap["lastMovement"] = lastMovement.toString()
+            hMap["total"] = security.enc(total.toString())
+            hMap["timeWoke"] = security.enc(timeWoke.toString())
+            hMap["lastMovement"] = security.enc(lastMovement.toString())
             stepsRef.setValue(hMap)
                 .addOnSuccessListener {
                     println("Steps Saved")
@@ -335,7 +335,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val totalStepsData = dataSnapshot.value
                     if(dashboardAdapter.data.any { it.name == "Steps" }){
-                        dashboardAdapter.data.first{it.name == "Steps"}.stat = totalStepsData.toString()
+                        dashboardAdapter.data.first{it.name == "Steps"}.stat = security.dec(totalStepsData.toString())
                         dashboardAdapter.filterData("")
                     }
                 }
@@ -363,9 +363,9 @@ class User{
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val stepsRef = userRef.child("health").child("heart").child("aggregate")
             val hMap = HashMap<String, String>()
-            hMap["min"] = min.toString()
-            hMap["max"] = max.toString()
-            hMap["avg"] = avg.toString()
+            hMap["min"] = security.enc(min.toString())
+            hMap["max"] = security.enc(max.toString())
+            hMap["avg"] = security.enc(avg.toString())
             stepsRef.setValue(hMap)
                 .addOnSuccessListener {
 //                    println("Heart Rate Saved")
@@ -383,9 +383,9 @@ class User{
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val heartRef = userRef.child("health").child("heart").child("now")
             val hMap = HashMap<String, String>()
-            hMap["avg"] = avgBPM.toString()
-            hMap["mostRecent"] = mostRecent.toString()
-            hMap["lastTaken"] = lastTaken.toString()
+            hMap["avg"] = security.enc(avgBPM.toString())
+            hMap["mostRecent"] = security.enc(mostRecent.toString())
+            hMap["lastTaken"] = security.enc(lastTaken.toString())
             heartRef.setValue(hMap)
                 .addOnSuccessListener {
                     println("Heart Rate Saved")
@@ -410,7 +410,7 @@ class User{
             println(formatCaloriesString(totalEnergy))
             val userRef = databaseReference.child(security.enc(firebaseAuth.currentUser!!.uid))
             val last24Ref = userRef.child("health").child("calories").child("last24")
-            last24Ref.setValue(formatCaloriesString(totalEnergy))
+            last24Ref.setValue(security.enc(formatCaloriesString(totalEnergy)))
                 .addOnSuccessListener {
                     println("Calories Saved")
                 }
@@ -428,7 +428,7 @@ class User{
             val lastSleepRef = userRef.child("health").child("sleep").child("mostRecent")
             println(totalTime == "0s")
             if(totalTime != "0s"){
-                lastSleepRef.setValue(totalTime)
+                lastSleepRef.setValue(security.enc(totalTime))
                     .addOnSuccessListener {
                         println("Sleep Saved To Database")
                     }
@@ -449,7 +449,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Sleep" }){
-                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == null) "Syncing" else if(sleepTotal == "0s") "N/A" else sleepTotal
+                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == null) "Syncing" else if(sleepTotal == "0s") "N/A" else security.dec(sleepTotal)
 
                         dashboardAdapter.filterData("")
                     }
@@ -469,7 +469,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val calories = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Calories" }){
-                        dashboardAdapter.data.first{it.name == "Calories"}.stat = if(calories == null) "Syncing" else calories
+                        dashboardAdapter.data.first{it.name == "Calories"}.stat = if(calories == null) "Syncing" else security.dec(calories)
                         dashboardAdapter.filterData("")
                     }
                 }
@@ -499,7 +499,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val mostRecentBpm = dataSnapshot.value
                     if(dashboardAdapter.data.any { it.name == "Pulse" }) {
-                        dashboardAdapter.data.first { it.name == "Pulse" }.stat = if(mostRecentBpm == null) "Syncing" else "${mostRecentBpm}bpm"
+                        dashboardAdapter.data.first { it.name == "Pulse" }.stat = if(mostRecentBpm == null) "Syncing" else "${security.dec(mostRecentBpm.toString())}bpm"
                     }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -687,38 +687,38 @@ class User{
                     if(healthSnapShot.hasChild("heart")){
                         val heartSnapshot = healthSnapShot.child("heart")
                         if(heartSnapshot.hasChild("aggregate")){
-                            emptyUser.avgBPM = heartSnapshot.child("aggregate").child("avg").value.toString()
-                            emptyUser.maxBPM = heartSnapshot.child("aggregate").child("max").value.toString()
-                            emptyUser.minBPM = heartSnapshot.child("aggregate").child("min").value.toString()
+                            emptyUser.avgBPM = security.dec(heartSnapshot.child("aggregate").child("avg").value.toString())
+                            emptyUser.maxBPM = security.dec(heartSnapshot.child("aggregate").child("max").value.toString())
+                            emptyUser.minBPM = security.dec(heartSnapshot.child("aggregate").child("min").value.toString())
                         }
                         if(heartSnapshot.hasChild("now")){
-                            emptyUser.currentBPM = heartSnapshot.child("now").child("mostRecent").value.toString()
+                            emptyUser.currentBPM = security.dec(heartSnapshot.child("now").child("mostRecent").value.toString())
                         }
                     }
                     if(healthSnapShot.hasChild("steps")){
                         val stepsSnapshot = healthSnapShot.child("steps")
                         if(stepsSnapshot.hasChild("lastMovement")){
-                            emptyUser.stepsLastDetected = formatTimeString(stepsSnapshot.child("lastMovement").value.toString())
+                            emptyUser.stepsLastDetected = formatTimeString(security.dec(stepsSnapshot.child("lastMovement").value.toString()))
                         }
                         if(stepsSnapshot.hasChild("timeWoke")){
-                            println(formatTimeString(stepsSnapshot.child("timeWoke").value.toString()))
-                            emptyUser.stepsFirstDetected = formatTimeString(stepsSnapshot.child("timeWoke").value.toString())
+                            println(formatTimeString(security.dec(stepsSnapshot.child("timeWoke").value.toString())))
+                            emptyUser.stepsFirstDetected = formatTimeString(security.dec(stepsSnapshot.child("timeWoke").value.toString()))
                         }
                         if(stepsSnapshot.hasChild("total")){
-                            emptyUser.steps24hTotal = stepsSnapshot.child("total").value.toString()
+                            emptyUser.steps24hTotal = security.dec(stepsSnapshot.child("total").value.toString())
                         }
                     }
                     if(healthSnapShot.hasChild("calories")){
                         val calSnapshot = healthSnapShot.child("calories")
                         if(calSnapshot.hasChild("last24")){
-                            emptyUser.caloriesTotalSpent = calSnapshot.child("last24").value.toString()
+                            emptyUser.caloriesTotalSpent = security.dec(calSnapshot.child("last24").value.toString())
                         }
 
                     }
                     if(healthSnapShot.hasChild("sleep")){
                         val sleepSnapshot = healthSnapShot.child("sleep")
                         if(sleepSnapshot.hasChild("mostRecent")){
-                            emptyUser.sleepTotal = sleepSnapshot.child("mostRecent").value.toString()
+                            emptyUser.sleepTotal = security.dec(sleepSnapshot.child("mostRecent").value.toString())
                         }
 
                     }

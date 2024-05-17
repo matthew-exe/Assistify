@@ -33,7 +33,7 @@ class ConfigHealthConnectActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_config_health_connect)
 
-        healthConnectManager = HealthConnectManager(this)
+        healthConnectManager = HealthConnectManager(this, false)
         viewPager = findViewById(R.id.viewPager)
         adapter = InstructionsAdapter(this)
         viewPager.adapter = adapter

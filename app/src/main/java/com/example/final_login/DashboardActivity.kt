@@ -79,12 +79,11 @@ class DashboardActivity : AppCompatActivity() {
         firebaseAuth = FirebaseAuth.getInstance()
         currentUser = firebaseAuth.currentUser!!
 
-        healthConnectManager = HealthConnectManager(this)
+        healthConnectManager = HealthConnectManager(this, false)
         healthConnectManager.syncHealthConnect()
 
-        //TODO("Uncomment to run background service")
-//        val serviceIntent = Intent(this, BackgroundWorker::class.java)
-//        startService(serviceIntent)
+        val serviceIntent = Intent(this, BackgroundWorker::class.java)
+        startService(serviceIntent)
 
         val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
 

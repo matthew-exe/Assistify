@@ -23,7 +23,7 @@ import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import kotlin.time.toKotlinDuration
 
-class HealthConnectManager(private val context: Context) {
+class HealthConnectManager(private val context: Context, private val isBackgroundWorker: Boolean) {
 
     private lateinit var healthConnectClient: HealthConnectClient
     private val user = User()
@@ -42,22 +42,29 @@ class HealthConnectManager(private val context: Context) {
     init {
         checkAvailability()
     }
+
     suspend fun hasAllPermissions(permissions: Set<String>): Boolean {
         return healthConnectClient.permissionController.getGrantedPermissions().containsAll(permissions)
     }
 
     fun checkAvailability() {
-        val packageManager = context.packageManager
-        val packageName = "com.google.android.apps.healthdata"
-        availability = try {
-            packageManager.getPackageInfo(packageName, 0)
-            HealthConnectAvailability.INSTALLED
-        } catch (e: PackageManager.NameNotFoundException) {
-            HealthConnectAvailability.NOT_INSTALLED
-        }
-        if(availability == HealthConnectAvailability.INSTALLED){
+        if(!isBackgroundWorker){
+            val packageManager = context.packageManager
+            val packageName = "com.google.android.apps.healthdata"
+            availability = try {
+                packageManager.getPackageInfo(packageName, 0)
+                HealthConnectAvailability.INSTALLED
+            } catch (e: PackageManager.NameNotFoundException) {
+                HealthConnectAvailability.NOT_INSTALLED
+            }
+            if(availability == HealthConnectAvailability.INSTALLED){
+                healthConnectClient = HealthConnectClient.getOrCreate(context)
+            }
+        } else {
+            availability == HealthConnectAvailability.INSTALLED
             healthConnectClient = HealthConnectClient.getOrCreate(context)
         }
+
     }
 
     private suspend fun readStepsLast24HC(){

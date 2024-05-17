@@ -14,7 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 class InstructionsAdapter(private val context: Context) : PagerAdapter() {
 
     private val layoutInflater: LayoutInflater = LayoutInflater.from(context)
-    private val healthConnectManager = HealthConnectManager(context)
+    private val healthConnectManager = HealthConnectManager(context, false)
     private var currentLayout = 0
     private lateinit var vgContainer: ViewGroup
     private val user = User()
@@ -135,7 +135,6 @@ class InstructionsAdapter(private val context: Context) : PagerAdapter() {
                 val view = layoutInflater.inflate(currentLayout, vgContainer)
                 addSyncHealthConnect(view.findViewById<Button>(R.id.btnInstall))
             }
-            println(user.isUserLoggedIn())
         }
     }
 

@@ -76,6 +76,7 @@
         </activity-alias>
 
         <service android:name=".BackgroundWorker" />
+
     </application>
 
 </manifest>

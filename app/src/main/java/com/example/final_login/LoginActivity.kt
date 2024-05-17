@@ -144,7 +144,7 @@ class LoginActivity : AppCompatActivity() {
             showForgotPasswordDialog()
         }
 
-        healthConnectManager = HealthConnectManager(this)
+        healthConnectManager = HealthConnectManager(this, false)
         setHasPermissions()
     }
 
@@ -305,6 +305,5 @@ class LoginActivity : AppCompatActivity() {
 
     private fun declinedTermsConditions() {
         user.deleteAccount()
-        println("Remove Account From System")
     }
 }
