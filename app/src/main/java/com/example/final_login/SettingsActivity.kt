@@ -28,6 +28,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
+import java.time.LocalDate
+import java.util.Calendar
 
 class SettingsActivity : AppCompatActivity() {
     private val user = User()
@@ -668,8 +670,14 @@ class SettingsActivity : AppCompatActivity() {
                                         val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.UK)
                                         dateFormat.isLenient = false
                                         try {
-                                            dateFormat.parse(input)
-                                            true
+                                            val date = dateFormat.parse(input)
+                                            val calendar = Calendar.getInstance()
+                                            if (date != null) {
+                                                calendar.time = date
+                                            }
+                                            val year = calendar.get(Calendar.YEAR)
+                                            val yearString = year.toString()
+                                            input.substring(input.length - 4) == yearString
                                         } catch (e: java.text.ParseException) {
                                             false
                                         }
