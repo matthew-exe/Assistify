@@ -24,3 +24,15 @@ Assistify aims to seamlessly integrate IoT devices and adaptive controls under o
 - Josh Bousfield (Developer)
 - Emre Kose (Developer)
 - Kent Liwag (Tester)
+
+### Dependencies
+- Core KTX
+- Health Connect Client
+- Compose Runtime
+- Firebase Auth
+- Firebase Database
+- Firebase BOM
+- Google Play Services Auth
+- [Slide to Act](https://github.com/cortinico/slidetoact)
+- [Circle Image View](https://github.com/hdodenhof/CircleImageView)
+- [Dots Indicator](https://github.com/tommybuonomo/dotsindicator)
