@@ -456,13 +456,9 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Sleep" }){
-                        var total:Any
-                        total = try{
-                            security.dec(sleepTotal)
-                        } catch (ex: Exception) {
-                            0
-                        }
-                        dashboardAdapter.data.first{it.name == "Steps"}.stat = if(total != "0" || total != 0 || total != null) total.toString() else "Syncing"
+                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = try {if(sleepTotal == null) "Syncing" else if(sleepTotal == "0s") "N/A" else security.dec(sleepTotal)} catch (e: Exception) { "Syncing"}
+
+
                         dashboardAdapter.filterData("")
                     }
                 }
@@ -481,7 +477,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val calories = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Calories" }){
-                        dashboardAdapter.data.first{it.name == "Calories"}.stat = try {if(calories == null) "Syncing" else security.dec(calories)} catch (e: InvocationTargetException) { "Syncing"}
+                        dashboardAdapter.data.first{it.name == "Calories"}.stat = try {if(calories == null) "Syncing" else security.dec(calories)} catch (ex: Exception) { "Syncing"}
 
                         dashboardAdapter.filterData("")
                     }
@@ -512,7 +508,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val mostRecentBpm = dataSnapshot.value
                     if(dashboardAdapter.data.any { it.name == "Pulse" }) {
-                        dashboardAdapter.data.first { it.name == "Pulse" }.stat = if(mostRecentBpm == null) "Syncing" else "${security.dec(mostRecentBpm.toString())}bpm"
+                        dashboardAdapter.data.first { it.name == "Pulse" }.stat = try{if(mostRecentBpm == null) "Syncing" else "${security.dec(mostRecentBpm.toString())}bpm"} catch (ex:Exception){"Syncing"}
                     }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
