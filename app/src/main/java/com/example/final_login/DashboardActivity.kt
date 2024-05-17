@@ -82,8 +82,8 @@ class DashboardActivity : AppCompatActivity() {
         healthConnectManager = HealthConnectManager(this, false)
         healthConnectManager.syncHealthConnect()
 
-        val serviceIntent = Intent(this, BackgroundWorker::class.java)
-        startService(serviceIntent)
+//        val serviceIntent = Intent(this, BackgroundWorker::class.java)
+//        startService(serviceIntent)
 
         val recyclerView: RecyclerView = findViewById(R.id.rvSensors)
 
