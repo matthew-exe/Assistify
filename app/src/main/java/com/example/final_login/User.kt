@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.lang.reflect.InvocationTargetException
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -335,7 +336,7 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val totalStepsData = dataSnapshot.value
                     if(dashboardAdapter.data.any { it.name == "Steps" }){
-                        dashboardAdapter.data.first{it.name == "Steps"}.stat = security.dec(totalStepsData.toString())
+                        dashboardAdapter.data.first{it.name == "Steps"}.stat = try {security.dec(totalStepsData.toString())} catch (e: InvocationTargetException) { "Syncing"}
                         dashboardAdapter.filterData("")
                     }
                 }
@@ -449,7 +450,8 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Sleep" }){
-                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = if(sleepTotal == null) "Syncing" else if(sleepTotal == "0s") "N/A" else security.dec(sleepTotal)
+                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = try {if(sleepTotal == null) "Syncing" else if(sleepTotal == "0s") "N/A" else security.dec(sleepTotal)} catch (e: InvocationTargetException) { "Syncing"}
+
 
                         dashboardAdapter.filterData("")
                     }
@@ -469,7 +471,8 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val calories = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Calories" }){
-                        dashboardAdapter.data.first{it.name == "Calories"}.stat = if(calories == null) "Syncing" else security.dec(calories)
+                        dashboardAdapter.data.first{it.name == "Calories"}.stat = try {if(calories == null) "Syncing" else security.dec(calories)} catch (e: InvocationTargetException) { "Syncing"}
+
                         dashboardAdapter.filterData("")
                     }
                 }
