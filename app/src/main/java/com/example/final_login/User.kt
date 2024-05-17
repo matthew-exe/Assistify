@@ -456,9 +456,13 @@ class User{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val sleepTotal = dataSnapshot.value.toString()
                     if(dashboardAdapter.data.any { it.name == "Sleep" }){
-                        dashboardAdapter.data.first{it.name == "Sleep"}.stat = try {if(sleepTotal == null) "Syncing" else if(sleepTotal == "0s") "N/A" else security.dec(sleepTotal)} catch (e: InvocationTargetException) { "Syncing"}
-
-
+                        var total:Any
+                        total = try{
+                            security.dec(sleepTotal)
+                        } catch (ex: Exception) {
+                            0
+                        }
+                        dashboardAdapter.data.first{it.name == "Steps"}.stat = if(total != "0" || total != 0 || total != null) total.toString() else "Syncing"
                         dashboardAdapter.filterData("")
                     }
                 }
