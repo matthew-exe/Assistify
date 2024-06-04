@@ -9,12 +9,6 @@ Assistify aims to seamlessly integrate IoT devices and adaptive controls under o
 <img src="https://img.shields.io/badge/Health_Connect-blue?style=flat-square&logo=google&logoColor=black" height="28"/>
 
 
-### Test Accounts:
-- test@email.com
-- link@email.com
-- Password for both test accounts: Test1234!
-
-
 ### Compatible With:
 ![Static Badge](https://img.shields.io/badge/Android_9%2B-lightblue?logo=android)
 ![Static Badge](https://img.shields.io/badge/Fitbit_Watch-%236750A4?style=flat-square&logo=fitbit)
