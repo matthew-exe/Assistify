@@ -11,7 +11,7 @@ import java.security.SecureRandom
 
 class Security {
 
-    // PLEASE REMOVE OR SET AS ENVIRONMENT VARIABLES IN PRODUCTION OR BEFORE PUSHING TO GITHUB
+    // Local only encrypt / decrypt the backend encrypts the data properly
     private val key = "ea97176337b69df46e943af5f8c5f2078610dc5775e2d2744d0defcaf390088c"
     private val iv = "61ea0760d89654d9a5448b6bfabd29f5"
 
